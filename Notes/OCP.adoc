@@ -1,0 +1,19 @@
+[student@workstation ~]$ oc new-app --docker-image=registry.redhat.io/rhel8/httpd-24:1-156 --name=travis
+
+For HTTP image
+
+*VIMRC File*
+
+[source,bash]
+----
+autocmd FileType yaml setlocal ai ts=2 sw=2 et sts=2 colorcolumn=3,5,7,9,11
+----
+
+*BASHRC to Setup the OC_EDITOR*
+
+[source,bash]
+----
+... output omitted ...
+# User specific aliases and functions
+export OC_EDITOR=vim
+----
