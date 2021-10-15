@@ -1,6 +1,6 @@
 = {subject}
-:subject: Managing and Building Container Images and Containers
-:description:  A more in-depth overview of tools like: Podman, Skopeo, and Buildah in addition to the Red Hat Web Console (Cockpit)
+:subject: Managing and Building Container Images and Containers)
+:description: A more in-depth overview of tools like: Podman, Skopeo, and Buildah in addition to the Red Hat Web Console (Cockpit)
 Travis Michette <tmichett@redhat.com>
 :doctype: book
 :customer:  GLS
@@ -14,9 +14,9 @@ Travis Michette <tmichett@redhat.com>
 :pdf-page-size: LETTER
 :icons: font
 ifdef::backend-pdf[]
-:title-page-background-image: image:images/Training_Cover.png[pdfwidth=8.0in,align=center]
+:title-page-background-image: image:Training_Cover.png[pdfwidth=8.0in,align=top]
 :pygments-style: tango
-:source-highlighter: pygments
+:source-highlighter: coderay
 endif::[]
 ifndef::env-github[:icons: font]
 ifdef::env-github[]
@@ -29,6 +29,7 @@ ifdef::env-github[]
 :warning-caption: :warning:
 endif::[]
 :revnumber: 1.0
+:imagesdir: images/
 
 // Introduction Section goes below here
 

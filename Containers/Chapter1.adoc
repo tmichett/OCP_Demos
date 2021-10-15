@@ -7,7 +7,18 @@
 :numbered:
 :chapter-label:
 :icons: font
+ifndef::env-github[:icons: font]
+ifdef::env-github[]
+:status:
+:outfilesuffix: .adoc
+:caution-caption: :fire:
+:important-caption: :exclamation:
+:note-caption: :paperclip:
+:tip-caption: :bulb:
+:warning-caption: :warning:
+endif::[]
 :imagesdir: images/
+
 
 == Managing Containers with the New Runtime
 
@@ -50,3 +61,4 @@ RHEL8 includes *Pacemaker* containers with *podman* as a tech preview. Pacemaker
 ----
 [student@workstation ~]$ sudo yum module install container-tools
 ----
+====

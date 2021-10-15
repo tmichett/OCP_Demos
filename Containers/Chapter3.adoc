@@ -7,10 +7,19 @@
 :numbered:
 :chapter-label:
 :icons: font
+ifndef::env-github[:icons: font]
+ifdef::env-github[]
+:status:
+:outfilesuffix: .adoc
+:caution-caption: :fire:
+:important-caption: :exclamation:
+:note-caption: :paperclip:
+:tip-caption: :bulb:
+:warning-caption: :warning:
+endif::[]
 :imagesdir: images/
 
 == Building Containers with Buildah
-
 
 .Creating a Custom Container
 [source,bash]
@@ -114,4 +123,3 @@ CONTAINER ID  IMAGE                                COMMAND               CREATED
 <5> Remove Container by ID
 <6> Removing Container Image from Registry
 <7> Delete Working Container from System
-====
