@@ -13,3 +13,22 @@ endif::[]
 == Podman Pods
 
 This will talk about Podman Pods
+
+=== Using and Leveraging Pods with Podman
+
+
+=== Podman Image and Container Pruning
+
+
+.References
+[NOTE]
+====
+*Managing Containers and Pods:* https://developers.redhat.com/blog/2019/01/15/podman-managing-containers-pods?ts=1634314817672#podman_pods__what_you_need_to_know
+
+*Podman System Prune:*
+
+*_man pages_*
+
+_podman-system-prune_, 
+
+====
