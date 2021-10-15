@@ -1,0 +1,36 @@
+ifndef::env-github[:icons: font]
+ifdef::env-github[]
+:status:
+:outfilesuffix: .adoc
+:caution-caption: :fire:
+:important-caption: :exclamation:
+:note-caption: :paperclip:
+:tip-caption: :bulb:
+:warning-caption: :warning:
+:imagesdir: images/
+endif::[]
+
+
+== Container Management with Ansible
+
+=== Ansible Podman Collections
+
+==== Obtaining Podman Collections
+
+The Podman collections for Ansible can be located from Ansible Automation Hub (https://console.redhat.com/ansible/automation-hub).
+
+.Ansible Automation Hub
+[TIP]
+====
+It is required that you have a Red Hat Subscription for Ansible Automation Platform (AAP2.0) in order to access Red Hat Supported Ansible collections. The lab and exercises will use the Ansible Galaxy Podman collection.
+
+.Installing Ansible Galaxy Podman Collection
+[source,bash]
+----
+ansible-galaxy collection install containers.podman
+----
+
+https://galaxy.ansible.com/containers/podman
+https://docs.ansible.com/ansible/latest/collections/containers/podman/index.html
+https://docs.ansible.com/ansible/latest/collections/containers/podman/podman_container_module.html
+====

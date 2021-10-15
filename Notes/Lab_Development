@@ -1,0 +1,22 @@
+Upped DO180 Workstation Specs
+
+RAM: 10GB
+CPU: 4 vCPUs
+
+Added VDB disk of 20GB
+Formatted and mounted to /var/lib/containers
+
+
+Errors so needed to fix SELinux Contexts on directory
+
+podman info --debug
+journalctl -b 0 | grep AVC
+ausearch -m avc -ts recent
+
+
+restorecon -R -v /var/lib/containers
+
+https://github.com/containers/podman/issues/3234
+
+
+** Notes: Looking at deploying in a non-privileged state
