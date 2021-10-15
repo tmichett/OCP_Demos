@@ -1,12 +1,3 @@
-:pygments-style: tango
-:source-highlighter: pygments
-:toc:
-:toclevels: 7
-:sectnums:
-:sectnumlevels: 6
-:numbered:
-:chapter-label:
-:icons: font
 ifndef::env-github[:icons: font]
 ifdef::env-github[]
 :status:
@@ -16,8 +7,9 @@ ifdef::env-github[]
 :note-caption: :paperclip:
 :tip-caption: :bulb:
 :warning-caption: :warning:
-endif::[]
 :imagesdir: images/
+endif::[]
+
 
 
 == Managing Containers with the New Runtime
@@ -54,11 +46,10 @@ RHEL8 includes *Pacemaker* containers with *podman* as a tech preview. Pacemaker
 ====
 
 .Using Container Tools
-====
+
 
 .Installation of Container Tools
 [source,bash]
 ----
 [student@workstation ~]$ sudo yum module install container-tools
 ----
-====

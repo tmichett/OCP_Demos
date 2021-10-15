@@ -1,12 +1,3 @@
-:pygments-style: tango
-:source-highlighter: pygments
-:toc:
-:toclevels: 7
-:sectnums:
-:sectnumlevels: 6
-:numbered:
-:chapter-label:
-:icons: font
 ifndef::env-github[:icons: font]
 ifdef::env-github[]
 :status:
@@ -16,8 +7,9 @@ ifdef::env-github[]
 :note-caption: :paperclip:
 :tip-caption: :bulb:
 :warning-caption: :warning:
-endif::[]
 :imagesdir: images/
+endif::[]
+
 
 == Building Containers with Buildah
 
