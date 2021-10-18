@@ -10,29 +10,48 @@ ifdef::env-github[]
 :imagesdir: images/
 endif::[]
 
-== Podman Pods
-
-This will talk about Podman Pods
-
-=== Using and Leveraging Pods with Podman
 
 
-=== Podman Image and Container Pruning
+== Managing Containers with the New Runtime
+
+=== Deploying Containers with the New Container Runtime
+
+==== The Podman Container Engine
+
+RHEL8 includes he *container-tools* package module. New engine is *podman* replaces *docker* and *moby*. It also contains new tools *buildah* to build container images and *skopeo* to manage images on registries like *runc*. The new toolset allows building/running containers without daemons.
+
+image::containers-runtime-stacks.png[title="Docker to RHEL8 Container Runtime", align="center"]
+
+*Container Runtime Toolset*
+
+* Docker replaced with new container runtime
+* New toolset supports OCI and reuse of third-party images
+* Integrates with *audit* of Docker client-server model
+* *container-tools* module provides new container runtime tools and engine.
 
 
-.References
-[NOTE]
+image::containers-runtime-toolset.svg[title="New Container Runtime", align="center"]
+
+*Describing new Container Runtime Tool*
+
+* The *podman* engine is daemonless and supporting container execution.
+* *podman* syntax is similar to the docker command, supporting *Dockerfile* use
+* *Buildah* builds container images, from scratch or a Dockerfile.
+* Copy and inspect container images in registries with *Skopeo*
+* *Skopeo* supports Docker and private registries, the Atomic registry, and local directories, including those which use OCI
+
+[TIP]
 ====
-*Managing Containers and Pods:* https://developers.redhat.com/blog/2019/01/15/podman-managing-containers-pods?ts=1634314817672#podman_pods__what_you_need_to_know
-
-*Managing Containers using Podman and Skopeo:* https://www.tecmint.com/manage-containers-using-podman-in-rhel/
-
-*Podman:* https://docs.podman.io/en/latest/
-
-*Podman System Prune:*
-
-*_man pages_*
-
-_podman-system-prune_, _podman-container-cleanup_,
-
+RHEL8 includes *Pacemaker* containers with *podman* as a tech preview. Pacemaker supports execution of the container across multiple hosts.
 ====
+
+.Using Container Tools
+
+
+.Installation of Container Tools
+[source,bash]
+----
+[student@workstation ~]$ sudo yum module install container-tools
+----
+
+=== Managing Containers using the Red Hat Web Console

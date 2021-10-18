@@ -11,4 +11,12 @@ ifdef::env-github[]
 endif::[]
 
 
-== Containers as System Services
+== Quay Image Registry
+
+=== Installing the Quay Image Registry
+
+
+=== Using the Quay Image Registry
+
+
+=== Inspecting Images with Skopeo on Remote Registries

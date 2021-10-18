@@ -1,0 +1,62 @@
+ifndef::env-github[:icons: font]
+ifdef::env-github[]
+:status:
+:outfilesuffix: .adoc
+:caution-caption: :fire:
+:important-caption: :exclamation:
+:note-caption: :paperclip:
+:tip-caption: :bulb:
+:warning-caption: :warning:
+:imagesdir: images/
+endif::[]
+
+
+== Introduction
+
+This guide with cover additional and supplemental materials for the DO180 custom container course. As part of this guide, students will be learning the following concepts:
+
+.*Course Objectives*
+* Exploring SystemD and Creating SystemD Services
+* Exploring FirewallD and FirewallD Custom Services
+* Exploring Cockpit and the Red Hat Web Console
+* Rootless Podman
+* Leveraging Podman's Pod Capabilities
+* Managing Containers with the Red Hat Web Console (Cockpit)
+* Running Containers as a Service (SystemD)
+* Building Container Images with Buildah (from scratch)
+* Building Container Images from Containerfile/Dockerfile Files
+* Installing/Configuring/Using Quay Container Registry
+* Using ClairV4 and Quay Mirroring with Quay
+* Exploring Skopeo
+
+.*Courses for Reference*
+* DO180
+* RH134
+* RH354
+
+This course will use a DO180 course for the hands-on lab environment. The environment has been modified to have an additional machine to perform custom exercises and have the Quay registry installed locally.
+
+
+=== Lab Machine Requirements
+
+In addition to the DO180 lab environment, a new VM has been added to that environment. This machine can be setup and configured locally with the following requirements:
+
+.VM Requirements
+* RHEL 8.4+
+* 6 vCPU (8 vCPU Recommended)
+* 12GB RAM (16GB Recommended)
+* 60GB Storage (Image and Database storage)
+
+
+=== Using the Lab Guide
+
+This lab guide and contents within the guide are meant to supplement the course and materials delivered as part of a custom DO180 delivery. It is advisable to download the RH354 course manual and the RH134 course manual prior to the class delivery. The DO180 course guide can be downloaded as part of the course.
+
+
+.Course Materials
+[IMPORTANT]
+====
+All course materials and lab materials for the custom portion of the course can be found here: https://github.com/tmichett/OCP_Demos
+
+The lab guide for this course can be downloaded from here: https://github.com/tmichett/OCP_Demos/blob/main/Containers/Containers.pdf
+====
