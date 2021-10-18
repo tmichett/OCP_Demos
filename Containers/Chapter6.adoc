@@ -15,6 +15,129 @@ endif::[]
 
 Containers can now be managed with the Ansible Podman collection leveraging Ansible Automation Plaatform (AAP). Red Hat curates and maintains several supported Ansible Collections at Ansible Automation Hub. The community collections are available to be installed from Ansible Galaxy.
 
+=== Ansible Refresher
+
+The following is a small reminder about Ansible and the basics around an Ansible Control node for managing systems with Ansible.
+
+==== Ansible Basics
+
+In order to use Ansible, the following items are required:
+
+* *ansible* is installed on the Control Node
+* An *ansible.cfg* file exists and points to a working inventory
+* An *inventory* file exists containing managed nodes
+
+===== Ansible Concepts and Architecture
+
+.Ansible Machine Types
+
+* *Control Node*: Location where Ansible is installed and used to run playbooks and execute Ansible ad-hoc commands
+
+* *Managed Host*: Network device that is managed by an Ansible control node
+
+The required Ansible components are the following:
+
+* *ansible.cfg*: Ansible configuration file with directives on how Ansible should work
+
+* *inventory*: Listing and organization of ansible managed nodes/hosts
+
+* *module*: Small piece of code to perform a variety of tasks (generally written in Python or Powershell)
+
+* *plugins*: Code that can be used to extend and adapt Ansible to new uses. Capable of manipulating data and extracting information from output. (_Used more in the next course DO447_)
+
+* *Ansible Tower/API*: Framework to control and manage Ansible at scale. Ansible Tower is not a core part of Ansible, but is an add-on product to more effectively utilize Ansible with teams.
+
+image::architecture-ansible.png[title="Ansible Architecture", align="center"]
+
+===== Building an Ansible Inventory
+
+An *inventory* file is the minimum needed item for Ansible to run. Inventory files provide a listing of hosts for Ansible to manage. There are multiple ways to define an inventory file.
+
+
+====== Static Inventory
+
+Static inventory files are generally defined in the INI format.
+
+.Simple Inventory
+[source,yaml]
+----
+web1.example.com
+web2.example.com
+db1.example.com
+db2.example.com
+192.0.2.42
+
+[webservers]
+web1.example.com
+web2.example.com
+192.0.2.42
+
+----
+
+===== Ansible Configuration Files
+
+It is important to note, there can be multiple Ansible configuration files. Ansible will look for and process configuration files in order.
+
+====
+. Location specified in *ANSIBLE_CONFIG*
+. The *ansible.cfg* file in the current working directory
+. The *.ansible.cfg* file in the user's home directory
+. The default */etc/ansible/ansible.cfg* file
+====
+
+NOTE: It is important to note that the first file in this order Ansible sees is what will be used. Therefore, if anything is setup for the *ansible.cfg* file in locations 1-3, it won't ever use the default file *_/etc/ansible/ansible.cfg_*
+
+TIP: *Ansible Configuration file documentation:* http://docs.ansible.com/ansible/intro_configuration.html
+
+
+.*Ansible Settings*
+[cols=2,cols="2,2",options=header]
+|===
+|Setting
+|Command Line Option
+
+|*inventory*
+|Location of the Ansible inventory file.
+
+|*remote_user*
+|The remote user account used to establish connections to managed hosts.
+
+|*become*
+|Enables or disables privilege escalation for operations on managed hosts.
+
+|*become_method*
+|Defines privilege escalation method on managed hosts.
+
+|*become_user*
+|User account to escalate privileges to on managed hosts.
+
+|*become_ask_pass*
+|Defines whether privilege escalation on managed hosts should prompt for password.
+
+|===
+
+.Ansible Collections
+[IMPORTANT]
+====
+Starting with Ansible 2.9 and the new Ansible (AAP), collections have been introduced and allow modules, roles, and other components to be stored in Ansible collections. Similar to Ansible Roles, Ansible Collections must be installed on the system and available for Ansible playbooks.
+
+Ansible Collections can be specified in the *ansible.cfg* file for the path where collections have been installed. As with Ansible Roles, it is common to install Ansible collections to the working directory in a sub-directory called *collections*. When working with Ansible Collections it is necessary to provide this information in the *ansible.cfg* file.
+
+.*ansible.cfg* for Using Collections
+[source,bash]
+----
+[defaults]
+remote_user = root
+inventory = inventory
+COLLECTIONS_PATHS = ~/.ansible/collections:/usr/share/ansible/collections:./collections
+
+[privilege_escalation]
+become = False
+become_method = sudo
+become_user = root
+become_ask_pass = False
+----
+====
 
 === Ansible Podman Collection
 
