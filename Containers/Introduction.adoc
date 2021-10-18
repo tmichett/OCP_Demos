@@ -16,6 +16,7 @@ endif::[]
 This guide with cover additional and supplemental materials for the DO180 custom container course. As part of this guide, students will be learning the following concepts:
 
 .*Course Objectives*
+* Exploring RHEL 8.x Differences
 * Exploring SystemD and Creating SystemD Services
 * Exploring FirewallD and FirewallD Custom Services
 * Exploring Cockpit and the Red Hat Web Console
@@ -27,7 +28,7 @@ This guide with cover additional and supplemental materials for the DO180 custom
 * Building Container Images from Containerfile/Dockerfile Files
 * Installing/Configuring/Using Quay Container Registry
 * Using ClairV4 and Quay Mirroring with Quay
-* Exploring Skopeo
+* Exploring Skopeo to Interact with Container Images
 
 .*Courses for Reference*
 * DO180

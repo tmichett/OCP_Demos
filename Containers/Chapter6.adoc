@@ -13,13 +13,22 @@ endif::[]
 
 == Container Management with Ansible
 
-=== Ansible Podman Collections
+Containers can now be managed with the Ansible Podman collection leveraging Ansible Automation Plaatform (AAP). Red Hat curates and maintains several supported Ansible Collections at Ansible Automation Hub. The community collections are available to be installed from Ansible Galaxy.
+
+
+=== Ansible Podman Collection
+
+The Ansible Podman collection is a required component in order to have the Ansible Modules needed to manage containers using Podman. Currently, the *containers.podman* is only available via Ansible Galaxy.
 
 ==== Obtaining Podman Collections
 
-The Podman collections for Ansible can be located from Ansible Automation Hub (https://console.redhat.com/ansible/automation-hub).
+In order to leverage Ansible to official manage Podman containers, the *containers.podman* collection must be installed on the Ansible Control node. Currently, there are two main sources for installation of Ansible collections.
 
-.Ansible Automation Hub
+.Ansible Collections
+* Red Hat supported collections for Ansible can be downloaded from Ansible Automation Hub (https://console.redhat.com/ansible/automation-hub).
+* Ansible Community collections can be downloaded from Ansible Galaxy (https://galaxy.ansible.com/containers/podman)
+
+.Ansible Automation Hub and Ansible Galaxy
 [TIP]
 ====
 It is required that you have a Red Hat Subscription for Ansible Automation Platform (AAP2.0) in order to access Red Hat Supported Ansible collections. The lab and exercises will use the Ansible Galaxy Podman collection.
@@ -30,7 +39,55 @@ It is required that you have a Red Hat Subscription for Ansible Automation Platf
 ansible-galaxy collection install containers.podman
 ----
 
+.*containers.podman* Documentation
 https://galaxy.ansible.com/containers/podman
 https://docs.ansible.com/ansible/latest/collections/containers/podman/index.html
 https://docs.ansible.com/ansible/latest/collections/containers/podman/podman_container_module.html
+====
+
+==== Installing and Using the *containers.podman* Collection
+
+There are multiple methods for the Podman collection to be installed, however, for this course and the exercises, the collection will be installed locally to the *./collections* sub-folder using a requirements.yml file. The *ansible.cfg* will point to this as already available in the path and the Ansible playbooks being utilized will reference the *collections* at the top of the playbook similar to Ansible roles so that throughout the playbook tasks, the shorter module name can be referenced.
+
+.Using Collections
+[TIP]
+====
+Referencing the *collection* and using shorter module names. This allows a cleaner and more streamlined approach and is generally consistent with the older Ansible versions. It is 100% fully acceptable to utilize the fully qualified module names, however, for the course and ease of use we will continue referencing Ansible modules by the shortened/condensed name.
+
+.Sample Playbook with Collections
+[source,bash]
+----
+---
+- name: Deploy Quay Mirror
+  hosts: quay
+  vars:
+    QUAY_DIR: /quay
+  vars_files:
+    - registry_login.yml
+  collections: <1>
+    - containers.podman
+
+    tasks:
+
+  ## Podman Collections Needed for Login
+      - name: Login to Container Registry
+        podman_login: <2>
+          username: "{{ registry_un }}"
+          password: "{{ registry_pass }}"
+          registry: "{{ registry_url }}"
+
+----
+====
+<1> Importing the collection(s) to be used and referenced by short module names in the playbook.
+<2> Leveraging modules by short module names in the playbook.
+
+
+
+
+.References
+[NOTE]
+====
+
+References for this chapter
+
 ====

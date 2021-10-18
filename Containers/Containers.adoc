@@ -47,5 +47,5 @@ include::Chapter7.adoc[]
 
 // Appendix Section below here
 
-//[appendix]
-//include::Chapters/AppendixA.adoc[]
+[appendix]
+include::Chapters/AppendixA.adoc[]

@@ -54,4 +54,10 @@ RHEL8 includes *Pacemaker* containers with *podman* as a tech preview. Pacemaker
 [student@workstation ~]$ sudo yum module install container-tools
 ----
 
+=== Podman Configuration Files
+
+
+=== Container Image Storage
+
+
 === Managing Containers using the Red Hat Web Console

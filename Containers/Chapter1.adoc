@@ -7,8 +7,535 @@ ifdef::env-github[]
 :note-caption: :paperclip:
 :tip-caption: :bulb:
 :warning-caption: :warning:
-:imagesdir: images/
 endif::[]
-
+:imagesdir: images/
 
 == RHEL 8 Changes
+
+RHEL 8.x brought several significant changes and expanded upon other changes that were introduced as part of the *SystemD* switch in RHEL 7.x. This course will highlight some of the most significant changes and enhancements to RHEL 8.x.
+
+.*RHEL 8.x Enhancements*
+* TMUX
+* SystemD
+* FirewallD
+
+
+=== TMUX Usage
+
+As part of the upgrade process and package replacement process in RHEL8, several packages have not only been deprecated, they've been completely removed. The *screen* package is one package that is no longer available for installation. Instead, a new terminal program *tmux* has been introduced to provide the *screen* functionality as well as other enhancements.
+
+.TMUX Usage
+[NOTE]
+=====
+TMUX References
+
+Red Hat Learning Community: https://learn.redhat.com/t5/Platform-Linux/Using-tmux-to-execute-commands-on-servers-in-parallel/m-p/2200
+
+Tactical TMUX: https://danielmiessler.com/study/tmux/
+=====
+
+In the example below, we will explore the *screen* functionalities of TMUX with respect to attaching and detaching of sessions.
+
+*Installing TMUX*
+
+. Install *tmux* with YUM
++
+.Installation of TMUX
+[source,bash]
+----
+[root@workstation ~]# yum install tmux
+Red Hat Enterprise Linux 8.0 AppStream (dvd)     21 MB/s | 5.3 MB     00:00
+Red Hat Enterprise Linux 8.0 BaseOS (dvd)        23 MB/s | 2.2 MB     00:00
+Last metadata expiration check: 0:00:01 ago on Mon 13 Apr 2020 10:55:47 AM EDT.
+Package tmux-2.7-1.el8.x86_64 is already installed.
+Dependencies resolved.
+Nothing to do.
+Complete!
+----
+
+. Launch *tmux*
++
+.Using *tmux*
+[source,yaml]
+----
+[student@workstation ~]$ tmux
+----
++
+image::Chapter1-7d227.png[title="*tmux* Terminal Window", align="center"]
+
+. Placing *tmux* Window in Background (_CTRL+B+D_)
++
+.Detaching a *tmux* Session
+[source,yaml]
+----
+[student@workstation ~]$ tmux
+[detached (from session 0)]
+
+----
+
+. Re-attaching to *tmux*
++
+.Source Description
+[source,bash]
+----
+[student@workstation ~]$ tmux list-sessions
+0: 1 windows (created Mon Apr 13 11:01:53 2020) [80x23]
+
+[student@workstation ~]$ tmux attach-session -t 0
+----
+
+.Naming or Renaming Sessions
+[TIP]
+====
+It is possible that once you are in a *tmux* session to rename the session.
+
+.Renaming a TMUX Session
+[source,yaml]
+----
+[student@workstation ~]$ tmux rename-session --help
+usage: rename-session [-t target-session] new-name
+
+[student@workstation ~]$ tmux rename-session -t 0 travis-demo
+----
+image::Chapter1-bf6b1.png[title="Renamed *tmux* Session", align="center"]
+
+[source,bash]
+----
+[student@workstation ~]$ tmux new-session
+[detached (from session travis-demo)]
+
+[student@workstation ~]$ tmux list-sessions
+travis-demo: 1 windows (created Mon Apr 13 11:08:28 2020) [98x23]
+
+[student@workstation ~]$ tmux attach-session -t travis-demo
+----
+====
+
+=== SystemD Overview
+
+==== Understanding SystemD Unit Files and Creating a Service
+
+Starting in RHEL 7, *SystemD* replaced the older style Linux SystemV (sysvinit daemon). This change continued through with RHEL 8 and more systemd tools replaced the traditional legacy tools. This small section will provide references and an overview of how *systemd* can be used to replace the older _init_ scripts that were placed in */etc/init.d/* or some of the other directories.
+
+.SystemD References
+[TIP]
+====
+Linus Torvalds and others on Linux's systemd: https://www.zdnet.com/article/linus-torvalds-and-others-on-linuxs-systemd/
+
+SysVinit Vs systemd Cheatsheet: https://www.2daygeek.com/sysvinit-vs-systemd-cheatsheet-systemctl-command-usage/
+====
+
+. Create the Init Script
++
+.Init Script to Run at Startup
+[source,bash]
+----
+[root@servera ~]# vim /usr/bin/ups_test_service.sh
+#!/usr/bin/bash
+
+DATE=`date '+%Y-%m-%d %H:%M:%S'`
+echo "This is a sample service started at ${DATE} for the UPS RH354 course." | systemd-cat -p info
+
+while :
+do
+echo "Looping...";
+sleep 30;
+done
+----
+
+. Make script executable
++
+.Running *chmod* on script
+[source,bash]
+----
+[root@servera ~]# chmod +x /usr/bin/ups_test_service.sh
+----
+
+
+. Edit SystemD Service (Unit File)
++
+.Editing the .service File
+[source,bash]
+----
+[root@servera ~]# vim /etc/systemd/system/ups_test_service.service
+
+[Unit]
+Description=UPS example systemd service.
+
+[Service]
+Type=simple
+ExecStart=/bin/bash /usr/bin/ups_test_service.sh
+
+[Install]
+WantedBy=multi-user.target
+----
+
+. Fix Permissions on *.service* File
++
+.Running *chmod* on .service File
+[source,bash]
+----
+[root@servera ~]# chmod 644 /etc/systemd/system/ups_test_service.service
+----
+
+.SystemD Services
+[NOTE]
+====
+Once a script has been created and made executable and a service file has properly been created and placed in */etc/systemd/system/* directory it is possible to use the *systemctl* command to interact with the service file and make it active on boot.
+====
+
+
+.Default SystemD Directories
+[IMPORTANT]
+====
+It is important to note that there are several default SystemD directories. When defining your own files, the proper location is to place them in */etc/systemd*. There is more information available in other Red Hat courses, specifically the RH442 Performance Tuning course.
+
+Default Location: */lib/systemd/*
+====
+
+. Starting and Enabling a Custom Service
++
+.Controlling a Custom Service with *systemctl*
+[source,bash]
+----
+[root@servera ~]# systemctl enable ups_test_service.service --now
+Created symlink /etc/systemd/system/multi-user.target.wants/ups_test_service.service → /etc/systemd/system/ups_test_service.service.
+----
+
+. Checking Status of a Custom Service
++
+.Using *systemctl* to Check Service Status
+[source,bash]
+----
+[root@servera ~]# systemctl status ups_test_service.service
+● ups_test_service.service - UPS example systemd service.
+   Loaded: loaded (/etc/systemd/system/ups_test_service.service; enab>
+   Active: active (running) since Wed 2020-05-20 18:08:22 EDT; 19s ago
+ Main PID: 2136 (bash)
+    Tasks: 2 (limit: 23896)
+   Memory: 940.0K
+   CGroup: /system.slice/ups_test_service.service
+           ├─2136 /bin/bash /usr/bin/ups_test_service.sh
+           └─2140 sleep 30
+
+May 20 18:08:22 servera.lab.example.com systemd[1]: Started UPS examp>
+May 20 18:08:22 servera.lab.example.com bash[2136]: Looping..
+----
+
+. Checking */var/log/messages* for Custom Service
++
+.Seaching Log file for Custom Service
+[source,bash]
+----
+[root@servera ~]# grep -i ups /var/log/messages
+May 20 18:08:22 jegui journal[2139]: This is a sample service started at 2020-05-20 18:08:22 for the UPS RH354 course.
+----
+
+.SystemD References
+[TIP]
+====
+
+Creating a Service at Boot: https://www.linode.com/docs/quick-answers/linux/start-service-at-boot/
+
+Overview of SystemD for RHEL7: https://access.redhat.com/articles/754933
+
+Converting traditional sysV init scripts to Red Hat Enterprise Linux 7 systemd unit files: https://www.redhat.com/en/blog/converting-traditional-sysv-init-scripts-red-hat-enterprise-linux-7-systemd-unit-files
+
+
+Creating and Modifying SystemD Unit Files: https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/system_administrators_guide/sect-managing_services_with_systemd-unit_files
+
+Creating a Linux service with systemd: https://medium.com/@benmorel/creating-a-linux-service-with-systemd-611b5c8b91d6
+
+How to create systemd service unit in Linux: https://linuxconfig.org/how-to-create-systemd-service-unit-in-linux
+====
+
+
+=== FirewallD
+
+Beginning in RHEL 8.0, Red Hat moved away from *iptables* as the back-end firewall implementation and instead moved to NFTables. However, the introduction of FirewallD and the *firewall-cmd* management commands implemented in RHEL 7.x have evolved and leveraging FirewallD is still the preferred firewall management solution in RHEL 8.x.
+
+==== FirewallD Service Definitions
+
+FirewallD was introduced in RHEL7 as part of the SystemD transition and a new way to manage firewalls without using the underlying firewall implementation (*iptables*). FirewallD with *firewall-cmd* continues to be used in RHEL8 as the preferred method of managing and maintaining firewall rules.
+
+.FirewallD Resources
+[NOTE]
+====
+https://firewalld.org/
+
+https://www.liquidweb.com/kb/an-introduction-to-firewalld/
+
+https://cheatography.com/mikael-leberre/cheat-sheets/firewall-cmd/
+====
+
+==== The *firewall-cmd* Utility
+
+The *firewall-cmd* utility is the primary method to manage and interact with firewall rules on RHEL7/8 systems. The *firewall-cmd* utility supports BASH completion and allows firewall rules to be added based on defined services or by specifying ports/protocols.
+
+.Allowing HTTP through the Firewall by Port/Protocol
+[source,bash]
+----
+[root@servera ~]# firewall-cmd --add-port=80/tcp
+success
+
+[root@servera ~]# firewall-cmd --list-all
+public (active)
+  target: default
+  icmp-block-inversion: no
+  interfaces: enp1s0
+  sources:
+  services: cockpit dhcpv6-client ssh
+  ports: 80/tcp
+  protocols:
+  masquerade: no
+  forward-ports:
+  source-ports:
+  icmp-blocks:
+  rich rules:
+
+[root@servera ~]# firewall-cmd --remove-port=80/tcp
+success
+----
+
+.Allowing HTTP through the Firewall by Service
+[source,bash]
+----
+[root@servera ~]# firewall-cmd --add-service=
+Display all 154 possibilities? (y or n)
+
+[root@servera ~]# firewall-cmd --add-service=http
+success
+
+[root@servera ~]# firewall-cmd --list-all
+public (active)
+  target: default
+  icmp-block-inversion: no
+  interfaces: enp1s0
+  sources:
+  services: cockpit dhcpv6-client http ssh
+  ports:
+  protocols:
+  masquerade: no
+  forward-ports:
+  source-ports:
+  icmp-blocks:
+  rich rules:
+----
+
+.*firewall-cmd* Usage Warning
+[WARNING]
+====
+The *firewall-cmd* utility can be used to make changes to the running firewall as shown in the examples above. This does not make changes to the firewall config file. In order to make the changes to the configuration file, it is necessary to use the *--permanent* options to have the changes written to a file.
+
+When using *--permanent*, and you are not making changes to the current firewall runtime, it is also necessary to use: *firewall-cmd --reload* to reload or load new firewall rules from the firewall configuration file.
+====
+
+.Important Header
+[IMPORTANT]
+====
+It is important to note that presently the Red Hat Web Console (cockpit) only supports management of *firewalld* using defined services.
+====
+
+==== FirewallD Files and Locations
+
+FirewallD has a few locations for files both for configuration and usage. As with most configuration files on a Linux system, those rely in */etc/*. The user configurable files for FirewallD also reside in */etc/*. Default configuration files for services, zones, and other FirewallD functionality resides in */usr/lib/firewalld*. This location contains all defined services files and default configuration files for FirewallD and used by the *firewall-cmd* utility.
+
+.FirewallD Configuration Files
+[source,bash]
+----
+[root@servera ~]# tree /etc/firewalld/
+/etc/firewalld/
+├── firewalld.conf
+├── helpers
+├── icmptypes
+├── ipsets
+├── lockdown-whitelist.xml
+├── services
+└── zones
+    ├── public.xml
+    └── public.xml.old
+
+5 directories, 4 files
+
+----
+
+.FirewallD Default Configuration Files
+[source,bash]
+----
+[root@servera ~]# tree /usr/lib/firewalld/
+/usr/lib/firewalld/
+├── helpers
+│   ├── amanda.xml
+│   ├── ftp.xml
+│   ├── h323.xml
+│   ├── irc.xml
+│   ├── netbios-ns.xml
+│   ├── pptp.xml
+│   ├── proto-gre.xml
+... output omitted ...
+└── zones
+    ├── block.xml
+    ├── dmz.xml
+    ├── drop.xml
+    ├── external.xml
+    ├── home.xml
+    ├── internal.xml
+    ├── public.xml
+    ├── trusted.xml
+    └── work.xml
+
+5 directories, 222 files
+----
+
+==== Defining a Custom Service File
+
+It is possible to define custom *firewalld* service files. These files can be used for your environments for custom applications or custom firewall rules. These service files can also be checked into a version control system such as *git*.
+
+.Creating a Custom Service File using Existing File as Base
+[TIP]
+====
+It is easiest to take an existing service file, copy it to the */etc/firewalld/services* directory, rename and edit the file.
+====
+
+. Copy existing FirewallD service file to */etc/firewalld/services*
++
+.Using SSH Service File as a Starting Point
+[source,bash]
+----
+[root@servera ~]# cp /usr/lib/firewalld/services/ssh.xml /etc/firewalld/services/custom_ssh.xml
+----
+
+. Edit the file and specify the new options
++
+.Edit the Custom SSH Service Definition
+[source,bash]
+----
+[root@servera ~]# vim /etc/firewalld/services/custom_ssh.xml
+<?xml version="1.0" encoding="utf-8"?>
+<service>
+  <short>SSH_Custom</short>
+  <description>This is a custom SSH service definition for paranoid people that don't want to run SSH on the default port of 22. This will allow SSH to run on the port 8022 to meet our defined security guidance.</description>
+  <port protocol="tcp" port="8022"/>
+</service>
+----
+
+. Listing FirewallD Services to Verify New Service
++
+.Getting Listing of FirewallD Services
+[source,bash]
+----
+[root@servera ~]# firewall-cmd --get-services | grep custom_ssh
+----
+
+.FirewallD Delays in Discovering a Service
+[CAUTION]
+====
+Depending on system speed and refreshing of FirewallD daemon, the new service might not be picked up immediately. It will be discovered or if you are in a hurry, you can run *firewall-cmd --reload* command to immediately have the service discovered and available.
+====
+
+==== FirewallD Configuration Files
+
+As stated above, the main FirewallD configuration files are located in */etc/firewalld*. To specifically change or view the configuration file on the system, you generally want to look at the firewalls in the *Firewall Zone*. This is found by opening the corresponding zone file in */etc/firewalld/zones* directory.
+
+. Viewing Firewall configuration for the Public Zone.
++
+.FirewallD Configuration for Public
+[source,bash]
+----
+[root@servera ~]# cat /etc/firewalld/zones/public.xml
+<?xml version="1.0" encoding="utf-8"?>
+<zone>
+  <short>Public</short>
+  <description>For use in public areas. You do not trust the other computers on networks to not harm your computer. Only selected incoming connections are accepted.</description>
+  <service name="ssh"/>
+  <service name="dhcpv6-client"/>
+  <service name="cockpit"/>
+</zone>
+----
+
+. Adding a custom service
++
+.Adding our new Service
+[source,bash]
+----
+[root@servera ~]# firewall-cmd --add-service=custom_ssh --permanent
+success
+----
+
+. Verifying Firewall configuration for the Public Zone.
++
+.FirewallD Configuration for Public with Custom Service
+[source,bash]
+----
+[root@servera ~]# cat /etc/firewalld/zones/public.xml
+<?xml version="1.0" encoding="utf-8"?>
+<zone>
+  <short>Public</short>
+  <description>For use in public areas. You do not trust the other computers on networks to not harm your computer. Only selected incoming connections are accepted.</description>
+  <service name="ssh"/>
+  <service name="dhcpv6-client"/>
+  <service name="cockpit"/>
+  <service name="custom_ssh"/>
+</zone>
+----
+
+=== Cockpit
+
+Another change with RHEL 8.x was with the graphical server and the desktop manager. The X11 project and XWindows has been replaced largely with Wayland/Gnome3 as the graphical rendering environment of choice. These changes introduced some dependencies on the graphical management of several system services and components. The Wayland change no longer supports the X11 forwarding, so it was necessary to build tools or extend existing tools to be managed differently. The *cockpit* project was utilized and implemented in RHEL 8 as the new Red Hat Web Management Console which brought in numerous plugins allowing these services to be managed graphically within a standard web browser.
+
+.Red Hat Web Management Console
+[IMPORTANT]
+====
+Leverage portions of the RH354 text around Cockpit and the Red Hat Web Management Console before looking at the additional Cockpit pacakges.
+====
+
+==== Installing Additional Cockpit Packages
+
+.Install all Base Cockpit Packages
+[source,bash]
+----
+[root@servera ~]# yum install cockpit*
+----
+
+image::Chapter3-0692a.png[title="Cockpit Dashboard", align="center"]
+
+
+.Cockpit Plugin and Package Availability
+[IMPORTANT]
+====
+Using the installation method above will install all Cockpit packages and plugins that are available in currently subscribed channels. However, not all components will work until additional back-end components are installed. For example, the *Composer* cockpit plugins need composer and other items installed in order to be able to be fully utilized. This installation gives the *Cockpit Dashboard Plugin* which allows connecting to multiple Web Consoles.
+====
+
+
+===== Cockpit to Manage Multiple Systems
+
+It is possible to use a single *cockpit* Interface to manage multiple servers.
+
+. Ensure cockpit socket/service is running and configured on all systems.
++
+.Test and Enable Cockpit
+[source,bash]
+----
+[student@workstation ~]$ ssh root@servera
+Activate the web console with: systemctl enable --now cockpit.socket
+
+[root@servera ~]# systemctl enable --now cockpit.socket
+Created symlink /etc/systemd/system/sockets.target.wants/cockpit.socket → /usr/lib/systemd/system/cockpit.socket.
+----
+
+. Connect to the Cockpit Web Console
++
+image::Chapter3-c05bc.png[title="Red Hat Web Console (cockpit)", align="center"]
+
+. Add another Web Console from the Cockpit Dashboard
+.. Navigate to the Dashboard
+.. Click the "+" and complete the information
++
+image::Chapter3-cfa22.png[title="Adding Additional machines", align="center"]
+
+. Verify the System Fingerprint and click *Connect*
+image::Chapter3-87075.png[title="Fingerprint Verification", align="center"]
+
+. It is now possible to switch systems from the System Drop-down menu
++
+image::Chapter3-f67ec.png[title="Switching Systems", align="center"]
