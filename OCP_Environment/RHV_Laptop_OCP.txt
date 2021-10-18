@@ -1,0 +1,26 @@
+
+https://nrocco.github.io/2014/06/05/suspend-prevent-systemd.html
+
+BY NICO DI ROCCO
+ JUNE 05, 2014
+ 1 COMMENT
+ PERMALINK
+By default systemd suspends your system when you close the lid (of your laptop). While this default behavior is acceptable in most cases, for me it posed a problem.
+
+This post explains how you can prevent your system from sleeping when closing the lid of your laptop only when connected to AC.
+
+When I work on my laptop and close the lid I like the fact that my system goes to sleep. This is similar behaviour Apple Macbooks have when you close the lid. And I like it.
+
+At work we use docking stations. Many times a day I get up from my desk an have to take my laptop with me. Resulting in many docking/undocking actions a day.
+
+Everytime I dock my laptop I close the lid. Within a few seconds my system goes to sleep and I need to wake it up by pressing the power button on my docking station before I can start working again.
+
+Months go by and I am getting more and more frustrated by these precious time I loose suspending/unsuspending my system. I don’t want to drag in any 3rd party tools/scripts/daemons that can lift this burdon. I like to stick to plain system and a plain systemd and keep my system as clean as possible.
+
+At some point I decided that everytime I dock my laptop I just leave my lid open just a bit, preventing it from going in to sleep mode and allowing me to use that precious time.
+
+This worked for a while but very soon you are being ridiculed by your collegues as the systemd user with his half-closed-lid and everytime they pass by they can’t help giving my laptop a friendly tap-on-the-back, forcing it to go in to sleep mode. I can’t blame them.
+
+The following solution came to mind.
+
+I created the following script /usr/local/bin/suspend-prevent

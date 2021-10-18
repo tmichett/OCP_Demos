@@ -1,0 +1,9 @@
+[Unit]
+Description=Determine during boot if inhibit lock needs to be set or not
+After=dbus.service
+
+[Service]
+ExecStart=/usr/local/bin/suspend-prevent.sh
+
+[Install]
+WantedBy=multi-user.target

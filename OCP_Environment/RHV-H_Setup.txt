@@ -1,0 +1,7 @@
+Copy items to system ...
+
+
+suspend-prevent-atboot.service => /etc/systemd/system/suspend-prevent-atboot.service
+50-suspend-prevent.rules => /etc/udev/rules.d/50-suspend-prevent.rules
+suspend-prevent.service => /etc/systemd/system/suspend-prevent.service
+suspend-prevent.sh => /usr/local/bin/suspend-prevent.sh

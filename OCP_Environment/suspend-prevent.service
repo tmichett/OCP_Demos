@@ -1,0 +1,6 @@
+[Unit]
+Description=Prevent suspend on lid close when on AC
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/suspend-prevent.sh --forever
