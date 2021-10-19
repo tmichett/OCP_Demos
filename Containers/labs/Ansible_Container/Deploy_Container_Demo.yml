@@ -52,7 +52,6 @@
           - "7080:80"
         volume:
           - "/Webhosting:/var/www/html:Z"
-<<<<<<< HEAD
 
 ## Open Firewall for Automated Testing
     - name: Open Firewall for Website
@@ -75,5 +74,3 @@
     - name: Test Website Output
       debug:
         msg: 'The website returned: "{{ result.content }}"'
-=======
->>>>>>> 2ad4bd3aef57f77a6c852d363f61628dcc64a155
