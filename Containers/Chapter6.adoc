@@ -210,7 +210,7 @@ collections/
             ├── CHANGELOG.rst
             ├── changelog
 
-... output omitted ...
+... OUTPUT OMITTED ...
 
 └── sanity
     ├── ignore-2.10.txt
@@ -254,6 +254,75 @@ Referencing the *collection* and using shorter module names. This allows a clean
 ====
 <1> Importing the collection(s) to be used and referenced by short module names in the playbook.
 <2> Leveraging modules by short module names in the playbook.
+
+
+==== Building Container Images Using Ansible
+
+The *podman_image* module from the *containers.podman* collection is needed in order to work with an manipulate container images. In order to build images, it is necessary to have either a valid *Containerfile* or valid *Dockerfile* for image building.
+
+.Building Podman Containers with Ansible
+
+. Verify the *ansible.cfg* file for proper collection usage
++
+.*ansible.cfg*
+[source,bash]
+----
+[defaults]
+remote_user = root
+inventory = inventory
+COLLECTIONS_PATHS = ~/.ansible/collections:/usr/share/ansible/collections:./collections
+----
+
+. Start with the top playbook definitions and directives
++
+.Ansible Playbook Directives
+[source,bash]
+----
+---
+- name: Build and Upload a Container Image
+  hosts: localhost
+  vars_files:
+    - vars/registry_login.yml <1>
+  collections:
+    - containers.podman <2>
+
+... OUTPUT OMITTED ...
+----
+<1> Always provide registry login information
+<2> Always specify the collections to be used
+
+. Create Playbook with Tasks
++
+.Playbook Tasks
+[source,bash]
+----
+tasks:
+  - name: Login to Container Registry <1>
+    podman_login:
+      username: "{{ registry_un }}"
+      password: "{{ registry_pass }}"
+      registry: "{{ registry_url }}"
+
+  - name: Build and Push Custom Container Image <2>
+    podman_image:
+      name: httpd_demo_ansible <3>
+      path: ./ <4>
+      push: yes <5>
+      username: "{{ registry_un }}" <6>
+      password: "{{ registry_pass }}" <7>
+      push_args: <8>
+        dest: "{{ registry_url }}/{{ registry_un }}"
+----
+<1> Initial task to login to registry
+<2> Task using the *podman image* module to build and push an image
+<3> Name/Tag of the image being built
+<4> Path to the *Containerfile* or *Dockerfile*
+<5> Define whether or not to push to remote image registry
+<6> Registry Username
+<7> Registry Password
+<8> Arguments used for pushing to remote registry. Works in conjunction with *push: yes*. Must have registry URL specified along with the location (_which is generally the repository username_).
+
+==== Deploying Podman Containers Using Ansible
 
 
 

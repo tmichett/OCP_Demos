@@ -26,7 +26,7 @@
         username: "{{ registry_un }}"
         password: "{{ registry_pass }}"
         push_args:
-          dest: "{{ registry_url }}/tmichett"
+          dest: "{{ registry_url }}/{{ registry_un }}"
 
 
 
