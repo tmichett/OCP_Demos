@@ -218,4 +218,11 @@ Podman root-level containers can leverage CNI. The containers SDN network is def
 
 For *rootless* podman the networking for containers leverages *SLIRP*. This is provided by the *slirp4netns* package and provides user-mode networking and namespaces for the networks. Containers running as a *Rootless* container will not receive an IP address from the CNI SDN and cannot communicate with each other or the outside except by using and leveraging *port forwarding*.
 
+
+.Red Hat Container Catalog
+[NOTE]
+====
+*Red Hat Container Catalog*: https://catalog.redhat.com/software/containers/search
+====
+
 === Managing Containers using the Red Hat Web Console
