@@ -23,7 +23,7 @@ EXPOSE ${PORT}
 
 # Demo to simulate new image being built from pipeline
 # Copy all files under src/ folder to Apache DocumentRoot (/var/www/html)
-RUN echo "Welcome to my Ansible Container Image" > /var/www/html/index.html
+# RUN echo "Welcome to my Ansible Container Image" > /var/www/html/index.html
 
 # Start Apache in the foreground
 CMD ["httpd", "-D", "FOREGROUND"]
