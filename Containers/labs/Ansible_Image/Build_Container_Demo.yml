@@ -12,21 +12,21 @@
   tasks:
 
 ## Podman Collections Needed for Login
-#    - name: Login to Container Registry
-#      podman_login:
-#        username: "{{ registry_un }}"
-#        password: "{{ registry_pass }}"
-#        registry: "{{ registry_url }}"
-
     - name: Login to Container Registry
+      podman_login:
+        username: "{{ registry_un }}"
+        password: "{{ registry_pass }}"
+        registry: "{{ registry_url }}"
+
+    - name: Build and Push Custom Container Image
       podman_image:
-        name: httpd_demo
+        name: httpd_demo_ansible
         path: ./
         push: yes
         username: "{{ registry_un }}"
         password: "{{ registry_pass }}"
         push_args:
-          dest: "{{ registry_url }}"
+          dest: "{{ registry_url }}/tmichett"
 
 
 
