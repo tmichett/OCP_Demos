@@ -12,8 +12,24 @@
     - name: Gather Information on Running Containers
       podman_container_info:
         name: Website_Demo
-        register: container_info
+      register: container_info
 
     - name: Running Container Information
       debug:
-        var: "{{ container_info }}"
+        var: container_info
+
+    - name: Set Fact for Running Container Launch Command
+      set_fact:
+        Args: "{{ container_info.containers | map(attribute='Args') | list }}"        
+
+    - name: Display Running Container Launch Command
+      debug:
+        var: Args      
+
+    - name: Set Fact for Running Container Image
+      set_fact:
+        ImageName: "{{ container_info.containers | map(attribute='ImageName') | list }}"
+
+    - name: Display Running Container Image
+      debug:
+        var: ImageName        
