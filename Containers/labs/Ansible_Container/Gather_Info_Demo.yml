@@ -1,0 +1,14 @@
+---
+- name: Container Information
+  hosts: localhost
+  vars_files:
+    - vars/registry_login.yml
+  collections:
+    - containers.podman
+
+  tasks:
+
+## Start and Run the HTTPD Container
+    - name: Gather Information on Running Containers
+      podman_container_info:
+        name: Website_Demo

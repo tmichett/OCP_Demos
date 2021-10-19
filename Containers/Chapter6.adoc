@@ -388,7 +388,10 @@ tasks:
 .References
 [NOTE]
 ====
+*Podman Collections Github Project*: https://github.com/containers/ansible-podman-collections
 
-References for this chapter
+*Podman Collection Ansible Galaxy*: https://galaxy.ansible.com/containers/podman
+
+*Podman Collections from Ansible Docs*: https://docs.ansible.com/ansible/latest/collections/containers/podman/
 
 ====
