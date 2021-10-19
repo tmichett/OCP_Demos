@@ -6,9 +6,6 @@
   collections:
     - containers.podman
 
-### Tasks for this playbook will setup a Quay Container Registry
-
-
   tasks:
 
 ## Prepare Config Folder
@@ -55,25 +52,3 @@
           - "7080:80"
         volume:
           - "/Webhosting:/var/www/html:Z"
-
-## Open Firewall for Automated Testing
-    - name: Open Firewall for Website
-      firewalld:
-        port: 7080/tcp
-        permanent: true
-        state: enabled
-        immediate: yes
-
-- name: Test Website
-  hosts: localhost
-  tasks:
-    - name: Test Website
-      uri:
-        url: http://quay.michettetech.com:7080
-        return_content: yes
-        status_code: 200
-      register: result
-
-    - name: Test Website Output
-      debug:
-        msg: 'The website returned: "{{ result.content }}"'
