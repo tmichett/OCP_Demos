@@ -1,5 +1,5 @@
 = {subject}
-:subject: Managing and Building Container Images and Containers)
+:subject: Managing and Building Container Images and Containers
 :description: A more in-depth overview of tools like: Podman, Skopeo, and Buildah in addition to the Red Hat Web Console (Cockpit)
 Travis Michette <tmichett@redhat.com>
 :doctype: book

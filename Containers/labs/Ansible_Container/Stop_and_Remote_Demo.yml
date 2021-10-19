@@ -1,0 +1,24 @@
+---
+- name: Container Information
+  hosts: localhost
+  vars_files:
+    - vars/registry_login.yml
+  collections:
+    - containers.podman
+
+  tasks:
+
+    - name: Stop Running Container
+      podman_container:
+        name: Website_Demo
+        state: stopped
+
+    - name: Remove Stopped Container
+      podman_container:
+        name: Website_Demo
+        state: absent
+
+    - name: Remove Container Image
+      podman_image:
+        name: quay.io/redhattraining/httpd-parent:2.4
+        state: absent
