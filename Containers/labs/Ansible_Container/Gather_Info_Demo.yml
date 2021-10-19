@@ -16,4 +16,4 @@
 
     - name: Running Container Information
       debug:
-        var: "{{ container_info }}" container_info
+        var: "{{ container_info }}"
