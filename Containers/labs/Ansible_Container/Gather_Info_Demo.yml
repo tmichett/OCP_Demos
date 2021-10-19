@@ -8,7 +8,6 @@
 
   tasks:
 
-## Start and Run the HTTPD Container
     - name: Gather Information on Running Containers
       podman_container_info:
         name: Website_Demo
@@ -20,11 +19,11 @@
 
     - name: Set Fact for Running Container Launch Command
       set_fact:
-        Args: "{{ container_info.containers | map(attribute='Args') | list }}"        
+        Args: "{{ container_info.containers | map(attribute='Args') | list }}"
 
     - name: Display Running Container Launch Command
       debug:
-        var: Args      
+        var: Args
 
     - name: Set Fact for Running Container Image
       set_fact:
@@ -32,4 +31,4 @@
 
     - name: Display Running Container Image
       debug:
-        var: ImageName        
+        var: ImageName

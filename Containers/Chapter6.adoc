@@ -384,6 +384,41 @@ tasks:
         - "/Webhosting:/var/www/html:Z"
 ----
 
+. Analyzing Running Containers with Ansible
+
+The *podman collection* has several components to manage and collect information from containers. The *podman_container_info* module can be used to get information about running containers. It requires the name of the container and collects all information as a list/dictionary.
+
+.Podman Container Info Module
+[TIP]
+====
+It is important to note that many of the Ansible *fact* modules have been replaced with *info* modules so the facts are returned as lists/dictionaries. You should consult each module's information page and examine the *Return Values* section.
+
+*podman_container_info*: https://docs.ansible.com/ansible/latest/collections/containers/podman/podman_container_info_module.html#ansible-collections-containers-podman-podman-container-info-module
+
+It is also important to know that in order to access specific elements from the information returned, a mapping of the value must be performed.
+
+.Mapping Element Needed
+[source,bash]
+----
+- name: Gather Information on Running Containers
+  podman_container_info: <1>
+    name: Website_Demo
+  register: container_info
+
+- name: Set Fact for Running Container Image
+  set_fact: <2>
+    ImageName: "{{ container_info.containers | map(attribute='ImageName') | list }}"
+
+- name: Display Running Container Image
+  debug: <3>
+    var: ImageName
+----
+<1> Using the *podman_container_info* to gather all facts and information
+<2> Using the *set_fact* module to map the attribute of the information to a known variable name
+<3> Displaying the information from the set fact
+====
+
+
 
 .References
 [NOTE]
