@@ -172,6 +172,57 @@ https://docs.ansible.com/ansible/latest/collections/containers/podman/podman_con
 
 There are multiple methods for the Podman collection to be installed, however, for this course and the exercises, the collection will be installed locally to the *./collections* sub-folder using a requirements.yml file. The *ansible.cfg* will point to this as already available in the path and the Ansible playbooks being utilized will reference the *collections* at the top of the playbook similar to Ansible roles so that throughout the playbook tasks, the shorter module name can be referenced.
 
+.Installing the Podman Collection
+
+Similar to installation of Ansible Roles, Ansible Collections can be installed in the local working directory in a sub-directory called *collections*. The collections needed for the Ansible projects can be specified in a *requirements.yml* file and installed just like Ansible Roles.
+
+. Create a *requirements.yml* File
++
+.Podman Collection *requirements.yml* File
+[source,bash]
+----
+collections:
+- name: containers.podman
+----
+
+. Install the roles/collections from the *requirements.yml* File
++
+.Installing the Collections
+[source,bash]
+----
+[student@workstation Ansible_Image]$ ansible-galaxy collection install -r requirements.yml -p ./collections
+Process install dependency map
+Starting collection install process
+Installing 'containers.podman:1.8.1' to '/home/student/github/OCP_Demos/Containers/labs/Ansible_Image/collections/ansible_collections/containers/podman'
+----
+
+. Verify the collection(s) are installed
++
+.Verifying Installed Collections
+[source,bash]
+----
+[student@workstation Ansible_Image]$ tree collections/
+collections/
+└── ansible_collections
+    └── containers
+        └── podman
+            ├── ansible-collection-containers-podman.spec
+            ├── CHANGELOG.rst
+            ├── changelog
+
+... output omitted ...
+
+└── sanity
+    ├── ignore-2.10.txt
+    ├── ignore-2.11.txt
+    ├── ignore-2.12.txt
+    ├── ignore-2.9.txt
+    └── requirements.txt
+
+64 directories, 146 files
+----
+
+
 .Using Collections
 [TIP]
 ====
