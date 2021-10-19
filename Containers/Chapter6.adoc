@@ -124,7 +124,7 @@ Starting with Ansible 2.9 and the new Ansible (AAP), collections have been intro
 Ansible Collections can be specified in the *ansible.cfg* file for the path where collections have been installed. As with Ansible Roles, it is common to install Ansible collections to the working directory in a sub-directory called *collections*. When working with Ansible Collections it is necessary to provide this information in the *ansible.cfg* file.
 
 .*ansible.cfg* for Using Collections
-[source,bash]
+[source,yaml]
 ----
 [defaults]
 remote_user = root
@@ -179,7 +179,7 @@ Similar to installation of Ansible Roles, Ansible Collections can be installed i
 . Create a *requirements.yml* File
 +
 .Podman Collection *requirements.yml* File
-[source,bash]
+[source,yaml]
 ----
 collections:
 - name: containers.podman
@@ -229,7 +229,7 @@ collections/
 Referencing the *collection* and using shorter module names. This allows a cleaner and more streamlined approach and is generally consistent with the older Ansible versions. It is 100% fully acceptable to utilize the fully qualified module names, however, for the course and ease of use we will continue referencing Ansible modules by the shortened/condensed name.
 
 .Sample Playbook with Collections
-[source,bash]
+[source,yaml]
 ----
 ---
 - name: Deploy Quay Mirror
@@ -265,7 +265,7 @@ The *podman_image* module from the *containers.podman* collection is needed in o
 . Verify the *ansible.cfg* file for proper collection usage
 +
 .*ansible.cfg*
-[source,bash]
+[source,yaml]
 ----
 [defaults]
 remote_user = root
@@ -276,7 +276,7 @@ COLLECTIONS_PATHS = ~/.ansible/collections:/usr/share/ansible/collections:./coll
 . Start with the top playbook definitions and directives
 +
 .Ansible Playbook Directives
-[source,bash]
+[source,yaml]
 ----
 ---
 - name: Build and Upload a Container Image
@@ -294,7 +294,7 @@ COLLECTIONS_PATHS = ~/.ansible/collections:/usr/share/ansible/collections:./coll
 . Create Playbook with Tasks
 +
 .Playbook Tasks
-[source,bash]
+[source,yaml]
 ----
 tasks:
   - name: Login to Container Registry <1>
@@ -331,7 +331,7 @@ The *podman_container* module from the *containers.podman* collection is needed 
 . Verify the *ansible.cfg* file for proper collection usage
 +
 .*ansible.cfg*
-[source,bash]
+[source,yaml]
 ----
 [defaults]
 remote_user = root
@@ -342,7 +342,7 @@ COLLECTIONS_PATHS = ~/.ansible/collections:/usr/share/ansible/collections:./coll
 . Start with the top playbook definitions and directives
 +
 .Ansible Playbook Directives
-[source,bash]
+[source,yaml]
 ----
 ---
 - name: Build and Upload a Container Image
@@ -360,7 +360,7 @@ COLLECTIONS_PATHS = ~/.ansible/collections:/usr/share/ansible/collections:./coll
 . Create the Playbook with Tasks
 +
 .Playbook Tasks
-[source,bash]
+[source,yaml]
 ----
 tasks:
 
@@ -398,7 +398,7 @@ It is important to note that many of the Ansible *fact* modules have been replac
 It is also important to know that in order to access specific elements from the information returned, a mapping of the value must be performed.
 
 .Mapping Element Needed
-[source,bash]
+[source,yaml]
 ----
 - name: Gather Information on Running Containers
   podman_container_info: <1>
@@ -418,6 +418,38 @@ It is also important to know that in order to access specific elements from the 
 <3> Displaying the information from the set fact
 ====
 
+. Controlling Running Containers with Ansible
+
+The *podman collection* has several components to manage and collect information from containers. The *podman_container* module can be used to interact with containers.
+
+.Example of Stopping / Removing a Container and Deleting a Container Image
+[source,yaml]
+----
+---
+- name: Container Information
+  hosts: localhost
+  vars_files:
+    - vars/registry_login.yml
+  collections:
+    - containers.podman
+
+  tasks:
+
+    - name: Stop Running Container
+      podman_container:
+        name: Website_Demo
+        state: stopped
+
+    - name: Remove Stopped Container
+      podman_container:
+        name: Website_Demo
+        state: absent
+
+    - name: Remove Container Image
+      podman_image:
+        name: quay.io/redhattraining/httpd-parent:2.4
+        state: absent
+----
 
 
 .References
