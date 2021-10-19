@@ -69,7 +69,7 @@
   tasks:
     - name: Test Website
       uri:
-        url: http://quay.michettetech.com:7080
+        url: http://localhost:7080
         return_content: yes
         status_code: 200
       register: result
