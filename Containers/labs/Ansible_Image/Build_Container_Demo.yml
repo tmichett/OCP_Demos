@@ -21,7 +21,7 @@
     - name: Login to Container Registry
       podman_image:
         name: httpd_demo
-        path: ./
+        path: ./Files/
         push: yes
         username: "{{ registry_un }}"
         password: "{{ registry_pass }}"
