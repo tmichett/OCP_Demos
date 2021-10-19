@@ -7,9 +7,8 @@ ifdef::env-github[]
 :note-caption: :paperclip:
 :tip-caption: :bulb:
 :warning-caption: :warning:
-:imagesdir: images/
 endif::[]
-
+:imagesdir: images/
 
 
 == Managing Containers with the New Runtime
@@ -56,8 +55,167 @@ RHEL8 includes *Pacemaker* containers with *podman* as a tech preview. Pacemaker
 
 === Podman Configuration Files
 
+Depending on whether *podman* is being run as a privileged user or as a *rootless* user, the configuration file locations and directives will be difference.
+
+==== Root-Based Podman
+
+When running Podman as a privileged user, the default configurations are used. Generally these files are not modified, however, it is a common practice to modify the *registries.conf* file to add additional container image registries as well as alter the registry search order.
+
+.Default Configuration Files
+* */etc/containers/storage.conf* - Contains information about the default storage for Podman containers when using *podman* in a non-rootless fashion.
+* */etc/containers/registries.conf* - Contains information about the registries used for *podman* when doing *podman search* and also for pulling/running of container images.
+* */etc/cni/net.d/87-podman-bridge.conflist* - Contains information related to the CNI (container network interface) and IP configuration for the container networks.
+
+==== Rootless Podman
+
+When running *podman* in *rootless* mode, all configuration files will be based on user configurations and are located within the user's home directory.
+
+.User-Based Podman Configuration Files
+* */home/student/.config/containers/storage.conf*: Specifies storage configuration for Podman in *rootless* mode.
+* */home/student/.config/containers/registries.conf*: Specifies registry configuration for Podman in *rootless* mode.
+
+
+.Podman User Configuration Files
+[IMPORTANT]
+====
+If the configuration files don't exist in the user's home directory, *podman* will default back up to */etc* for the configuration files and if they aren't there, it will fall back to the */usr/share/containers/* directory.
+====
+
+
+.Podman Configuration File Precedence
+[TIP]
+====
+*podman* has multiple configuration file locations and the order of precedence depends on the if the files exist. Traditionally in a *rootless* implementation, the configuration files with be in the user's *$HOME/.config/containers* directory. In the case of networking, there is no CNI equivalent for *rootless* Podman as *rootless* containers rely on *SLIRP* for networking.
+
+.*Containers.conf*
+. *$HOME/.config/containers/containers.conf*
+. */etc/containers/containers.conf*
+. */usr/share/containers/containers.conf*
+
+.Storage Configurations
+. *$HOME/.config/containers/storage.conf*
+. */etc/containers/storage.conf*
+
+.Registry Configurations
+. *HOME/.config/containers/registries.conf*
+. */etc/containers/registries.d/*
+. */etc/containers/registries.conf*
+
+Precedence of *1* is the highest and will override all others.
+====
+
+
+.References
+[NOTE]
+====
+* *Podman Project - Config Files and Tutorial*: https://github.com/containers/podman/blob/main/docs/tutorials/rootless_tutorial.md
+*
+====
+
 
 === Container Image Storage
 
+Containers use ephemeral storage for running containers which is an overlay filesystem with a new read/write (RW) layer added to the original container image. This ephemeral storage is removed once the container is removed from the system. Container images on the other-hand are stored locally on the system in the container image storage registry. It is important to know where the image storage is located for both container images and ephemeral storage for running containers so that it can be monitored for pro-active system administration and cleanup. The storage location for both container images and ephemeral storage is generally defined in the *storage.conf* file.
+
+==== Root-Based Podman
+
+A default installation of Red Hat Container Tools (podman) will create a configuration file for storage located */etc/containers/storage.conf*. These are the most likely settings to be used when running Podman as a *root* user.
+
+.Default Storage Location
+[source,bash]
+----
+[storage]
+
+# Default Storage Driver
+driver = "overlay"
+
+# Temporary storage location
+runroot = "/var/run/containers/storage"
+
+# Primary Read/Write location of container storage
+graphroot = "/var/lib/containers/storage"
+----
+
+There are plenty of options regarding containers and image storage, but the primary locations to monitor are */var/run/containers/storage* and */var/lib/containers/storage* as these will be the most used locations by *podman*.
+
+==== Rootless Podman
+
+Podman uses the storage configuration file located *$HOME/.config/containers/storage.conf*. These settings are used because the *overlay* filesystem must use a user-space filesystem overlay so it uses *FUSEFS* storage drives for the user-space filesystems.
+
+.Default Storage Location for Rootless Podman
+[source,bash]
+----
+[storage]
+  driver = "overlay"
+  runroot = "/run/user/1000"
+  graphroot = "/home/student/.local/share/containers/storage" <1>
+  [storage.options]
+
+... OUTPUT OMITTED ...
+
+    mount_program = "/usr/bin/fuse-overlayfs" <2>
+----
+<1> Image storage location
+<2> FUSEFS Overlay Filesystem Driver
+
+There are plenty of options regarding containers and image storage, but the primary locations to monitor are */var/run/containers/storage* and */var/lib/containers/storage* as these will be the most used locations by *podman*.
+
+
+=== Container Networking
+
+Podman is meant to provide all management of containers and the container runtime. Podman is capable of managing the container network (SDN) for root-based Podman containers. The CNI controls the specifications for networking and how the SDN is defined on the system. There is no SDN available for *Rootless* containers as *podman* implements networking for *Rootless* containers using *SLIRP*.
+
+==== Root-Based Podman
+
+Podman root-level containers can leverage CNI. The containers SDN network is defined in the */etc/cni/net.d/87-podman-bridge.conflist* configuration file. Containers can communicate to each other within the SDN on the same system.
+
+.*/etc/cni/net.d/87-podman-bridge.conflist*
+[source,json]
+----
+{
+    "cniVersion": "0.4.0",
+    "name": "podman",
+    "plugins": [
+	{
+            "type": "bridge", <1>
+            "bridge": "cni-podman0", <2>
+            "isGateway": true,
+            "ipMasq": true,
+            "ipam": {
+		"type": "host-local",
+		"routes": [
+		    {
+			"dst": "0.0.0.0/0"
+		    }
+		],
+		"ranges": [ <3>
+		    [
+			{
+			    "subnet": "10.88.0.0/16",
+			    "gateway": "10.88.0.1"
+        }
+  		    ]
+  		]
+              }
+  	},
+  	{
+              "type": "portmap",
+              "capabilities": {
+  		"portMappings": true
+              }
+  	},
+  	{
+              "type": "firewall"
+  	}
+      ]
+  }
+----
+<1> Defines network type as a *Bridge*
+<2> Defines the network name for the bridge as *cni-podman0* for the container SDN
+<3> Defines the network IP Address range for the container SDN
+
+==== Rootless Podman
+
+For *rootless* podman the networking for containers leverages *SLIRP*. This is provided by the *slirp4netns* package and provides user-mode networking and namespaces for the networks. Containers running as a *Rootless* container will not receive an IP address from the CNI SDN and cannot communicate with each other or the outside except by using and leveraging *port forwarding*.
 
 === Managing Containers using the Red Hat Web Console
