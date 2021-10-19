@@ -12,3 +12,8 @@
     - name: Gather Information on Running Containers
       podman_container_info:
         name: Website_Demo
+        register: container_info
+
+    - name: Running Container Information
+      debug:
+        var: "{{ container_info }}" container_info
