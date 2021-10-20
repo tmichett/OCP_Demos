@@ -71,6 +71,12 @@ endif::[]
 * *How to use auto-updates and rollbacks in Podman*
 ** https://www.redhat.com/sysadmin/podman-auto-updates-rollbacks
 
+* *Managing your Podman containers with Cockpit on Fedora*
+** https://www.tutorialworks.com/podman-monitoring-cockpit-fedora/
+
+* *Oracle Linux: Use Cockpit to Manage Podman Containers*
+** https://docs.oracle.com/en/operating-systems/oracle-linux/8/tutorial-cockpit-podman/#Before-You-Begin
+
 == Buildah References
 
 * *Buildah Tutorial*
@@ -120,6 +126,8 @@ endif::[]
 * *Kubernetes get started — Deploy a simple web server*
 ** https://medium.com/@mngaonkar/kubernetes-get-started-deploy-a-simple-web-server-9636f4aa8706
 
+* *Developing with Kubernetes on Fedora*
+** https://www.tutorialworks.com/kubernetes-fedora-dev-setup/
 
 == Docker References
 
