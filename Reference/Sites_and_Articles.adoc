@@ -30,13 +30,46 @@ ifdef::env-github[]
 endif::[]
 
 
+
+== Hands-on Labs
+
+* *Red Hat Enterprise Linux Skills Workshops*
+** https://lab.redhat.com/
+
+== RHEL 8 Containers
+
+* *BUILDING, RUNNING, AND MANAGING CONTAINERS*
+** https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html-single/building_running_and_managing_containers/index
+
 == Podman References
+
+* *What is Podman?*
+** https://docs.podman.io/en/latest/
+
+* *podman*
+** https://podman.io/
+
+* *Ansible Collection: containers.podman*
+** https://galaxy.ansible.com/containers/podman
+** https://github.com/containers/ansible-podman-collections
+
+* *Using Ansible to configure Podman containers*
+** https://fedoramagazine.org/using-ansible-to-configure-podman-containers/
 
 * *Rootless Podman*
 ** https://github.com/containers/podman/blob/main/docs/tutorials/rootless_tutorial.md
+** https://github.com/containers/podman/blob/main/rootless.md
 ** https://fedoramagazine.org/running-containers-with-podman/
+** https://developers.redhat.com/blog/2020/09/25/rootless-containers-with-podman-the-basics#example__using_rootless_containers
 
+*podman : setroubleshoot[9420]: SELinux is preventing bash from map access on the file /usr/bin/bash*
+** https://access.redhat.com/solutions/3911431
 
+* *How to debug issues with volumes mounted on rootless containers*
+** https://www.redhat.com/sysadmin/debug-rootless-podman-mounted-volumes
+
+* *How to use auto-updates and rollbacks in Podman*
+** https://www.redhat.com/sysadmin/podman-auto-updates-rollbacks
 
 == Buildah References
 
@@ -54,10 +87,54 @@ endif::[]
 
 == OpenShift Container Platform References
 
+* *Disconnected OpenShift*
+** https://github.com/redhat-cop/ocp-disconnected-docs
+** https://github.com/redhat-cop/ocp-disconnected-docs/blob/main/appendix/disconnected-registry-standalone-quay.md
+
+* *Installer Provisioned Infrastructure (IPI) of OpenShift on Baremetal Install Guides*
+** https://openshift-kni.github.io/baremetal-deploy/
+
+* *Deploy OpenShift at the Edge with Single-Node OpenShift*
+** https://cloud.redhat.com/blog/deploy-openshift-at-the-edge-with-single-node-openshift
+
 == Kubernetes References
 
 * *Creating Kubernetes YAML Files*
 ** https://hackernoon.com/how-to-create-kubernetes-yaml-files
 
+* *Kubernetes by Example*
+** https://kubebyexample.com/
+
+* *Learn Kubernetes using Red Hat Developer Sandbox for OpenShift*
+** https://developers.redhat.com/developer-sandbox/activities/learn-kubernetes-using-red-hat-developer-sandbox-openshift
+
+* *Running Kubernetes and the dashboard with Docker Desktop*
+** https://andrewlock.net/running-kubernetes-and-the-dashboard-with-docker-desktop/
+
+* *Kubernetes Pods*
+** https://kubernetes.io/docs/concepts/workloads/pods/
+
+* *Getting Started with Kubernetes: Deploy a Docker Container with Kubernetes in 5 minutes*
+** https://codeburst.io/getting-started-with-kubernetes-deploy-a-docker-container-with-kubernetes-in-5-minutes-eb4be0e96370
+
+* *Kubernetes get started — Deploy a simple web server*
+** https://medium.com/@mngaonkar/kubernetes-get-started-deploy-a-simple-web-server-9636f4aa8706
+
 
 == Docker References
+
+* *Transitioning from Docker to Podman*
+** https://developers.redhat.com/blog/2020/11/19/transitioning-from-docker-to-podman?ts=1633696447887#run_an_existing_image_using_podman
+
+* *Docker and Fedora 35*
+** https://fedoramagazine.org/docker-and-fedora-35/
+
+== Git References
+
+* *A Git cheatsheet that all coders need*
+** https://towardsdatascience.com/a-git-cheatsheet-that-all-coders-need-bf8ad4d91576
+
+== Quay
+
+* *Deploy Red Hat Quay for proof-of-concept (non-production) purposes*
+** https://access.redhat.com/documentation/en-us/red_hat_quay/3/html/deploy_red_hat_quay_for_proof-of-concept_non-production_purposes/index
