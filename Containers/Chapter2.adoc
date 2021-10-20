@@ -233,6 +233,25 @@ For *rootless* podman the networking for containers leverages *SLIRP*. This is p
 
 The Red Hat Web Management Console (Cockpit) can be used to manage container images as well as running containers. However, in order to manage some of the aspects around containers, certain configurations must already be in place.
 
+Cockpit can almost manage the full container lifecycle. using the *Podman containers* plugin. Container images can be downloaded, managed, deleted. Containers can be launched from container images, stopped, restarted. Containers can even be analyzed providing runtime information, container logs, and even console access. Existing containers can also be turned into new container images using the *Commit* functions.
+
+.Container Runtime Details
+
+The *Details* tab can provide container runtime information. This is similar to running the *podman inspect* without providing all the details.
+
+image::Chapter2-e877a.png[title="Container Runtime Information", align="center"]
+
+.Container Logs
+
+The *Logs* tab is capable of sharing the container logs. This is similar to running the *podman logs* command.
+
+image::Chapter2-64e78.png[title="Container Logs", align="center"]
+
+.Container Console
+
+Cockpit also allows accessing a console directly inside the running container. Accessing the console via cockpit is the same as running the *podman exec -it <Container> /bin/bash* command.
++
+image::Chapter2-416de.png[title="Container Console", align="center"]
 
 ==== Installing Cockpit Podman Plugins
 
@@ -300,6 +319,32 @@ Once installed and enabled, the *Podman containers* plugin can begin managing co
 ** There are some difficulties with providing authentication information to registries as there isn't currently an interface to login to the registry within Cockpit.
 * *Storage Volumes*: It might be necessary to have volumes and permissions setup to properly mount/map the volumes into the running containers
 
+.Registry Credentials
+[IMPORTANT]
+====
+In order for Podman to authenticate, you must provide credentials. There needs to be a config file and you may also need to login to *podman* from the command line.
+
+.*.docker/config.json* Config File
+[source,bash]
+----
+[student@servera ~]$ cat .docker/config.json
+{
+  "ServerURL": "https://registry.redhat.io/v1",
+  "Username": "RHNID",
+  "Secret": "RHNPassword"
+}
+----
+
+.CLI Login
+[source,bash]
+----
+[student@servera ~]$ podman login registry.redhat.io
+Authenticating with existing credentials...
+Existing credentials are valid. Already logged in to registry.redhat.io
+----
+====
+
+
 .Container Image Management with Cockpit
 
 . Navigate to the *Images* section and select *Get new image*
@@ -354,6 +399,105 @@ image::Chapter2-1bc27.png[title="Images in Local Registry", align="center"]
 image::Chapter2-fb988.png[title="HTTPD-Parent Image Details - Image Information", align="center"]
 +
 image::Chapter2-2fd80.png[title="Clair Image Details - Containers Using Image", align="center"]
+
+.Container Management with Cockpit
+
+It is possible to manage both *rootless* and *root-based* containers in Cockpit depending on the user you are using to access the management console. In order to create and launch new containers from Cockpit, the image must already be downloaded and existing in the local image registry.
+
+*Container Creation*
+
+. Select the image to be used to launch the container by clicking the *Play* button.
++
+image::Chapter2-cd516.png[title="HTTPD-Parent Image Selection", align="center"]
+. Enter details you wish to use for your image and click "Run"
+.. Container Name
+.. Port mapping
+.. Volume mapping
++
+image::Chapter2-acd5b.png[title="Launcing a Demo Container", align="center"]
++
+.*NOTE* Regarding *With terminal*
+[WARNING]
+====
+For several containers, you should *uncheck* the *_With terminal_* option as this could cause the container to exit unexpectedly.
+====
+. Verify container was launched
++
+image::Chapter2-8a097.png[title="Running Container Verification", align="center"]
++
+image::Chapter2-4003d.png[title="Running Container Details", align="center"]
+
+. Allow connection to container externally through Firewall
+.. Click *Networking*
+.. Click *Edit rules and zones* for the Firewall
++
+image::Chapter2-4a197.png[title="Using Cockpit to Manage Firewalls", align="center"]
+
+. Click *Add Services* and either select an existing service or create custom ports, then click the *Add Services* button on the *Add services to public zone*.
+.. Verify the service was added
++
+image::Chapter2-079f2.png[title="Add the HTTP Service", align="center"]
++
+image::Chapter2-98f48.png[title="HTTP Service Available", align="center"]
+
+. Verify the container is running and hosting the website via the console and through a web browser.
++
+.Local Container Verification
+[source,bash]
+----
+sh-4.4# curl localhost
+Hello from the httpd-parent container!
+sh-4.4#
+----
++
+image::Chapter2-6ee11.png[title="Container Console in Cockpit", align="center"]
++
+image::Chapter2-70921.png[title="Application Verification in Firefox", align="center"]
+
+*Saving a Container Image from a Runnign Container*
+
+. Select the container to use as a base for the image
+.. Click *Commit*
++
+image::Chapter2-376ab.png[title="Creating an new image from a container.", align="center"]
+
+. Select and complete the *Commit image* form
+.. Specify *Image name*
+.. Other fields are optional
++
+image::Chapter2-b93ab.png[title="Committing image", align="center"]
++
+.Images from a Running Container
+[TIP]
+====
+It is possible to create images from running container. If the container is running, it will be paused briefly while the image is created.
+====
+
+. Verify the image was created
++
+image::Chapter2-97e74.png[title="Image Verification", align="center"]
++
+.Image Tags
+[IMPORTANT]
+====
+If there is no tag specified when the image is being committed, *podman* will automatically add the *_latest_* tag to the image.
+====
+
+
+*Container Cleanup*
+
+. Select the container to stop and remove.
+.. If you just want to stop a running container, click *Stop*
+.. To stop and remove the container, click the *Trashcan*
++
+image::Chapter2-2506f.png[title="Container Cleanup", align="center"]
++
+.Deleting a Running Container
+[TIP]
+====
+Running containers must be stopped before they can be deleted or removed. If a container is running, and you click the *Trashcan* it will stop and delete the container. This is similar to performing a *podman rm -f <Container>* as it will force stop and then remove the container.
+====
+
 
 .References
 [NOTE]
