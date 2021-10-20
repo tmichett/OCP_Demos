@@ -496,6 +496,8 @@ image::Chapter2-2506f.png[title="Container Cleanup", align="center"]
 [TIP]
 ====
 Running containers must be stopped before they can be deleted or removed. If a container is running, and you click the *Trashcan* it will stop and delete the container. This is similar to performing a *podman rm -f <Container>* as it will force stop and then remove the container.
+
+image::Chapter2-606fd.png[title="Force Removing a Running Container", align="center"]
 ====
 
 

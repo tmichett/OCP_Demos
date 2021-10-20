@@ -29,7 +29,7 @@ This will talk about Podman Pods
 
 *Podman:* https://docs.podman.io/en/latest/
 
-* *Moving from docker-compose to Podman pods*: https://www.redhat.com/sysadmin/compose-podman-pods
+*Moving from docker-compose to Podman pods*: https://www.redhat.com/sysadmin/compose-podman-pods
 
 *Podman System Prune:*
 
