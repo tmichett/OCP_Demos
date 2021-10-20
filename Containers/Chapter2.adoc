@@ -109,7 +109,11 @@ Precedence of *1* is the highest and will override all others.
 [NOTE]
 ====
 * *Podman Project - Config Files and Tutorial*: https://github.com/containers/podman/blob/main/docs/tutorials/rootless_tutorial.md
-*
+* *Why can't I use sudo with rootless Podman?*: https://www.redhat.com/sysadmin/sudo-rootless-podman
+* *What happens behind the scenes of a rootless Podman container?*: https://www.redhat.com/sysadmin/behind-scenes-podman
+* *Rootless containers using Podman*: https://www.redhat.com/sysadmin/rootless-containers-podman
+* *Container video series: Rootless containers, process separation, and OpenSCAP*: https://www.redhat.com/sysadmin/container-video-series (Really good by Brian Smith - Former RH TAM, now works in the RHEL Platform BU)
+* *Why can’t rootless Podman pull my image?*: https://www.redhat.com/sysadmin/rootless-podman
 ====
 
 
@@ -226,3 +230,136 @@ For *rootless* podman the networking for containers leverages *SLIRP*. This is p
 ====
 
 === Managing Containers using the Red Hat Web Console
+
+The Red Hat Web Management Console (Cockpit) can be used to manage container images as well as running containers. However, in order to manage some of the aspects around containers, certain configurations must already be in place.
+
+
+==== Installing Cockpit Podman Plugins
+
+In order to utilize Cockpit to manage containers with Podman there must be two things that are in place.
+
+.Cockpit *podman* Requirements
+* Podman cockpit plugins
+* Podman service started and running on the system
+
+. Install *cockpit-podman* Modules
++
+.Installation of Cockpit *podman* Plugins
+[source,bash]
+----
+[root@servera ~]# yum install cockpit-podman
+
+... OUTPUT OMITTED ...
+
+Complete!
+[root@servera ~]#
+----
+
+. Enable *podman* Service in Cockpit
+.. Sign into Cockpit
+.. Click "*Podman containers*"
+.. Click "*Start podman*"
++
+image::Chapter2-c0656.png[title="Cockpit - Podman Containers (Setup)", align="center"]
++
+image::Chapter2-89d80.png[title="Cockpit - Podman Containers (In-Use)", align="center"]
++
+.Ensure Cockpit is both Installed and Enabled
+[IMPORTANT]
+====
+
+.Installing Cockpit
+[source,bash]
+----
+[root@servera ~]# yum install cockpit
+
+... OUTPUT OMITTED ...
+
+subscription-manager-cockpit-1.28.13-2.el8.noarch
+tracer-common-0.7.5-2.el8.noarch
+
+Complete!
+----
+
+.Enabling Cockpit Socket
+[source,bash]
+----
+[root@servera ~]# systemctl enable cockpit.socket --now
+Created symlink /etc/systemd/system/sockets.target.wants/cockpit.socket → /usr/lib/systemd/system/cockpit.socket
+----
+====
+
+
+==== Using Cockpit to Manage Containers
+
+Once installed and enabled, the *Podman containers* plugin can begin managing containers and images. There are a few things to remember and consider as the *plugin* can't do everything.
+
+.Plugin Considerations and Limitations
+* *Registries*: Image registries must be setup and specified ahead of time in the */etc/containers/registries.conf* file.
+** Image registries must be in the configuration file in order for images to be downloaded and used. If the configuration file is updated after the *podman* service has been started, the service must be "restarted" in order for Cockpit to see the changes.
+** There are some difficulties with providing authentication information to registries as there isn't currently an interface to login to the registry within Cockpit.
+* *Storage Volumes*: It might be necessary to have volumes and permissions setup to properly mount/map the volumes into the running containers
+
+.Container Image Management with Cockpit
+
+. Navigate to the *Images* section and select *Get new image*
++
+image::Chapter2-d266c.png[title="Cockpit - Podman Container Images", align="center"]
++
+image::Chapter2-4b45a.png[title="Search for Images", align="center"]
+. Select the registry to search, tags, and image name/description, then click "Download"
+.. Search for the HTTPD-Parent image in the *quay.io* registry.
++
+image::Chapter2-9e757.png[title="HTTPD 2.4 Parent Image from Red Hat Training - Quay.io", align="center"]
++
+.Adding the *quay.io* Registry to */etc/containers/registries.conf*
+[TIP]
+====
+Update the *registries.conf* file and then restart the *podman* service.
+
+.Edit */etc/containers/registries.conf*
+[source,bash]
+----
+# To ensure compatibility with docker we've included docker.io in the default search list. However Red Hat
+# does not curate, patch or maintain container images from the docker.io registry.
+[registries.search]
+registries = ['registry.access.redhat.com', 'registry.redhat.io', 'docker.io', 'quay.io']<1>
+----
+<1> Adding *quay.io*
+
+
+.Restart *podman*
+[source,bash]
+----
+[root@servera ~]# systemctl restart podman.service
+----
+
+====
++
+.Registry Authentication
+[CAUTION]
+====
+It is important to keep in mind, images requiring authentication to a registry will provide errors in Cockpit as you will be accessing the registry as an unauthenticated user.
+
+image::Chapter2-5a3bb.png[title="Registry Authentication Issues", align="center"]
+
+Based on timeline and platform difficulties, images downloaded in the Red Hat Web Management Console will be coming from public (unauthenticated) registries.
+====
+. Confirm image was downloaded.
++
+image::Chapter2-1bc27.png[title="Images in Local Registry", align="center"]
+
+. Explore image details by clicking the *>* and expanding the available information.
++
+image::Chapter2-fb988.png[title="HTTPD-Parent Image Details - Image Information", align="center"]
++
+image::Chapter2-2fd80.png[title="Clair Image Details - Containers Using Image", align="center"]
+
+.References
+[NOTE]
+====
+
+*Oracle Linux: Use Cockpit to Manage Podman Containers*: https://docs.oracle.com/en/operating-systems/oracle-linux/8/tutorial-cockpit-podman/#Before-You-Begin
+
+*Managing your Podman containers with Cockpit on Fedora*: https://www.tutorialworks.com/podman-monitoring-cockpit-fedora/
+====
