@@ -1,0 +1,9 @@
+[rhel-8-for-x86_64-baseos-rpms]
+name="Local classroom copy of BaseOS on dvd"
+baseurl=file:///RHEL84/BaseOS
+gpgcheck=0
+
+[rhel-8-for-x86_64-appstream-rpms]
+name="Local classroom copy of AppStream on dvd"
+baseurl=file:///RHEL84/AppStream
+gpgcheck=0
