@@ -66,7 +66,7 @@
           - tree
         state: latest
 
-## Create Student User
+## Create Student User with Password and Sudo File
     - name: Create Student User
       user:
         name: student
@@ -80,4 +80,4 @@
         dest: /etc/sudoers.d/student
 
     - name: Password for Student user
-      shell: echo "redhat" | passwd student --stdin
+      shell: echo "student" | passwd student --stdin
