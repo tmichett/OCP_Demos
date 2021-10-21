@@ -20,3 +20,16 @@ endif::[]
 
 
 === Inspecting Images with Skopeo on Remote Registries
+
+
+.References
+[NOTE]
+====
+
+*Deploy Red Hat Quay for proof-of-concept (non-production) purposes*: https://access.redhat.com/documentation/en-us/red_hat_quay/3/html/deploy_red_hat_quay_for_proof-of-concept_non-production_purposes/index
+Deploying Quay as a local registry server using local storage and containerized services.
+
+*Quay Lab PoC*: https://github.com/tmichett/quay_lab_poc
+Deploying the Quay Registry locally based on the Proof-of-Concept local deployment.
+
+====

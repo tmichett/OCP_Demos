@@ -19,6 +19,9 @@ RHEL 8.x brought several significant changes and expanded upon other changes tha
 * SystemD
 * FirewallD
 
+Before beginning the course, there is a quick set of steps that will be completed as an exercise so that the environment can be setup and prepared. The *Workstation* machine will be our GUI machine used throughout the week and is running RHEL 8.2. We will also be using a custom RHEL 8.4 system called *server*.
+
+include::../labs/server_prep/Setup_Exercise.adoc[]
 
 === TMUX Usage
 
@@ -130,7 +133,7 @@ SysVinit Vs systemd Cheatsheet: https://www.2daygeek.com/sysvinit-vs-systemd-che
 .Init Script to Run at Startup
 [source,bash]
 ----
-[root@servera ~]# vim /usr/bin/ups_test_service.sh
+[root@server ~]# vim /usr/bin/ups_test_service.sh
 #!/usr/bin/bash
 
 DATE=`date '+%Y-%m-%d %H:%M:%S'`
@@ -148,7 +151,7 @@ done
 .Running *chmod* on script
 [source,bash]
 ----
-[root@servera ~]# chmod +x /usr/bin/ups_test_service.sh
+[root@server ~]# chmod +x /usr/bin/ups_test_service.sh
 ----
 
 
@@ -157,7 +160,7 @@ done
 .Editing the .service File
 [source,bash]
 ----
-[root@servera ~]# vim /etc/systemd/system/ups_test_service.service
+[root@server ~]# vim /etc/systemd/system/ups_test_service.service
 
 [Unit]
 Description=UPS example systemd service.
@@ -175,7 +178,7 @@ WantedBy=multi-user.target
 .Running *chmod* on .service File
 [source,bash]
 ----
-[root@servera ~]# chmod 644 /etc/systemd/system/ups_test_service.service
+[root@server ~]# chmod 644 /etc/systemd/system/ups_test_service.service
 ----
 
 .SystemD Services
@@ -198,7 +201,7 @@ Default Location: */lib/systemd/*
 .Controlling a Custom Service with *systemctl*
 [source,bash]
 ----
-[root@servera ~]# systemctl enable ups_test_service.service --now
+[root@server ~]# systemctl enable ups_test_service.service --now
 Created symlink /etc/systemd/system/multi-user.target.wants/ups_test_service.service → /etc/systemd/system/ups_test_service.service.
 ----
 
@@ -207,7 +210,7 @@ Created symlink /etc/systemd/system/multi-user.target.wants/ups_test_service.ser
 .Using *systemctl* to Check Service Status
 [source,bash]
 ----
-[root@servera ~]# systemctl status ups_test_service.service
+[root@server ~]# systemctl status ups_test_service.service
 ● ups_test_service.service - UPS example systemd service.
    Loaded: loaded (/etc/systemd/system/ups_test_service.service; enab>
    Active: active (running) since Wed 2020-05-20 18:08:22 EDT; 19s ago
@@ -218,8 +221,8 @@ Created symlink /etc/systemd/system/multi-user.target.wants/ups_test_service.ser
            ├─2136 /bin/bash /usr/bin/ups_test_service.sh
            └─2140 sleep 30
 
-May 20 18:08:22 servera.lab.example.com systemd[1]: Started UPS examp>
-May 20 18:08:22 servera.lab.example.com bash[2136]: Looping..
+May 20 18:08:22 server.lab.example.com systemd[1]: Started UPS examp>
+May 20 18:08:22 server.lab.example.com bash[2136]: Looping..
 ----
 
 . Checking */var/log/messages* for Custom Service
@@ -227,7 +230,7 @@ May 20 18:08:22 servera.lab.example.com bash[2136]: Looping..
 .Seaching Log file for Custom Service
 [source,bash]
 ----
-[root@servera ~]# grep -i ups /var/log/messages
+[root@server ~]# grep -i ups /var/log/messages
 May 20 18:08:22 jegui journal[2139]: This is a sample service started at 2020-05-20 18:08:22 for the UPS RH354 course.
 ----
 
@@ -275,10 +278,10 @@ The *firewall-cmd* utility is the primary method to manage and interact with fir
 .Allowing HTTP through the Firewall by Port/Protocol
 [source,bash]
 ----
-[root@servera ~]# firewall-cmd --add-port=80/tcp
+[root@server ~]# firewall-cmd --add-port=80/tcp
 success
 
-[root@servera ~]# firewall-cmd --list-all
+[root@server ~]# firewall-cmd --list-all
 public (active)
   target: default
   icmp-block-inversion: no
@@ -293,20 +296,20 @@ public (active)
   icmp-blocks:
   rich rules:
 
-[root@servera ~]# firewall-cmd --remove-port=80/tcp
+[root@server ~]# firewall-cmd --remove-port=80/tcp
 success
 ----
 
 .Allowing HTTP through the Firewall by Service
 [source,bash]
 ----
-[root@servera ~]# firewall-cmd --add-service=
+[root@server ~]# firewall-cmd --add-service=
 Display all 154 possibilities? (y or n)
 
-[root@servera ~]# firewall-cmd --add-service=http
+[root@server ~]# firewall-cmd --add-service=http
 success
 
-[root@servera ~]# firewall-cmd --list-all
+[root@server ~]# firewall-cmd --list-all
 public (active)
   target: default
   icmp-block-inversion: no
@@ -343,7 +346,7 @@ FirewallD has a few locations for files both for configuration and usage. As wit
 .FirewallD Configuration Files
 [source,bash]
 ----
-[root@servera ~]# tree /etc/firewalld/
+[root@server ~]# tree /etc/firewalld/
 /etc/firewalld/
 ├── firewalld.conf
 ├── helpers
@@ -362,7 +365,7 @@ FirewallD has a few locations for files both for configuration and usage. As wit
 .FirewallD Default Configuration Files
 [source,bash]
 ----
-[root@servera ~]# tree /usr/lib/firewalld/
+[root@server ~]# tree /usr/lib/firewalld/
 /usr/lib/firewalld/
 ├── helpers
 │   ├── amanda.xml
@@ -402,7 +405,7 @@ It is easiest to take an existing service file, copy it to the */etc/firewalld/s
 .Using SSH Service File as a Starting Point
 [source,bash]
 ----
-[root@servera ~]# cp /usr/lib/firewalld/services/ssh.xml /etc/firewalld/services/custom_ssh.xml
+[root@server ~]# cp /usr/lib/firewalld/services/ssh.xml /etc/firewalld/services/custom_ssh.xml
 ----
 
 . Edit the file and specify the new options
@@ -410,7 +413,7 @@ It is easiest to take an existing service file, copy it to the */etc/firewalld/s
 .Edit the Custom SSH Service Definition
 [source,bash]
 ----
-[root@servera ~]# vim /etc/firewalld/services/custom_ssh.xml
+[root@server ~]# vim /etc/firewalld/services/custom_ssh.xml
 <?xml version="1.0" encoding="utf-8"?>
 <service>
   <short>SSH_Custom</short>
@@ -424,7 +427,7 @@ It is easiest to take an existing service file, copy it to the */etc/firewalld/s
 .Getting Listing of FirewallD Services
 [source,bash]
 ----
-[root@servera ~]# firewall-cmd --get-services | grep custom_ssh
+[root@server ~]# firewall-cmd --get-services | grep custom_ssh
 ----
 
 .FirewallD Delays in Discovering a Service
@@ -442,7 +445,7 @@ As stated above, the main FirewallD configuration files are located in */etc/fir
 .FirewallD Configuration for Public
 [source,bash]
 ----
-[root@servera ~]# cat /etc/firewalld/zones/public.xml
+[root@server ~]# cat /etc/firewalld/zones/public.xml
 <?xml version="1.0" encoding="utf-8"?>
 <zone>
   <short>Public</short>
@@ -458,7 +461,7 @@ As stated above, the main FirewallD configuration files are located in */etc/fir
 .Adding our new Service
 [source,bash]
 ----
-[root@servera ~]# firewall-cmd --add-service=custom_ssh --permanent
+[root@server ~]# firewall-cmd --add-service=custom_ssh --permanent
 success
 ----
 
@@ -467,7 +470,7 @@ success
 .FirewallD Configuration for Public with Custom Service
 [source,bash]
 ----
-[root@servera ~]# cat /etc/firewalld/zones/public.xml
+[root@server ~]# cat /etc/firewalld/zones/public.xml
 <?xml version="1.0" encoding="utf-8"?>
 <zone>
   <short>Public</short>
@@ -494,7 +497,7 @@ Leverage portions of the RH354 text around Cockpit and the Red Hat Web Managemen
 .Install all Base Cockpit Packages
 [source,bash]
 ----
-[root@servera ~]# yum install cockpit*
+[root@server ~]# yum install cockpit*
 ----
 
 image::Chapter3-0692a.png[title="Cockpit Dashboard", align="center"]
@@ -516,10 +519,10 @@ It is possible to use a single *cockpit* Interface to manage multiple servers.
 .Test and Enable Cockpit
 [source,bash]
 ----
-[student@workstation ~]$ ssh root@servera
+[student@workstation ~]$ ssh root@server
 Activate the web console with: systemctl enable --now cockpit.socket
 
-[root@servera ~]# systemctl enable --now cockpit.socket
+[root@server ~]# systemctl enable --now cockpit.socket
 Created symlink /etc/systemd/system/sockets.target.wants/cockpit.socket → /usr/lib/systemd/system/cockpit.socket.
 ----
 
