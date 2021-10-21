@@ -56,3 +56,28 @@
         regexp: '^172.25.250.251 quay.local quay'
         line: '172.25.250.251 quay.local quay'
       delegate_to: localhost
+
+## Install Bash completion, tree, vim, and other apps
+    - name: Install applications
+      yum:
+        name:
+          - bash-completion
+          - vim
+          - tree
+        state: latest
+
+## Create Student User
+    - name: Create Student User
+      user:
+        name: student
+        state: present
+        shell: /bin/bash
+        comment: Student User
+
+    - name: Sudo for Student user
+      copy:
+        content: student ALL=(ALL) NOPASSWD:ALL
+        dest: /etc/sudoers.d/student
+
+    - name: Password for Student user
+      shell: echo "redhat" | passwd student --stdin
