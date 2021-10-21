@@ -21,7 +21,7 @@ RHEL 8.x brought several significant changes and expanded upon other changes tha
 
 Before beginning the course, there is a quick set of steps that will be completed as an exercise so that the environment can be setup and prepared. The *Workstation* machine will be our GUI machine used throughout the week and is running RHEL 8.2. We will also be using a custom RHEL 8.4 system called *server*.
 
-include::../labs/server_prep/Setup_Exercise.adoc[]
+include::./labs/server_prep/Setup_Exercise.adoc[]
 
 === TMUX Usage
 
