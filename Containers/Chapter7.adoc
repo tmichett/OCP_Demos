@@ -7,13 +7,287 @@ ifdef::env-github[]
 :note-caption: :paperclip:
 :tip-caption: :bulb:
 :warning-caption: :warning:
-:imagesdir: images/
 endif::[]
-
+:imagesdir: images/
 
 == Quay Image Registry
 
 === Installing the Quay Image Registry
+
+=== Installing the Quay Image Registry with Ansible
+
+There is a Github project that can be used to install a Quay image registry locally which includes a Mirroring and ClairV4 scanning process. The Github repository should have been cloned as part of the exercise in Chapter 1. The Github repository is: https://github.com/tmichett/quay_lab_poc and can deploy a fully functional Quay image registry locally.
+
+.Local Quay Instance Details
+* *Server FQDN*: quay.local
+* *Images Used*:
+** registry.redhat.io/rhel8/postgresql-10:1
+** registry.redhat.io/rhel8/redis-5:1
+** registry.redhat.io/quay/quay-rhel8:v3.6.0-62
+** registry.redhat.io/quay/clair-rhel8:v3.6.0-70
+
+The Quay playbooks have been broken down so that they can be run to easily deploy Quay. There are options for deploying based on the configuration files being pre-populated as well as using the Quay container to create the TGZ configuration.
+
+==== Deploying Quay with Ansible
+
+. Change to the *github/quay_lab_poc* directory
++
+[source,bash]
+----
+[student@workstation ~]$ cd github/quay_lab_poc/
+----
+
+. Create a registry credential file and update the file with your information
++
+.Copy *registry_login.yml_example* to *registry_login.yml*
+[source,bash]
+----
+[student@workstation quay_lab_poc]$ cp registry_login.yml_example registry_login.yml
+----
++
+.Edit the file *registry_login.yml*
+[source,bash]
+----
+[student@workstation quay_lab_poc]$ vim registry_login.yml
+registry_un: UN_Goes_Here <1>
+registry_pass: Password_Goes_Here <2>
+registry_url: registry.redhat.io
+----
+<1> Replace with your Red Hat Login ID
+<2> Replace with your Red Hat Login Password
+
+. Run the *Quay_Prepare.yml* playbook
++
+[source,bash]
+----
+[student@workstation quay_lab_poc]$ ansible-playbook Quay_Prepare.yml
+
+PLAY [Installation of Packages and Preparing the System] *********************************************************************************************
+
+TASK [Gathering Facts] *******************************************************************************************************************************
+ok: [quay.local]
+
+... OUTPUT OMITTED ...
+
+TASK [Start the Quay Config Container] ***************************************************************************************************************
+changed: [quay.local]
+
+TASK [Open the Quay Config Container Site] ***********************************************************************************************************
+[Open the Quay Config Container Site] <1>
+Go to the Quay Configuration container website and enter the appropriate configuration values. For help, look at https://github.com/tmichett/quay_lab/References/Quay-3.5_Deployment.pdf. Login with the credentials provided which are UN: quayconfig and PW: secret. Press 'Enter' when you've completed the configuration and downloaded the file. The file should be placed in the files directory for this playbook.: <2>
+
+... OUTPUT OMITTED ...'
+
+PLAY RECAP *******************************************************************************************************************************************
+quay.local                 : ok=13   changed=10   unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+----
+<1> This allows you to open the Quay Config Site to create a custom configuration file.
+<2> Once you've opened the Quay config site and completed the configuration as well as downloaded the file you can hit "Enter". It is also possible to hit "Enter" and skip this step so that the already existing configuration file can be used.
++
+.Ansible Failure Possible
+[IMPORTANT]
+====
+It is possible that you will receive an Ansible failure message like this
+
+[source,bash]
+----
+[student@workstation quay_lab_poc]$ ansible-playbook Quay_Prepare.yml
+ERROR! vars file registry_login.yml was not found <1>
+Could not find file on the Ansible Controller.
+If you are using a module and expect the file to exist on the remote, see the remote_src option
+----
+<1> This error means you forgot to create/edit the *registry_login.yml* file.
+
+====
+
+. Run the configuration file deployment based on using the TAR config file or the file-based configuration method. *_NOTE: You can only choose one method for configuration._*
++
+.File-Based Configuration Method
+[source,bash]
+----
+[student@workstation quay_lab_poc]$ ansible-playbook Quay_Config_Deploy_Files.yml
+----
++
+.File-Based Configuration Considerations
+[IMPORTANT]
+====
+The *./files/config/config.yaml* file will be used and deployed to control the configuration of the Quay environment.
+====
++
+.TAR File Configuration Method
+[source,bash]
+----
+
+----
++
+.TAR-Based Configuration Considerations
+[IMPORTANT]
+====
+The *./files/quay-config.tar.gz* file will be used and deployed to control the configuration of the Quay environment. This file MUST have been created as part of the Quay configuration container process with the WebUI and it must be placed in the *./files/quay-config.tar.gz* before running the playbook.
+====
+
+. Deploy the ClairV4 scanning image by executing the *Quay_Clair_Deploy.yml* playbook
++
+[source,bash]
+----
+[student@workstation quay_lab_poc]$ ansible-playbook Quay_Clair_Deploy.yml
+----
+
+. Deploy the Quay container registry by executing the *Quay_Deploy.yml* playbook.
++
+[source,bash]
+----
+[student@workstation quay_lab_poc]$ ansible-playbook Quay_Deploy.yml
+----
+
+. Deploy the Quay Mirroring Container by executing the *Quay_Mirror_Deploy.yml* playbook.
++
+[source,bash]
+----
+[student@workstation quay_lab_poc]$ ansible-playbook Quay_Mirror_Deploy.yml
+----
+
+==== Setting up the Quay Web Console
+
+After all Quay containers have been configured and installed, it is necessary to setup the Admin (Superuser) for Quay as well as test out the system for both image scanning and the ability to mirror container images from upstream repositories.
+
+===== Configuring the Quay Super User
+
+After the Quay registry has been deployed, it is important to finish configuring the super users (admins) that were defined as part of the setup and configuration file (*config.yaml*) that was created during the Quay preparation section.
+
+It is necessary to look at the *config.yaml* file and configure these users with a password and create the accounts officially before moving forward with utilizing the Quay container registry and the lab environment.
+
+.Configure Quay Super Users
+[IMPORTANT]
+====
+It is possible to either look in the configuration file of the *quay-config.tar.gz* or the actual *config.yaml* file for the *_SUPER_USERS_* section. This is where the usernames are defined that will function as Quay super users.
+
+.Quay Super Users
+[source,yaml]
+----
+SUPER_USERS:
+    - quayadmin
+    - travis
+----
+====
+
+. Open the Quay web console by navigating to it in your favorite browser using *http://Quay-FQDN:8080*
++
+image::README-6d4f6.png[]
+
+
+. Click *Create Account* to create the administrator/superuser accounts for Quay as defined in the *config.yaml* file.
+** Repeat this step for all super users in the *config.yaml* file.
++
+image::README-aade3.png[]
++
+image::README-2085a.png[]
++
+image::README-4c04a.png[]
+
+. Verify the account was setup properly and you have *Super User* rights by clicking your Username and looking for *Super User Admin Panel*.
++
+image::README-6c250.png[]
+
+==== Testing Quay and ClairV4 Image Scanning
+
+In order to test the scanning capabilities and ensure that things function properly, update a basic image into the Quay Repository
+
+. Login to Quay Repository
++
+.*podman* Authentication
+[source,bash]
+----
+[root@quay ~]# podman login --tls-verify=false quay.local:8080
+Username: travis
+Password:
+Login Succeeded!
+----
+
+. Pull and Download an Image, Tag it, then upload to repository
++
+.Downloading image
+[source,bash]
+----
+[root@quay ~]# podman pull ubuntu:20.04
+Resolved "ubuntu" as an alias (/etc/containers/registries.conf.d/000-shortnames.conf)
+Trying to pull docker.io/library/ubuntu:20.04...
+Getting image source signatures
+Copying blob 16ec32c2132b done
+Copying config 1318b700e4 done
+Writing manifest to image destination
+Storing signatures
+1318b700e415001198d1bf66d260b07f67ca8a552b61b0da02b3832c778f221b
+----
++
+.Tagging image
+[source,bash]
+----
+[root@quay ~]# podman tag docker.io/library/ubuntu:20.04 quay.local:8080/travis/ubuntu:20.04
+----
++
+.Push image
+[source,bash]
+----
+[root@quay ~]# podman push --tls-verify=false quay.local:8080/travis/ubuntu:20.04
+Getting image source signatures
+Copying blob 7555a8182c42 done
+Copying config 1318b700e4 done
+Writing manifest to image destination
+Storing signatures
+----
+
+. Verify image exists in Quay
++
+image::README-45241.png[]
+
+. Navigate to image tags and see if the security scan has completed
++
+image::README-6ecb7.png[]
+
+. Click on Security scan to view the vulnerabilities
++
+image::README-8b2ee.png[]
+
+==== Testing Repository Mirroring
+
+The next step is to ensure that the QUAY Image mirroring container is working and that you can successfully mirror container images from upstream repositories.
+
+. Create a new repository in Quay by clicking *Create New Repository*
++
+image::README-a249a.png[]
+
+. Give repository a name and setup the repository visibility
++
+image::README-e0e97.png[]
+
+. In the newly created repository, click the *Settings* option from the left-side navigation menu. Set the *Repository State* to *_Mirror_*.
++
+image::README-cec53.png[]
+
+. In the newly created repository, click the *Mirroring* option from the left-side navigation menu.
++
+image::README-0e703.png[]
+
+. In the *Mirroring* tab, complete the required information for the repository and create a *Robot User*. Click *Enable Mirror*
+.. Registry Location - quay.io/redhattraining/httpd-parent
+.. Tags: latest and 2.4
++
+image::README-5415f.png[]
++
+image::README-95133.png[]
++
+image::README-e29b8.png[]
+
+. Click "*Sync Now*" to perform immediate synchronization
++
+image::README-115df.png[]
+
+. Verify synchronization completed on the *Mirroring* tab as well as the *Tag History*
++
+image::README-4189e.png[]
++
+image::README-de19a.png[]
 
 
 === Using the Quay Image Registry
