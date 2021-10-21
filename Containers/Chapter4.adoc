@@ -10,10 +10,11 @@ ifdef::env-github[]
 :imagesdir: images/
 endif::[]
 
+== Container Images
 
-== Building Containers with Buildah
+=== Building Containers with Buildah
 
-
+==== Building images as the *root* user
 
 .EXAMPLE - Creating a Custom Container Image Using Buildah
 =====
@@ -121,4 +122,28 @@ CONTAINER ID  IMAGE                                COMMAND               CREATED
 <7> Delete Working Container from System
 =====
 
-=== Building an Image Using Buildah Rootless
+==== Building an Image Using Buildah Rootless
+
+
+=== Managing Images and System Storage
+
+
+.References
+[NOTE]
+====
+
+*Getting into the weeds with Buildah: The buildah unshare command*: https://www.redhat.com/sysadmin/buildah-unshare-command
+
+*How rootless Buildah works: Building containers in unprivileged environments*: https://opensource.com/article/19/3/tips-tricks-rootless-buildah
+
+*Building and managing container images with Buildah*: https://mohitgoyal.co/2021/05/16/building-and-managing-container-images-with-buildah/
+
+*podman-image-prune*: https://docs.podman.io/en/latest/markdown/podman-image-prune.1.html
+
+*podman-system-prune*: https://docs.podman.io/en/latest/markdown/podman-system-prune.1.html
+
+*podman-container-prune* https://docs.podman.io/en/latest/markdown/podman-container-prune.1.html
+
+*Man Pages*: _man podman-image-prune_, _man podman-system-prune_, _man podman-container-prune_, _man buildah_, _man podman_
+
+====

@@ -12,3 +12,13 @@ endif::[]
 
 
 == Containers as System Services
+
+
+
+.References
+[NOTE]
+====
+
+*Managing containerized system services with Podman*: https://developers.redhat.com/blog/2018/11/29/managing-containerized-system-services-with-podman
+
+====

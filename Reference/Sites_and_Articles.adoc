@@ -41,6 +41,9 @@ endif::[]
 * *BUILDING, RUNNING, AND MANAGING CONTAINERS*
 ** https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html-single/building_running_and_managing_containers/index
 
+* *Github - Open Repository for Container Tools*
+** https://github.com/containers
+
 == Podman References
 
 * *What is Podman?*
@@ -77,6 +80,26 @@ endif::[]
 * *Oracle Linux: Use Cockpit to Manage Podman Containers*
 ** https://docs.oracle.com/en/operating-systems/oracle-linux/8/tutorial-cockpit-podman/#Before-You-Begin
 
+* *Configuring container networking with Podman*
+** https://www.redhat.com/sysadmin/container-networking-podman
+
+* *Rootless Podman and NFS*
+** https://www.redhat.com/sysadmin/rootless-podman-nfs
+
+* *How to debug issues with volumes mounted on rootless containers*
+** https://www.redhat.com/sysadmin/debug-rootless-podman-mounted-volumes
+
+* *How to run systemd in a container*
+** https://developers.redhat.com/blog/2019/04/24/how-to-run-systemd-in-a-container?ts=1634821561683
+
+* *Rootless containers with Podman: The basics*
+** https://developers.redhat.com/blog/2020/09/25/rootless-containers-with-podman-the-basics
+
+* *Managing containerized system services with Podman*
+** https://developers.redhat.com/blog/2018/11/29/managing-containerized-system-services-with-podman
+
+
+
 == Buildah References
 
 * *Buildah Tutorial*
@@ -89,7 +112,33 @@ endif::[]
 * *Buildah and Podman Cheatsheet*
 ** https://www.jasonneurohr.com/articles/my-little-buildah-and-podman-cheat-sheet/#92
 
+* *Getting into the weeds with Buildah: The buildah unshare command*
+** https://www.redhat.com/sysadmin/buildah-unshare-command
+
+* *How rootless Buildah works: Building containers in unprivileged environments*
+** https://opensource.com/article/19/3/tips-tricks-rootless-buildah
+
+* *Building and managing container images with Buildah*
+** https://mohitgoyal.co/2021/05/16/building-and-managing-container-images-with-buildah/
+
+* *Podman: Managing pods and containers in a local container runtime*
+** https://developers.redhat.com/blog/2019/01/15/podman-managing-containers-pods#mariadb_example
+
+* *Useful Podman Commands*
+** https://ksummersill.medium.com/useful-podman-commands-39275ac4f632
+
+
+
 == Skopeo References
+
+* *Skopeo - Exercise from redhatgov.io*
+** http://redhatgov.io/workshops/security_openshift/exercise1.4/
+
+* *Skopeo on Github*
+** https://github.com/containers/skopeo
+
+* *How to run Skopeo in a container*
+** https://www.redhat.com/sysadmin/how-run-skopeo-container
 
 == OpenShift Container Platform References
 
@@ -129,6 +178,9 @@ endif::[]
 * *Developing with Kubernetes on Fedora*
 ** https://www.tutorialworks.com/kubernetes-fedora-dev-setup/
 
+* *Kubernetes Auditing*
+** https://kubernetes.io/docs/tasks/debug-application-cluster/audit/
+
 == Docker References
 
 * *Transitioning from Docker to Podman*
@@ -136,6 +188,11 @@ endif::[]
 
 * *Docker and Fedora 35*
 ** https://fedoramagazine.org/docker-and-fedora-35/
+
+* *Podman and Buildah for Docker users*
+** https://developers.redhat.com/blog/2019/02/21/podman-and-buildah-for-docker-users
+
+
 
 == Git References
 
