@@ -1,0 +1,15 @@
+Host server.lab.example.com
+  IdentityFile ~/.ssh/id_rsa
+  StrictHostKeyChecking no
+
+Host server
+  IdentityFile ~/.ssh/id_rsa
+  StrictHostKeyChecking no
+
+Host quay.local
+  IdentityFile ~/.ssh/id_rsa
+  StrictHostKeyChecking no
+
+Host *
+	IdentityFile ~/.ssh/lab_rsa
+	StrictHostKeyChecking no

@@ -1,0 +1,14 @@
+---
+- hosts: localhost
+
+### Playbook to get Satellite QCOW and other files on Foundation0.
+### This playbook does not make Foundation0 a system that can run Satellite
+### Must run "Setup.Content.yml" playbook to setup Foundation0 and the other FoundationX systems.
+
+  tasks:
+
+## Copy SSH Config File
+    - name: Copy User's SSH Config File
+      copy:
+        src: ssh_user_config
+        dest: /home/user/student/.ssh/config
