@@ -64,7 +64,23 @@
           - bash-completion
           - vim
           - tree
+          - firewalld
         state: latest
+
+## Setup and Enable Firewalld
+    - name: Enable FirewallD
+      systemd:
+        name: firewalld
+        state: started
+        enabled: yes
+
+    - name: Ensure SSH is Enabled
+      firewalld:
+        service: ssh
+        permanent: yes
+        state: enabled
+
+
 
 ## Create Student User with Password and Sudo File
     - name: Create Student User
