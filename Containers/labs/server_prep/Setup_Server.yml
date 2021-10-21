@@ -41,3 +41,18 @@
       copy:
         src: rhel_dvd.repo
         dest: /etc/yum.repos.d/rhel_dvd.repo
+
+## Modify the /etc/hosts file on Server
+    - name: Modify /etc/hosts to have the quay.local
+      lineinfile:
+        path: /etc/hosts
+        regexp: '^172.25.250.251 quay.local quay'
+        line: '172.25.250.251 quay.local quay'
+
+## Modify the /etc/hosts file on Workstation
+    - name: Modify /etc/hosts to have the quay.local
+      lineinfile:
+        path: /etc/hosts
+        regexp: '^172.25.250.251 quay.local quay'
+        line: '172.25.250.251 quay.local quay'
+      delegate_to: localhost
