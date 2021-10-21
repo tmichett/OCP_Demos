@@ -1,0 +1,38 @@
+---
+- hosts: server
+
+### Playbook to get Satellite QCOW and other files on Foundation0.
+### This playbook does not make Foundation0 a system that can run Satellite
+### Must run "Setup.Content.yml" playbook to setup Foundation0 and the other FoundationX systems.
+
+  tasks:
+
+## Check for RHEL84 Content Directory Existance
+    - name: Create /RHEL84
+      stat:
+        path: /RHEL84
+      register: RHEL84_Dir
+
+    - name: Output Directory Status
+      debug:
+        msg: "The RHEL84 Content directory already exists"
+      when: RHEL84_Dir.stat.exists
+
+## Create the RHEL84 directory for mounting the content ISO
+    - name: Create /RHEL84 Directory
+      file:
+        path: /RHEL84
+        state: directory
+        mode: '0755'
+      when: RHEL84_Dir.stat.exists == false
+
+
+## Mount RHEL84 content ISO
+    - name: Create /RHEL84 Directory
+      mount:
+        path: /RHEL84
+        src: /dev/sr0
+        fstype: iso9660
+        state: mounted
+        opts: ro
+      when: RHEL84_Dir.stat.exists == true

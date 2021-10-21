@@ -20,3 +20,19 @@ https://github.com/containers/podman/issues/3234
 
 
 ** Notes: Looking at deploying in a non-privileged state
+
+
+## Modify the /etc/fstab file for the RHEL7 for Satellite ISO
+    - name: Modify /etc/fstab
+      lineinfile:
+        path: /etc/fstab
+        regexp: '^/dev/sr0'
+        line: '/content/courses/rh403/rhel7-for-satellite-x86_64-20190829.iso   /content/rhs6.6/x86_64/rhel7-satellite   iso9660   loop,ro   0 0'
+
+## Mount Files from /etc/fstab
+    - name: Mount CDN Content
+      mount:
+        path: /content/rhs6.6/x86_64/cdn
+        src: /content/courses/rh403/cdn-rhs6.6-x86_64-20191125.iso
+        fstype: iso9660
+        state: present
