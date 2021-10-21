@@ -11,4 +11,4 @@
     - name: Copy User's SSH Config File
       copy:
         src: ssh_user_config
-        dest: /home/user/student/.ssh/config
+        dest: /home/student/.ssh/config
