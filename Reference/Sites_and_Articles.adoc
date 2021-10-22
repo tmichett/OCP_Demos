@@ -181,6 +181,18 @@ endif::[]
 * *Kubernetes Auditing*
 ** https://kubernetes.io/docs/tasks/debug-application-cluster/audit/
 
+* *Let's Learn Kubernetes - Basics - 1*
+** https://dev.to/pghildiyal/let-s-learn-kubernetes-basics-part-1-3of7
+
+* *Let's Learn Kubernetes - Basics - 2*
+** https://dev.to/pghildiyal/let-s-learn-kubernetes-basics-2-2a9a
+
+* *Let's Learn Kubernetes - Basics - 3*
+** https://dev.to/pghildiyal/lets-learn-kubernetes-basics-3-4lm
+
+* *Let's Learn Kubernetes - Basics - 4*
+** https://dev.to/pghildiyal/lets-learn-kubernetes-basics-4-bf8
+
 == Docker References
 
 * *Transitioning from Docker to Podman*
@@ -192,7 +204,13 @@ endif::[]
 * *Podman and Buildah for Docker users*
 ** https://developers.redhat.com/blog/2019/02/21/podman-and-buildah-for-docker-users
 
+== Misc Container Information
 
+* *Video: podman systemd-based system containers with GUI Desktop*
+** https://www.montanalinux.org/video-podman-rootless-systemd-xfce-x2go-container.html
+
+* *How to run an X11 application (xclock) on podman?*
+** https://superuser.com/questions/1407370/how-to-run-an-x11-application-xclock-on-podman
 
 == Git References
 
