@@ -12,11 +12,53 @@ endif::[]
 
 == Quay Image Registry
 
-=== Installing the Quay Image Registry
+The Quay image registry depends on multiple sources and configuration files. The exercises here will go through a local "Proof of Concept" deployment. It will be necessary to open up firewall ports as well as provide persistent storage mount points that can be mounted and accessed within the containers.
 
-=== Installing the Quay Image Registry with Ansible
+There are multiple options for deploying Quay locally. For the purpose of this course, we will be installing the Quay registry with both the Security Scanner and the Mirroring Worker.
 
-There is a Github project that can be used to install a Quay image registry locally which includes a Mirroring and ClairV4 scanning process. The Github repository should have been cloned as part of the exercise in Chapter 1. The Github repository is: https://github.com/tmichett/quay_lab_poc and can deploy a fully functional Quay image registry locally.
+.*Quay Deployment Options*
+* Stand-Alone Quay  Registry
+* Quay Registry with a Mirroring Worker
+* Quay Registry with Clair Security Scanner
+* *Quay Registry with Clair Security Scanner and Mirroring Worker*
++
+.SSL and Security
+[IMPORTANT]
+====
+All deployment scenarios allow the use of creating SSL/TLS certificates to secure the network connection. For the purpose of this content, we will be omitting the steps for generating the SSL/TLS certificates and accessing the registry via HTTPS.
+====
+
+.Network Ports for Firewalls and Port Mapping
+[cols="4a,4a",options=header]
+|===
+|Service Name
+|Network Port
+
+|Quay HTTPS
+|8443/TCP
+
+|Quay HTTP
+|8080/TCP
+
+|Quay HTTP
+|80/TCP
+
+|Quay HTTPS
+|8443/TCP
+
+|Postgresql Quay
+|5432/TCP
+
+|Postgresql ClairV4
+|5433/TCP
+
+|Redis for Quay
+|6379
+
+|ClairV4 HTTP
+|8081/TCP
+
+|===
 
 .Local Quay Instance Details
 * *Server FQDN*: quay.local
@@ -25,8 +67,58 @@ There is a Github project that can be used to install a Quay image registry loca
 ** registry.redhat.io/rhel8/redis-5:1
 ** registry.redhat.io/quay/quay-rhel8:v3.6.0-62
 ** registry.redhat.io/quay/clair-rhel8:v3.6.0-70
++
+.Container Port Mapping
+[cols="4a,4a",options=header]
+|===
+|Container Name
+|Mapped Port
 
-The Quay playbooks have been broken down so that they can be run to easily deploy Quay. There are options for deploying based on the configuration files being pre-populated as well as using the Quay container to create the TGZ configuration.
+|clairv4
+|8001:8080
+
+|postgres-clairv4
+|5433:5432
+
+|redis
+|6379:6379
+
+|postgres
+|5432:5432
+
+|quay (_Config Container Only_)
+|8080:8080
+
+|quay (_Running Container_)
+|80:8080
+
+|===
+
+.Storage Mount Points
+[cols="4a,4a,4a",options=header]
+|===
+|Container Name
+|Mount Point on Host System
+|Purpose
+
+|quay
+|/quay
+|Storage for configuration files and images. Multiple sub-directories under this local directory mounted to Quay, Postresql, Redis for persistent storage.
+
+|clairv4
+|/etc/clairv4 *=>* /clair
+|Storage for configuration files and images.
+
+|===
+
+
+=== Installing the Quay Image Registry Manually
+
+=== Installing the Quay Image Registry with Ansible
+
+There is a Github project that can be used to install a Quay image registry locally which includes a Mirroring and ClairV4 scanning process. The Github repository should have been cloned as part of the exercise in Chapter 1. The Github repository is: https://github.com/tmichett/quay_lab_poc and can deploy a fully functional Quay image registry locally.
+
+The Quay playbooks have been broken down so that they can be run to easily deploy Quay. There are options for deploying based on the configuration files being pre-populated as well as using the Quay container to create the TGZ configuration. There is also a special playbook created to bring already deployed containers back online.
 
 ==== Deploying Quay with Ansible
 
