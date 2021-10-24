@@ -98,7 +98,14 @@ endif::[]
 * *Managing containerized system services with Podman*
 ** https://developers.redhat.com/blog/2018/11/29/managing-containerized-system-services-with-podman
 
+* *The podman play kube command now supports deployments*
+** https://www.redhat.com/sysadmin/podman-play-kube
 
+* *Podman Tutorials*
+** https://docs.podman.io/en/latest/Tutorials.html
+
+* *Auto-updating podman containers with systemd*
+** https://fedoramagazine.org/auto-updating-podman-containers-with-systemd/
 
 == Buildah References
 
@@ -127,6 +134,11 @@ endif::[]
 * *Useful Podman Commands*
 ** https://ksummersill.medium.com/useful-podman-commands-39275ac4f632
 
+* *Podman: Managing pods and containers in a local container runtime*
+** https://developers.redhat.com/blog/2019/01/15/podman-managing-containers-pods
+
+* *Spinning up and Managing Pods with multiple containers with Podman*
+** https://mohitgoyal.co/2021/04/23/spinning-up-and-managing-pods-with-multiple-containers-with-podman/
 
 
 == Skopeo References
@@ -192,6 +204,9 @@ endif::[]
 
 * *Let's Learn Kubernetes - Basics - 4*
 ** https://dev.to/pghildiyal/lets-learn-kubernetes-basics-4-bf8
+
+* *How to run a Kubernetes cluster on your laptop*
+** https://www.redhat.com/sysadmin/kubernetes-cluster-laptop
 
 == Docker References
 

@@ -1,0 +1,57 @@
+= {subject}
+:subject: Reference Sites and Articles That Can be Useful
+:description:  A collection of URLs for Reference on Building VM Lab Environments
+Travis Michette <tmichett@redhat.com>
+:doctype: book
+:customer:  GLS
+:listing-caption: Listing
+:toc:
+:toclevels: 7
+:sectnums:
+:sectnumlevels: 6
+:numbered:
+:chapter-label:
+:pdf-page-size: LETTER
+:icons: font
+ifdef::backend-pdf[]
+:title-page-background-image: image:images/Training_Cover.png[pdfwidth=8.0in,align=center]
+:pygments-style: tango
+:source-highlighter: pygments
+endif::[]
+ifndef::env-github[:icons: font]
+ifdef::env-github[]
+:status:
+:outfilesuffix: .adoc
+:caution-caption: :fire:
+:important-caption: :exclamation:
+:note-caption: :paperclip:
+:tip-caption: :bulb:
+:warning-caption: :warning:
+endif::[]
+
+
+
+== Creating a Lab Environment
+
+* *Automate virtual machine deployment with Ansible: Design (1 of 3)*
+** https://www.redhat.com/sysadmin/deployment-ansible-design
+
+* *Automate virtual machine deployment with Ansible: Automation (2 of 3)*
+** https://www.redhat.com/sysadmin/deployment-ansible-automation
+
+* *Automate virtual machine deployment with Ansible: The playbooks (3 of 3)* 
+** https://www.redhat.com/sysadmin/deployment-ansible-playbooks
+
+* *Build a lab in five minutes with three simple commands*
+** https://www.redhat.com/sysadmin/build-lab-quickly
+
+* *Build a lab in 36 seconds with Ansible*
+** https://www.redhat.com/sysadmin/build-VM-fast-ansible
+
+
+
+
+== Git References
+
+* *A Git cheatsheet that all coders need*
+** https://towardsdatascience.com/a-git-cheatsheet-that-all-coders-need-bf8ad4d91576
