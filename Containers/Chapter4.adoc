@@ -7,8 +7,9 @@ ifdef::env-github[]
 :note-caption: :paperclip:
 :tip-caption: :bulb:
 :warning-caption: :warning:
-:imagesdir: images/
 endif::[]
+:imagesdir: images/
+
 
 == Container Images
 
@@ -18,108 +19,231 @@ endif::[]
 
 .EXAMPLE - Creating a Custom Container Image Using Buildah
 =====
+
+. Create a container with Buildah
++
 .Creating a Custom Container
 [source,bash]
 ----
-[root@workstation ~]# buildah from scratch
+[root@server ~]# buildah from scratch
 working-container
 ----
 
+. Inspect the Container
++
 .Naming and Inspecting a Custom Container
 [source,bash]
 ----
-[root@workstation ~]# buildah config --label name=My-Container working-container
-[root@workstation ~]# buildah inspect working-container
+[root@server ~]# buildah config --label name=Demo-Container working-container
+[root@server ~]# buildah inspect working-container
+{
+    "Type": "buildah 0.0.1",
+    "FromImage": "",
+    "FromImageID": "",
+
+... OUTPUT OMITTED ...
+
+"History": null,
+"Devices": []
+}
 ----
 
+. Mount container disk image and prepare for installation and customization
++
 .Installing Packages on Working Container
 [source,bash]
 ----
-[root@workstation ~]#  buildah mount working-container <1>
+[root@server ~]# buildah mount working-container
+/var/lib/containers/storage/overlay/47059b1cb7f2c518e7f98d905b7ae1bcad78e8962575361bdf7dda36701d38a9/merged <1>
 
+[root@server ~]# export Container_Disk_Image=/var/lib/containers/storage/overlay/47059b1cb7f2c518e7f98d905b7ae1bcad78e8962575361bdf7dda36701d38a9/merged <2>
 
-[root@workstation ~]# yumdownloader --destdir=/tmp redhat-release-server <2>
-
-[root@workstation ~]# rpm -ivh --root /var/lib/containers/storage/overlay/a6a136063f0ada2b1ed4b01eff9a04b4d6419ae828bc4b49e742bca594e08560/merged /tmp/redhat-release-8.0-0.39.el8.x86_64.rpm <3>
-
-[root@workstation ~]# cp  /etc/yum.repos.d/rhel_dvd.repo /var/lib/containers/storage/overlay/a6a136063f0ada2b1ed4b01eff9a04b4d6419ae828bc4b49e742bca594e08560/merged/etc/yum.repos.d/ <4>
-
-[root@workstation ~]# yum install --installroot /var/lib/containers/storage/overlay/a6a136063f0ada2b1ed4b01eff9a04b4d6419ae828bc4b49e742bca594e08560/merged httpd <5>
-
-
-[root@workstation ~]# echo "This is a custom webserver container for me" >> /var/lib/containers/storage/overlay/a6a136063f0ada2b1ed4b01eff9a04b4d6419ae828bc4b49e742bca594e08560/merged/var/www/html/index.html <6>
-
-[root@workstation ~]#  yum install --installroot /var/lib/containers/storage/overlay/a6a136063f0ada2b1ed4b01eff9a04b4d6419ae828bc4b49e742bca594e08560/merged httpd-manual <7>
-
-[root@workstation ~]# buildah config --cmd "/usr/sbin/httpd -DFOREGROUND" working-container <8>
-
-[root@workstation ~]# buildah config --port 80/tcp working-container <9>
-
-[root@workstation ~]# yum clean all --installroot /var/lib/containers/storage/overlay/a6a136063f0ada2b1ed4b01eff9a04b4d6419ae828bc4b49e742bca594e08560/merged <10>
-
-[root@workstation ~]#  buildah unmount working-container <11>
-
-[root@workstation ~]# buildah commit working-container my-container-image <12>
-
-[root@workstation ~]# buildah images <13>
-
+[root@server ~]# echo $Container_Disk_Image
+/var/lib/containers/storage/overlay/47059b1cb7f2c518e7f98d905b7ae1bcad78e8962575361bdf7dda36701d38a9/merged <3>
 ----
 <1> Mount container image filesystem for modification
-<2> Download Red Hat Release RPM for installation
-<3> Install Red Hat Release RPM
-<4> Create repository for container image so files can be installed
-<5> Install the HTTP package for a webserver
-<6> Create an *index.html* file for the webserver
-<7> Install the Apache manual for reference documentation
-<8> Configure webserver to run
-<9> Configure and open port *80* for the *TCP* protocol for the container
-<10> Clean up yum data to minimize required disk space
-<11> Unmount the container image filesystem
-<12> Commit the container image
-<13> List container images
+<2> Export Container Disk Image Mountpoint for easy reference
+<3> Verify *Container_Disk_Image* Variable
 
+. Prepare container image for installation of RPM Packages
++
+.Download Red Hat Release RPM for installation
+[source,bash]
+----
+[root@server ~]# yumdownloader --destdir=/tmp redhat-release-server
+Last metadata expiration check: 23:16:26 ago on Sun 24 Oct 2021 01:57:13 PM EDT.
+----
+
+. Install the Red Hat Release RPM to setup GPG keys for repository
++
+.Install Red Hat Release RPM
+[source,bash]
+----
+[root@server ~]# rpm -ivh --root $Container_Disk_Image /tmp/redhat-release-8.4-0.6.el8.x86_64.rpm
+warning: /tmp/redhat-release-8.4-0.6.el8.x86_64.rpm: Header V3 RSA/SHA256 Signature, key ID fd431d51: NOKEY
+Verifying...                          ################################# [100%]
+Preparing...                          ################################# [100%]
+Updating / installing...
+   1:redhat-release-8.4-0.6.el8       ################################# [100%]
+----
+
+. Setup the Repository on Disk Image
++
+.Create repository for container image so files can be installed
+[source,bash]
+----
+[root@server ~]# cp  /etc/yum.repos.d/rhel_dvd.repo $Container_Disk_Image/etc/yum.repos.d/
+----
+
+. Install the *httpd* Apache Pacakge to the Container
++
+.Install the HTTP package for a webserver
+[source,bash]
+----
+[root@server ~]# yum install --installroot $Container_Disk_Image httpd
+----
+
+. Create a custom *index.html* File
++
+.Create an *index.html* file for the webserver
+[source,bash]
+----
+[root@server ~]# echo "This is a custom webserver container for me" >> $Container_Disk_Image/var/www/html/index.html
+----
+
+. Install the Apache Manual for Webserver Documentation
++
+.Install the Apache manual for reference documentation
+[source,bash]
+----
+[root@server ~]# yum install --installroot $Container_Disk_Image httpd-manual
+----
++
+.Poor Practice
+[CAUTION]
+====
+It is a poor practice to have unneeded items, packages, and documentation in containers. This step normally wouldn't be performed.
+====
+
+. Set the Container's Runtime Command
++
+.Configure webserver to run
+[source,bash]
+----
+[root@server ~]# buildah config --cmd "/usr/sbin/httpd -DFOREGROUND" working-container
+----
+
+. Configure and EXPORT the webserver default port
++
+.Configure and open port *80* for the *TCP* protocol for the container
+[source,bash]
+----
+[root@server ~]# buildah config --port 80/tcp working-container
+----
+
+. Cleanup unneeded files to conserve space on container image.
++
+.Clean up yum data to minimize required disk space
+[source,bash]
+----
+[root@server ~]# yum clean all --installroot $Container_Disk_Image
+13 files removed
+----
+
+. Unmount Container Filesystem image.
++
+.Unmount the container image filesystem
+[source,bash]
+----
+[root@server ~]# buildah unmount working-container
+fb5387521fd7b0c9f6dd567ca0f76222178f0ffbcf38fc990df9d49a60079e1
+----
+
+. Commit container image to local container registry
++
+.Commit the container image
+[source,bash]
+----
+[root@server ~]# buildah commit working-container demo-container-image <1>
+Getting image source signatures
+Copying blob 1a73c59066af done
+
+... OUTPUT OMITTED ...
+
+Storing signatures
+d21ee320b60ad274b010328df6f10f6dfed578623f00855748d8aaa3c29b5e94
+----
+<1> This will create a container image tagged *demo-container-image* with the *latest* tag.
+
+. View and List Container Images
++
+.List container images
+[source,bash]
+----
+[root@server ~]# buildah images | grep demo
+localhost/demo-container-image                    latest      d21ee320b60a   About a minute ago   553 MB
+----
+
+. Test the Container image by launching a container
++
 .Testing the Container Image
 [source,bash]
 ----
-[root@workstation ~]# podman run -d -p 8080:80 localhost/my-container-image
+[root@server ~]# podman run --name demo-container-buildah -d -p 8880:80 localhost/demo-container-image
+be3bbc8898fc6cab1cef5d78721f46b985e957d30984d591271fffcb5b906994
 
-[root@workstation ~]# curl localhost:8080
+[root@server ~]# curl localhost:8880
 This is a custom webserver container for me
 
-[root@workstation ~]# curl http://localhost:8080/manual/
+[root@server ~]# curl http://localhost:8880/manual/
 
 ----
 
-image::HTTPD_Container.png[title="Testing Container", align="center"]
-
-.Stopping and Cleanup of Image
+. Test image in Web Browser
++
+.Open Firewall Ports
 [source,bash]
 ----
-[root@workstation ~]# podman list <1>
-CONTAINER ID  IMAGE                                COMMAND               CREATED        STATUS           PORTS                 NAMES
-9bd572633953  localhost/my-container-image:latest  /usr/sbin/httpd -...  2 seconds ago  Up 1 second ago  0.0.0.0:8080->80/tcp  cranky_stonebraker
-
-[root@workstation ~]# podman stop 9bd572633953 <2>
-9bd572633953276ac75417db3ac8e70875a0f2713e8cdfd32253fe343d06153d
-
-[root@workstation ~]# podman stop -a <3>
-
-[root@workstation ~]# podman rm cranky_stonebraker <4>
-
-[root@workstation ~]# podman rm 9bd572633953276ac75417db3ac8e70875a0f2713e8cdfd32253fe343d06153d <5>
-
-[root@workstation ~]# podman rmi localhost/my-container-image <6>
-
-[root@workstation ~]# buildah delete working-container <7>
-
+[root@server ~]# firewall-cmd --add-port=8880/tcp --permanent ; firewall-cmd --reload
+success
+success
 ----
-<1> Listing Running Containers
-<2> Stopping Single Container by ID
-<3> Stopping All Running Containers
-<4> Remove Container by Name
-<5> Remove Container by ID
-<6> Removing Container Image from Registry
-<7> Delete Working Container from System
++
+image::Chapter4-1f4e8.png[title="Custom *index.html", align="center"]
++
+image::Chapter4-f7bf0.png[title="Apache Manual", align="center"]
+
+.Cleaning up the Container
+
+. Stop and Remove the Container
++
+[source,bash]
+----
+[root@server ~]# podman rm demo-container-buildah --force
+be3bbc8898fc6cab1cef5d78721f46b985e957d30984d591271fffcb5b906994
+----
++
+.Image Removal
+[IMPORTANT]
+====
+Normally we could remove images and cleanup, but we will need to check this image into a registry later. This image shouldn't be removed until it has been checked into a remote container registry.
+
+[source,bash]
+----
+[root@server ~]# podman rmi localhost/demo-container-image
+----
+
+====
+
+. Delete the *working container* image from the system
++
+.Delete Working Container from System
+[source,bash]
+----
+[root@server ~]# buildah delete working-container
+fb5387521fd7b0c9f6dd567ca0f76222178f0ffbcf38fc990df9d49a60079e18
+----
+
 =====
 
 ==== Building an Image Using Buildah Rootless
