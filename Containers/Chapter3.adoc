@@ -311,6 +311,144 @@ image::Chapter3-09a1c.png[title="Wordpress Installation Page", align="center"]
 
 === Podman Image and Container Pruning
 
+It is extremely important to cleanup containers, pods, and container images/volumes when the containers are no longer running as resources are prevented from being used even if the container is stopped. More importantly, it is important from a systems management and maintenance standpoint.
+
+==== Using Podman Prune Commands
+
+The *podman <subsystem> prune* command can remove and cleanup Pods, containers, container images, and volumes. This command can be useful as it will only cleanup what isn't being used. For example, if containers are stopped, but will be re-run at a later point, there is no reason to cleanup a volume or the container image because the image is being used, even if it is being used by a stopped container.
+
+===== Cleaning Up Pods
+
+.Looking at Pods
+[source,bash]
+----
+[root@server Buildah]# podman pod ps
+POD ID        NAME                STATUS   CREATED        INFRA ID      # OF CONTAINERS
+35870e1ae2d0  wordpress_demo_pod  Running  6 minutes ago  bfe7065204b2
+----
+
+.Stopping a Pod
+[source,bash]
+----
+[root@server Buildah]# podman pod stop wordpress_demo_pod
+35870e1ae2d067e6bc84e4df7ccd2b30f6df6ba4cdb4c098814311ddec1f5b41
+----
+
+.Looking at Stopped Pod
+[source,bash]
+----
+[root@server Buildah]# podman ps -ap
+CONTAINER ID  IMAGE                                            COMMAND               CREATED         STATUS                    PORTS                 NAMES               POD ID        PODNAME
+bfe7065204b2  registry.access.redhat.com/ubi8/pause:latest                           10 minutes ago  Exited (0) 2 minutes ago  0.0.0.0:8880->80/tcp  35870e1ae2d0-infra  35870e1ae2d0  wordpress_demo_pod
+21ff11d8a20a  registry.access.redhat.com/rhscl/mysql-57-rhel7  run-mysqld            10 minutes ago  Exited (0) 2 minutes ago  0.0.0.0:8880->80/tcp  db                  35870e1ae2d0  wordpress_demo_pod
+fb2162542a72  quay.io/redhattraining/wordpress:5.3.0           apache2-foregroun...  10 minutes ago  Exited (0) 2 minutes ago  0.0.0.0:8880->80/tcp  wp                  35870e1ae2d0  wordpress_demo_pod
+----
+
+.Pruning Stopped Pods and Containers for Pods
+[source,bash]
+----
+[root@server Buildah]# podman pod prune
+WARNING! This will remove all stopped/exited pods..
+Are you sure you want to continue? [y/N] y
+35870e1ae2d067e6bc84e4df7ccd2b30f6df6ba4cdb4c098814311ddec1f5b41
+
+[root@server Buildah]# podman ps -ap
+CONTAINER ID  IMAGE   COMMAND  CREATED  STATUS  PORTS   NAMES   POD ID  PODNAME
+----
+
+===== Cleaning Up Containers
+
+.Preparing Containers
+
+.Running a Sample Container
+[source,bash]
+----
+[root@server Buildah]# podman run --name demo-container-buildah -d -p 8880:80 localhost/demo-container-image
+e67dea0b982076219db520581f6e9d1a02e1fe168c2992507f9e0bd973d7d1e
+----
+
+.Stopping a Sample Container
+[source,bash]
+----
+[root@server Buildah]# podman stop demo-container-buildah
+e67dea0b982076219db520581f6e9d1a02e1fe168c2992507f9e0bd973d7d1ed
+----
+
+.Looking for Stopped Containers (*podman ps -a*)
+[source,bash]
+----
+[root@server Buildah]# podman ps -a
+CONTAINER ID  IMAGE                           COMMAND               CREATED        STATUS                         PORTS                 NAMES
+e67dea0b9820  localhost/demo-container-image  /usr/sbin/httpd -...  2 minutes ago  Exited (0) About a minute ago  0.0.0.0:8880->80/tcp  demo-container-buildah <4>
+----
+<1> Looking at images and verifying image exists
+<2> Attempting to *prune* images
+<3> Image remains after pruning
+<4> Image attached to a running or *stopped* container
+
+.Cleanup of Containers
+
+Cleanup of exited/stopped containers is also very important as these containers are reserving system resources, storage space, namespaces, networking, etc. The *podman container prune* command can be used to cleanup and remove all stopped containers.
+
+.Container Cleanup
+[source,bash]
+----
+[root@server Buildah]# podman container prune
+WARNING! This will remove all non running containers.
+Are you sure you want to continue? [y/N] y
+e67dea0b982076219db520581f6e9d1a02e1fe168c2992507f9e0bd973d7d1ed
+----
+
+===== Cleaning Up Images
+
+.Image Management
+
+Image management is extremely important when using Podman as there are a limited number of resources on the system - namely storage space. Having a good strategy for container cleanup is needed in order to ensure a healthy system. The *podman image prune* command can be used to cleanup and remove all orphaned images not being used by containers. The *podman rmi* command is used to delete actual tagged images from the local image registry.
+
+.Cleanup of Images
+[source,bash]
+----
+[root@server Buildah]# podman images | grep demo <1>
+localhost/demo-container-image                   latest     d21ee320b60a  2 hours ago    553 MB
+
+[root@server Buildah]# podman images prune <2>
+REPOSITORY  TAG     IMAGE ID  CREATED  SIZE
+
+[root@server Buildah]# podman images | grep demo <3>
+localhost/demo-container-image                   latest     d21ee320b60a  2 hours ago    553 MB
+----
+
+.Image Cleanup
+[IMPORTANT]
+====
+It will always be necessary to cleanup images after a pod or a container cleanup because there could be *orphaned* and *dangling* images left after all stopped pods and containers have been pruned. This happens if there are images on the system that are unused and have no tags assigned to them.
+
+.Image Listing
+[source,bash]
+----
+[root@server Buildah]# podman images
+REPOSITORY                                       TAG        IMAGE ID      CREATED        SIZE
+localhost/demo-container-image                   latest     d21ee320b60a  3 hours ago    553 MB
+----
+
+.Image Pruning
+[source,bash]
+----
+[root@server Buildah]# podman image prune
+
+WARNING! This will remove all dangling images.
+Are you sure you want to continue? [y/N] y
+
+----
+====
+
+
+.Image Cleanup
+[TIP]
+====
+Actual container image cleanup is performed with the *podman rmi ** command which will delete all images that aren't attached to containers. It won't remove any images that are attached to currently running or stopped containers unless the *--force* option is used. However, when using *--force* this will also stop and remove all containers prior to removing the container images.
+====
+
 
 .References
 [NOTE]
@@ -333,4 +471,6 @@ _podman-system-prune_, _podman-container-cleanup_, _podman-pod-prune_, _podman-c
 
 *Spinning up and Managing Pods with multiple containers with Podman*: https://mohitgoyal.co/2021/04/23/spinning-up-and-managing-pods-with-multiple-containers-with-podman/
 
+
+*What is a dangling image and what is an unused image?*: https://newbedev.com/what-is-a-dangling-image-and-what-is-an-unused-image
 ====

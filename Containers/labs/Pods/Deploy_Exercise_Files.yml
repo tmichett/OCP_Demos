@@ -1,0 +1,14 @@
+---
+- name: Deploy Exercise Files to Server
+  hosts: server
+  tasks:
+
+## Prepare Config Folder
+    - name: Copy Files to Server
+      copy:
+        src: "{ item }"
+        dest: /root/
+        mode: u+rwx,g+rwx,o+x
+      loop:
+        - pod_cleanup.sh
+        - pod_launch.sh
