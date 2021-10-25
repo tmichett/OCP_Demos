@@ -25,7 +25,7 @@ set -e
 miopod=$(podman pod create --name wordpress_demo_pod -p 8880:80)
 
 # Creating a persistent volume for the MySQL container
-miovol=$(podman volume create)
+miovol=$(podman volume create sqlvol)
 
 # Getting the path of the persistent volume
 pathmiovol=$(podman volume inspect $miovol -f "{{.Mountpoint}}")
