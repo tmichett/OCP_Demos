@@ -10,5 +10,5 @@
         dest: /root/
         mode: u+rwx,g+rwx,o+x
       loop:
-        - pod_cleanup.sh
-        - pod_launch.sh
+        - ./pod_cleanup.sh
+        - ./pod_launch.sh
