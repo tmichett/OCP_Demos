@@ -463,6 +463,65 @@ Starting collection install process
 Installing 'containers.podman:1.8.1' to '/home/student/github1/OCP_Demos/Containers/labs/Pods/collections/ansible_collections/containers/podman
 ----
 
+.Create the Registry Credentials File
+[source,bash]
+----
+[student@workstation Pods]$ cp vars/registry_login_demo.yml vars/registry_login.yml
+[student@workstation Pods]$ vim vars/registry_login.yml
+----
+
+.Launch a Container
+[source,bash]
+----
+[student@workstation Pods]$ ansible-playbook Deploy_Container_Demo.yml
+
+PLAY [Deploy HTTPD Server Demo] ******************************************************
+
+... OUTPUT OMITTED ...
+----
+
+.Identify Containers on Workstation
+[source,bash]
+----
+[student@workstation Pods]$ sudo podman ps
+CONTAINER ID  IMAGE                                    COMMAND               CREATED         STATUS             PORTS                 NAMES
+51ed5c1fc601  quay.io/redhattraining/httpd-parent:2.4  /bin/sh -c /usr/s...  48 seconds ago  Up 47 seconds ago  0.0.0.0:7080->80/tcp  Website_Demo
+----
+
+
+.Stop Container on Workstation
+[source,bash]
+----
+[student@workstation Pods]$ sudo podman stop Website_Demo
+51ed5c1fc601e3722b9a6288e7ec879c75e0b4eefb03707ffd8f83056d9654c5
+----
+
+.Prune Containers on Workstation
+[source,bash]
+----
+[student@workstation Pods]$ sudo podman container prune
+51ed5c1fc601e3722b9a6288e7ec879c75e0b4eefb03707ffd8f83056d9654c5
+----
+
+
+.Prune Images on Workstation
+[source,bash]
+----
+[student@workstation Pods]$ sudo podman image prune
+----
+
+.List and Delete Images on Workstation
++
+[source,bash]
+----
+[student@workstation Pods]$ sudo podman images
+REPOSITORY                            TAG   IMAGE ID       CREATED       SIZE
+quay.io/redhattraining/httpd-parent   2.4   3639ce1374d3   2 years ago   236 MB
+
+[student@workstation Pods]$ sudo podman rmi 3639ce1374d3
+Untagged: quay.io/redhattraining/httpd-parent:2.4
+Deleted: 3639ce1374d3611e80ed66decd7d5467b72d010c21e19e4f193cd8b944e8c9f5
+----
 
 ====
 
