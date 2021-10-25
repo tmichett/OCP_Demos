@@ -514,14 +514,20 @@ CONTAINER ID  IMAGE                                    COMMAND               CRE
 +
 [source,bash]
 ----
-[student@workstation Pods]$ sudo podman images
+[student@workstation Pods]$ sudo podman images <1>
 REPOSITORY                            TAG   IMAGE ID       CREATED       SIZE
 quay.io/redhattraining/httpd-parent   2.4   3639ce1374d3   2 years ago   236 MB
 
-[student@workstation Pods]$ sudo podman rmi 3639ce1374d3
+[student@workstation Pods]$ sudo podman rmi 3639ce1374d3 <2>
 Untagged: quay.io/redhattraining/httpd-parent:2.4
 Deleted: 3639ce1374d3611e80ed66decd7d5467b72d010c21e19e4f193cd8b944e8c9f5
+
+[student@workstation Pods]$ sudo podman images <3>
+REPOSITORY   TAG   IMAGE ID   CREATED   SIZE
 ----
+<1> Listing Images
+<2> Removing desired image
+<3> Ensuring image was removed
 
 ====
 
