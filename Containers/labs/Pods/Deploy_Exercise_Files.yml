@@ -6,7 +6,7 @@
 ## Prepare Config Folder
     - name: Copy Files to Server
       copy:
-        src: "{ item }"
+        src: "{{ item }}"
         dest: /root/
         mode: u+rwx,g+rwx,o+x
       loop:
