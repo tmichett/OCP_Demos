@@ -36,7 +36,7 @@ image::containers-runtime-toolset.svg[title="New Container Runtime", align="cent
 * The *podman* engine is daemonless and supporting container execution.
 * *podman* syntax is similar to the docker command, supporting *Dockerfile* use
 * *Buildah* builds container images, from scratch or a Dockerfile.
-* Copy and inspect container images in registries with *Skopeo*
+* Copy and inspect container images in both local and remote container registries with *Skopeo*
 * *Skopeo* supports Docker and private registries, the Atomic registry, and local directories, including those which use OCI
 
 [TIP]
