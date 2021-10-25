@@ -133,11 +133,11 @@ SysVinit Vs systemd Cheatsheet: https://www.2daygeek.com/sysvinit-vs-systemd-che
 .Init Script to Run at Startup
 [source,bash]
 ----
-[root@server ~]# vim /usr/bin/ups_test_service.sh
+[root@server ~]# vim /usr/bin/systemd_test_service.sh
 #!/usr/bin/bash
 
 DATE=`date '+%Y-%m-%d %H:%M:%S'`
-echo "This is a sample service started at ${DATE} for the UPS RH354 course." | systemd-cat -p info
+echo "This is a sample service started at ${DATE} for the SystemD Custom course." | systemd-cat -p info
 
 while :
 do
@@ -151,7 +151,7 @@ done
 .Running *chmod* on script
 [source,bash]
 ----
-[root@server ~]# chmod +x /usr/bin/ups_test_service.sh
+[root@server ~]# chmod +x /usr/bin/systemd_test_service.sh
 ----
 
 
@@ -160,14 +160,14 @@ done
 .Editing the .service File
 [source,bash]
 ----
-[root@server ~]# vim /etc/systemd/system/ups_test_service.service
+[root@server ~]# vim /etc/systemd/system/systemd_test_service.service
 
 [Unit]
-Description=UPS example systemd service.
+Description=Systemd-Test-Service example systemd service.
 
 [Service]
 Type=simple
-ExecStart=/bin/bash /usr/bin/ups_test_service.sh
+ExecStart=/bin/bash /usr/bin/systemd_test_service.sh
 
 [Install]
 WantedBy=multi-user.target
@@ -178,7 +178,7 @@ WantedBy=multi-user.target
 .Running *chmod* on .service File
 [source,bash]
 ----
-[root@server ~]# chmod 644 /etc/systemd/system/ups_test_service.service
+[root@server ~]# chmod 644 /etc/systemd/system/systemd_test_service.service
 ----
 
 .SystemD Services
@@ -201,8 +201,8 @@ Default Location: */lib/systemd/*
 .Controlling a Custom Service with *systemctl*
 [source,bash]
 ----
-[root@server ~]# systemctl enable ups_test_service.service --now
-Created symlink /etc/systemd/system/multi-user.target.wants/ups_test_service.service → /etc/systemd/system/ups_test_service.service.
+[root@server ~]# systemctl enable systemd_test_service.service --now
+Created symlink /etc/systemd/system/multi-user.target.wants/systemd_test_service.service → /etc/systemd/system/systemd_test_service.service.
 ----
 
 . Checking Status of a Custom Service
@@ -210,19 +210,19 @@ Created symlink /etc/systemd/system/multi-user.target.wants/ups_test_service.ser
 .Using *systemctl* to Check Service Status
 [source,bash]
 ----
-[root@server ~]# systemctl status ups_test_service.service
-● ups_test_service.service - UPS example systemd service.
-   Loaded: loaded (/etc/systemd/system/ups_test_service.service; enab>
-   Active: active (running) since Wed 2020-05-20 18:08:22 EDT; 19s ago
- Main PID: 2136 (bash)
-    Tasks: 2 (limit: 23896)
-   Memory: 940.0K
-   CGroup: /system.slice/ups_test_service.service
-           ├─2136 /bin/bash /usr/bin/ups_test_service.sh
-           └─2140 sleep 30
+[root@server ~]# systemctl status systemd_test_service.service
+● systemd_test_service.service - Systemd-Test-Service example systemd service.
+   Loaded: loaded (/etc/systemd/system/systemd_test_service.service; enabled; vendor >
+   Active: active (running) since Mon 2021-10-25 10:07:42 EDT; 24s ago
+ Main PID: 1533 (bash)
+    Tasks: 2 (limit: 152500)
+   Memory: 612.0K
+   CGroup: /system.slice/systemd_test_service.service
+           ├─1533 /bin/bash /usr/bin/systemd_test_service.sh
+           └─1537 sleep 30
 
-May 20 18:08:22 server.lab.example.com systemd[1]: Started UPS examp>
-May 20 18:08:22 server.lab.example.com bash[2136]: Looping..
+Oct 25 10:07:42 server.lab.example.com systemd[1]: Started Systemd-Test-Service examp>
+Oct 25 10:07:42 server.lab.example.com bash[1533]: Looping...
 ----
 
 . Checking */var/log/messages* for Custom Service
@@ -230,8 +230,8 @@ May 20 18:08:22 server.lab.example.com bash[2136]: Looping..
 .Seaching Log file for Custom Service
 [source,bash]
 ----
-[root@server ~]# grep -i ups /var/log/messages
-May 20 18:08:22 jegui journal[2139]: This is a sample service started at 2020-05-20 18:08:22 for the UPS RH354 course.
+[root@server ~]# grep -i "systemd custom" /var/log/messages
+Oct 25 10:07:42 server journal[1536]: This is a sample service started at 2021-10-25 10:07:42 for the SystemD Custom course.
 ----
 
 .SystemD References
