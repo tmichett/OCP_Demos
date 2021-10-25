@@ -146,4 +146,5 @@ CONTAINER ID  IMAGE                                COMMAND               CREATED
 
 *Man Pages*: _man podman-image-prune_, _man podman-system-prune_, _man podman-container-prune_, _man buildah_, _man podman_
 
+*Build Containers the Hard Way*: https://github.com/tmichett/build-containers-the-hard-way
 ====

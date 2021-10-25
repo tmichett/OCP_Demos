@@ -7,15 +7,307 @@ ifdef::env-github[]
 :note-caption: :paperclip:
 :tip-caption: :bulb:
 :warning-caption: :warning:
-:imagesdir: images/
 endif::[]
+:imagesdir: images/
+
 
 == Podman Pods
 
-This will talk about Podman Pods
+*Podman* has replaced *Docker/Moby* in RHEL 8 and will be the container management application moving forward. *Podman* (short for Pod Manager) is a daemon-less way to run containers and pods as a standard non-privileged user or as a privileged or "root" user. Podman also lends itself nicely to Kubernetes since it manages both containers and pods. Remember that the smallest item that Kubernetes/Openshift manages is a pod and that pods consist of one or more containers.
 
 === Using and Leveraging Pods with Podman
 
+Generally the concept of pod is associated with orchestration tools such as Red Hat Openshift and Kubernetes. A pod is a collection of one or more containers and will always include an *Infrastructure* or *Infra* container. The *Infra* container is meant to serve as a placeholder for the namespace allowing the pod to remain while allowing containers to be stopped and started while the pod stays running.
+
+image::Chapter3-93594.png[title="Example of a Pod", align="center"]
+
+When using *pods* port bindings and network port mapping is done at the *pod* level, therefore this is assigned to the *infra* container. In order to change and modify ports on the container, it is necessary to delete the *pod* as once resources have been assigned, they can't be changed.
+
+Podman is capable of managing pods with the *podman pod* command. It is possible to get assistance and help from *podman* directly by using the *podman pod --help* command.
+
+.*podman* Pod Management
+[source,bash]
+----
+[root@server ~]# podman pod --help
+Manage pods
+
+Description:
+  Pods are a group of one or more containers sharing the same network, pid and ipc namespaces.
+
+Usage:
+  podman pod [command]
+
+Available Commands:
+  create      Create a new empty pod
+  exists      Check if a pod exists in local storage
+  inspect     Displays a pod configuration
+  kill        Send the specified signal or SIGKILL to containers in pod
+  pause       Pause one or more pods
+  prune       Remove all stopped pods and their containers
+  ps          List pods
+  restart     Restart one or more pods
+  rm          Remove one or more pods
+  start       Start one or more pods
+  stats       Display a live stream of resource usage statistics for the containers in one or more pods
+  stop        Stop one or more pods
+  top         Display the running processes of containers in a pod
+  unpause     Unpause one or more pods
+----
+
+Additional more detailed help is available by using the *podman pod <command> --help* for command specific help.
+
+.*podman pod stop* Help
+[source,bash]
+----
+[root@server ~]# podman pod stop --help
+Stop one or more pods
+
+Description:
+  The pod name or ID can be used.
+
+  This command will stop all running containers in each of the specified pods.
+
+Usage:
+  podman pod stop [options] POD [POD...]
+
+Examples:
+  podman pod stop mywebserverpod
+  podman pod stop --latest
+  podman pod stop --time 0 490eb 3557fb
+
+Options:
+  -a, --all                       Stop all running pods
+  -i, --ignore                    Ignore errors when a specified pod is missing
+  -l, --latest                    Act on the latest container podman is aware of
+                                  Not supported with the "--remote" flag
+      --pod-id-file stringArray   Write the pod ID to the file
+  -t, --time uint                 Seconds to wait for pod stop before killing the container (default 10
+----
+
+==== Creating a Pod and Adding a Container
+
+Podman pods are created just like containers. It is possible to skip the *podman pod create* command to create the pod and then subsequently run the pod with the *podman pod run* command. Instead, you can directly use the *podman pod run* command to create and run the pod. When creating a pod with a container as a single command, you MUST use the *new:<name>* directives to name a new Pod letting *podman* know you aren't attempting to reuse an existing Pod.
+
+
+.Creating a Container and Running in a Pod (Multiple Commands)
+[source,bash]
+----
+[root@server ~]# podman pod create --name rht-demo -p 8080:80 <1>
+e18e307bab06dd45d3cc5a90472ea075979aacb3adfc2071dfd68dca284b03a3
+
+[root@server ~]# podman run -d --pod rht-demo --name webserver quay.io/redhattraining/httpd-parent <2>
+deeb7e789eafa99f45e6774f6ec0f124b1abbf9d211946c2fa2360e515db1c96
+
+[root@server ~]# curl localhost:8080
+Hello from the httpd-parent container!
+
+[root@server ~]# podman pod ps
+POD ID        NAME      STATUS   CREATED        INFRA ID      # OF CONTAINERS
+e18e307bab06  rht-demo  Running  3 minutes ago  3113f296524c  2
+
+[root@server ~]# podman ps
+CONTAINER ID  IMAGE                                         COMMAND               CREATED             STATUS                 PORTS                 NAMES
+3113f296524c  registry.access.redhat.com/ubi8/pause:latest                        3 minutes ago       Up About a minute ago  0.0.0.0:8080->80/tcp  e18e307bab06-infra <3>
+deeb7e789eaf  quay.io/redhattraining/httpd-parent           /bin/sh -c /usr/s...  About a minute ago  Up About a minute ago  0.0.0.0:8080->80/tcp  webserver
+----
+<1> Create the Pod and port forwards for the Pod
+<2> Create a container to run in the Pod. The port forward comes from the *pod* definition.
+<3> *Infra* Container for the Pod
+<4> Actually running webserver container. *NOTE: port 8080 forwards to container port 80*.
+
+
+.Creating a Container and Running in a Pod (Single Command)
+[source,bash]
+----
+[root@server ~]# podman run -d --pod new:rht-demo -p 80:80 quay.io/redhattraining/httpd-parent
+17ac5ef7876afdcaa52a356f14284411617d9e2c7d8ab58ea5545cec61ab7547
+
+[root@server ~]# curl localhost
+Hello from the httpd-parent container!
+----
+
+==== Cleaning up Pods and Containers
+
+It is necessary to do cleanup and maintenance on Pods and Containers as this doesn't occur automatically with Podman as it does with Openshift/Kubernetes. Just as with managing regular containers, managing pods requires stopping and deleting Pods before those pods can be removed.
+
+It is possible to delete and remove the pod and running containers in a single instance. In order to delete and remove pods, it is necessary to know the names and status of pods which can be found with the *podman pod ps* command.
+
+.Podman Pod Cleanup
+[source,bash]
+----
+[root@server ~]# podman pod ps <1>
+POD ID        NAME      STATUS   CREATED         INFRA ID      # OF CONTAINERS
+e18e307bab06  rht-demo  Running  12 minutes ago  3113f296524c  2
+
+[root@server ~]# podman ps <2>
+CONTAINER ID  IMAGE                                         COMMAND               CREATED         STATUS             PORTS                 NAMES
+3113f296524c  registry.access.redhat.com/ubi8/pause:latest                        15 minutes ago  Up 13 minutes ago  0.0.0.0:8080->80/tcp  e18e307bab06-infra
+deeb7e789eaf  quay.io/redhattraining/httpd-parent           /bin/sh -c /usr/s...  13 minutes ago  Up 13 minutes ago  0.0.0.0:8080->80/tcp  webserver
+----
+<1> Running Pods
+<2> Running Containers
+
+In order to delete a pod and the containers running within the pod, you must use the *--force* option.
+
+.Source Description
+[source,bash]
+----
+[root@server ~]# podman pod rm rht-demo --force <1>
+e18e307bab06dd45d3cc5a90472ea075979aacb3adfc2071dfd68dca284b03a3
+
+[root@server ~]# podman pod ps <2>
+POD ID  NAME    STATUS  CREATED  INFRA ID  # OF CONTAINERS
+
+[root@server ~]# podman ps -a <3>
+CONTAINER ID  IMAGE   COMMAND  CREATED  STATUS  PORTS   NAMES
+----
+<1> Stopping all containers and removing the Pod
+<2> Verifying pod has been removed
+<3> Verifying there are no running containers and all containers have been removed.
+
+.*podman pod rm* Errors
+[IMPORTANT]
+====
+You cannot remove a pod that has running or paused containers.
+
+.*podman pod rm* Error
+[source,bash]
+----
+[root@server ~]# podman pod rm rht-demo
+Error: pod e18e307bab06dd45d3cc5a90472ea075979aacb3adfc2071dfd68dca284b03a3 has containers that are not ready to be removed: cannot remove container 3113f296524c48a2eabdcd6f114f64c213e8844ecd2eb754557683dc7c205203 as it is running - running or paused containers cannot be removed without force: container state improper
+----
+====
+
+=== Creating a multi-container Pod for Wordpress
+
+.Exercise - Creating a multi-container Pod for Wordpress
+====
+In this exercise, you will be creating a pod to run the Wordpress application. This pod will contain multiple containers, namely Wordpress and MySQL/MariaDB.
+
+. Create the pod for running the Wordpress web application
++
+[source,bash]
+----
+[root@server ~]# podman pod create --name wordpress_pod_demo -p 80:80
+5cbe751d69a99b9fdefb5225180c4897c95f60245eaf049570c2980bfdf74e2d
+----
+
+. Verify the pod has been created
++
+.Verification of Pod creation
+[source,bash]
+----
+[root@server ~]# podman pod ps --ctr-names <1>
+POD ID        NAME                STATUS   CREATED        INFRA ID      <no value>
+5cbe751d69a9  wordpress_pod_demo  Created  2 minutes ago  893b2d69c740  5cbe751d69a9-infra
+----
+<1> Added the *--ctr-names* to show container names
++
+.Verification using *podman ps* to get Port mapping
+[source,bash]
+----
+[root@server ~]# podman ps --pod -a
+CONTAINER ID  IMAGE                                          COMMAND         CREATED        STATUS                     PORTS                                           NAMES               POD ID        PODNAME
+893b2d69c740  registry.access.redhat.com/ubi8/pause:latest                   3 minutes ago  Created                    0.0.0.0:80->80/tcp                              5cbe751d69a9-infra  5cbe751d69a9  wordpress_pod_demo
+----
+
+. Create the Database container
++
+[source,bash]
+----
+[root@server ~]# podman run -d --name db \
+>                   -e MYSQL_USER=wordpress \
+>                   -e MYSQL_PASSWORD=wordpress \
+>                   -e MYSQL_DATABASE=wordpress \
+>                   -e MYSQL_ROOT_PASSWORD=somewordpress \
+>                   --pod wordpress_pod_demo registry.access.redhat.com/rhscl/mysql-57-rhel7
+ec64df9149af45d2ce1f26d03354cd748e28815e25a73430f69180bc8a3246d8
+----
++
+.Testing the Database to ensure it is up and ready
+[TIP]
+=====
+You can check login to MySQL and verify the service allows login and a simple *select* command.
+
+.Testing for Zero Return Code
+[source,bash]
+----
+[root@server ~]# podman exec db bash -c 'mysql -u root -e "SELECT 1" &> /dev/null'; echo $?
+0
+----
+
+
+=====
+
+. Start the Wordpres Container
++
+[source,bash]
+----
+[root@server ~]# podman run -d --name wp \
+>                   -e WORDPRESS_DB_HOST=127.0.0.1:3306 \
+>                   -e WORDPRESS_DB_USER=wordpress \
+>                   -e WORDPRESS_DB_PASSWORD=wordpress \
+>                   -e WORDPRESS_DB_NAME=wordpress \
+>                   --pod wordpress_pod_demo quay.io/redhattraining/wordpress:5.3.0
+Trying to pull quay.io/redhattraining/wordpress:5.3.0...
+Getting image source signatures
+Copying blob 60f22fbbd07a [=============================>--------] 57.4MiB / 73.1MiB
+Copying blob 60f22fbbd07a [=============================>--------] 57.5MiB / 73.1MiB
+
+... OUTPUT OMITTED ...
+
+Writing manifest to image destination
+Storing signatures
+793b3d5de8108204ed9161fdc65cf81214be99a13676e9f8f251f439852c70f2
+----
+
+. Check Podman Pod and Container Status
++
+[source,bash]
+----
+[root@server ~]# podman pod ps --ctr-names
+POD ID        NAME                STATUS   CREATED         INFRA ID      <no value>
+5cbe751d69a9  wordpress_pod_demo  Running  13 minutes ago  893b2d69c740  wp <1>,5cbe751d69a9-infra <2>,db <3>
+----
+<1> The *wp* container is running for Wordpress
+<2> The *infra* container is running for the Pod
+<3> The *db* container is running to provide the database for Wordpress
+
+. Verify Website from CLI
++
+[source,bash]
+----
+[root@server ~]# curl -I http://127.0.0.1/wp-admin/install.php
+HTTP/1.1 200 OK
+Date: Mon, 25 Oct 2021 16:34:17 GMT
+Server: Apache/2.4.38 (Debian)
+X-Powered-By: PHP/7.3.12
+Expires: Wed, 11 Jan 1984 05:00:00 GMT
+Cache-Control: no-cache, must-revalidate, max-age=0
+Content-Type: text/html; charset=utf-8
+----
+
+. Open Firewall ports on *server.lab.example.com* for port 80/tcp and check from web browser.
++
+.Opening Port
+[source,bash]
+----
+[root@server ~]# firewall-cmd --add-service=http --permanent ; firewall-cmd --reload
+success
+success
+----
++
+image::Chapter3-09a1c.png[title="Wordpress Installation Page", align="center"]
+
+. Cleanup Pods and Containers
++
+.Removing Pods and Containers
+[source,bash]
+----
+[root@server ~]# podman pod rm wordpress_pod_demo  --force
+----
+
+====
 
 === Podman Image and Container Pruning
 
@@ -31,10 +323,14 @@ This will talk about Podman Pods
 
 *Moving from docker-compose to Podman pods*: https://www.redhat.com/sysadmin/compose-podman-pods
 
-*Podman System Prune:*
+*Podman: Managing pods and containers in a local container runtime*: https://developers.redhat.com/blog/2019/01/15/podman-managing-containers-pods#
 
 *_man pages_*
 
-_podman-system-prune_, _podman-container-cleanup_,
+_podman-system-prune_, _podman-container-cleanup_, _podman-pod-prune_, _podman-container-prune_, _podman-image-prune_, and _podman-volume-prune_.
+
+*Stefano's Project on Github*: https://github.com/sstagnaro/rht-contrib
+
+*Spinning up and Managing Pods with multiple containers with Podman*: https://mohitgoyal.co/2021/04/23/spinning-up-and-managing-pods-with-multiple-containers-with-podman/
 
 ====
