@@ -191,6 +191,9 @@ endif::[]
 * *Deploy OpenShift at the Edge with Single-Node OpenShift*
 ** https://cloud.redhat.com/blog/deploy-openshift-at-the-edge-with-single-node-openshift
 
+* *okd4-single-node-cluster*
+** https://cgruver.github.io/okd4-single-node-cluster/
+
 == Kubernetes References
 
 * *Creating Kubernetes YAML Files*
@@ -275,11 +278,3 @@ endif::[]
 
 * *Deploy Red Hat Quay for proof-of-concept (non-production) purposes*
 ** https://access.redhat.com/documentation/en-us/red_hat_quay/3/html/deploy_red_hat_quay_for_proof-of-concept_non-production_purposes/index
-
-== OpenShift
-
-* Deploy OpenShift at the Edge with Single-Node OpenShift
-** https://cloud.redhat.com/blog/deploy-openshift-at-the-edge-with-single-node-openshift
-
-* *okd4-single-node-cluster*
-** https://cgruver.github.io/okd4-single-node-cluster/
