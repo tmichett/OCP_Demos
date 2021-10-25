@@ -450,6 +450,23 @@ Actual container image cleanup is performed with the *podman rmi ** command whic
 ====
 
 
+
+====
+
+
+.Install Podman Containers Collection
+[source,bash]
+----
+[student@workstation Pods]$ ansible-galaxy collection install -r requirements.yml -p collections
+Process install dependency map
+Starting collection install process
+Installing 'containers.podman:1.8.1' to '/home/student/github1/OCP_Demos/Containers/labs/Pods/collections/ansible_collections/containers/podman
+----
+
+
+====
+
+
 .References
 [NOTE]
 ====
