@@ -107,6 +107,43 @@ endif::[]
 * *Auto-updating podman containers with systemd*
 ** https://fedoramagazine.org/auto-updating-podman-containers-with-systemd/
 
+* *Automate Podman Containers with Ansible 1/2*
+** https://redhatnordicssa.github.io/ansible-podman-containers-1
+
+* *Automate Podman Containers with Ansible 2/2*
+** https://redhatnordicssa.github.io/ansible-podman-containers-2
+
+* *Podman: Managing pods and containers in a local container runtime*
+** https://developers.redhat.com/blog/2019/01/15/podman-managing-containers-pods#mariadb_example
+
+* *Useful Podman Commands*
+** https://ksummersill.medium.com/useful-podman-commands-39275ac4f632
+
+* *Podman: Managing pods and containers in a local container runtime*
+** https://developers.redhat.com/blog/2019/01/15/podman-managing-containers-pods
+
+* *Spinning up and Managing Pods with multiple containers with Podman*
+** https://mohitgoyal.co/2021/04/23/spinning-up-and-managing-pods-with-multiple-containers-with-podman/
+
+* *Moving from docker-compose to Podman pods*
+** https://www.redhat.com/sysadmin/compose-podman-pods
+
+* *Working with pods with podman generate and podman play*
+** https://mohitgoyal.co/2021/05/10/working-with-pods-with-podman-generate-and-podman-play/
+
+* *Manage containers with Podman Compose*
+** https://fedoramagazine.org/manage-containers-with-podman-compose/
+
+* *Podman Tutorial For Beginners: Step by Step Guides*
+** https://devopscube.com/podman-tutorial-beginners/
+
+* *Podman SystemD Tutorial*
+** https://www.jwillikers.com/a-podman-pod-as-a-systemd-service
+
+* *Podman to the Rescue?*
+** https://matthewegunter.medium.com/podman-to-the-rescue-b90ae74a35e0
+
+
 == Buildah References
 
 * *Buildah Tutorial*
@@ -128,19 +165,6 @@ endif::[]
 * *Building and managing container images with Buildah*
 ** https://mohitgoyal.co/2021/05/16/building-and-managing-container-images-with-buildah/
 
-* *Podman: Managing pods and containers in a local container runtime*
-** https://developers.redhat.com/blog/2019/01/15/podman-managing-containers-pods#mariadb_example
-
-* *Useful Podman Commands*
-** https://ksummersill.medium.com/useful-podman-commands-39275ac4f632
-
-* *Podman: Managing pods and containers in a local container runtime*
-** https://developers.redhat.com/blog/2019/01/15/podman-managing-containers-pods
-
-* *Spinning up and Managing Pods with multiple containers with Podman*
-** https://mohitgoyal.co/2021/04/23/spinning-up-and-managing-pods-with-multiple-containers-with-podman/
-
-
 == Skopeo References
 
 * *Skopeo - Exercise from redhatgov.io*
@@ -151,6 +175,9 @@ endif::[]
 
 * *How to run Skopeo in a container*
 ** https://www.redhat.com/sysadmin/how-run-skopeo-container
+
+* *Introduction to using buildah, podman and skopeo to work on containers*
+** http://redhatgov.io/workshops/rhel_8/exercise1.8/
 
 == OpenShift Container Platform References
 
@@ -208,6 +235,15 @@ endif::[]
 * *How to run a Kubernetes cluster on your laptop*
 ** https://www.redhat.com/sysadmin/kubernetes-cluster-laptop
 
+* *kdigger: a Context Discovery Tool for Kubernetes*
+** https://blog.quarkslab.com/kdigger-a-context-discovery-tool-for-kubernetes.html
+
+* *How to create Kubernetes YAML files*
+** https://itnext.io/how-to-create-kubernetes-yaml-files-abb8426eeb45
+
+* Living with Kubernetes: Debug Clusters in 8 Commands
+** https://thenewstack.io/living-with-kubernetes-debug-clusters-in-8-commands/
+
 == Docker References
 
 * *Transitioning from Docker to Podman*
@@ -218,6 +254,9 @@ endif::[]
 
 * *Podman and Buildah for Docker users*
 ** https://developers.redhat.com/blog/2019/02/21/podman-and-buildah-for-docker-users
+
+* Deep dive into Linux Networking and Docker — Bridge, vETH and IPTables
+** https://medium.com/techlog/diving-into-linux-networking-and-docker-bridge-veth-and-iptables-a05eb27b1e72
 
 == Misc Container Information
 
@@ -236,3 +275,11 @@ endif::[]
 
 * *Deploy Red Hat Quay for proof-of-concept (non-production) purposes*
 ** https://access.redhat.com/documentation/en-us/red_hat_quay/3/html/deploy_red_hat_quay_for_proof-of-concept_non-production_purposes/index
+
+== OpenShift
+
+* Deploy OpenShift at the Edge with Single-Node OpenShift
+** https://cloud.redhat.com/blog/deploy-openshift-at-the-edge-with-single-node-openshift
+
+* *okd4-single-node-cluster*
+** https://cgruver.github.io/okd4-single-node-cluster/
