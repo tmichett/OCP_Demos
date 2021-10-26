@@ -346,7 +346,7 @@ Existing credentials are valid. Already logged in to registry.redhat.io
 
 
 .Container Image Management with Cockpit
-
+====
 . Navigate to the *Images* section and select *Get new image*
 +
 image::Chapter2-d266c.png[title="Cockpit - Podman Container Images", align="center"]
@@ -359,7 +359,7 @@ image::Chapter2-9e757.png[title="HTTPD 2.4 Parent Image from Red Hat Training - 
 +
 .Adding the *quay.io* Registry to */etc/containers/registries.conf*
 [TIP]
-====
+=====
 Update the *registries.conf* file and then restart the *podman* service.
 
 .Edit */etc/containers/registries.conf*
@@ -379,17 +379,17 @@ registries = ['registry.access.redhat.com', 'registry.redhat.io', 'docker.io', '
 [root@servera ~]# systemctl restart podman.service
 ----
 
-====
+=====
 +
 .Registry Authentication
 [CAUTION]
-====
+=====
 It is important to keep in mind, images requiring authentication to a registry will provide errors in Cockpit as you will be accessing the registry as an unauthenticated user.
 
 image::Chapter2-5a3bb.png[title="Registry Authentication Issues", align="center"]
 
 Based on timeline and platform difficulties, images downloaded in the Red Hat Web Management Console will be coming from public (unauthenticated) registries.
-====
+=====
 . Confirm image was downloaded.
 +
 image::Chapter2-1bc27.png[title="Images in Local Registry", align="center"]
@@ -399,13 +399,14 @@ image::Chapter2-1bc27.png[title="Images in Local Registry", align="center"]
 image::Chapter2-fb988.png[title="HTTPD-Parent Image Details - Image Information", align="center"]
 +
 image::Chapter2-2fd80.png[title="Clair Image Details - Containers Using Image", align="center"]
+====
 
 .Container Management with Cockpit
 
 It is possible to manage both *rootless* and *root-based* containers in Cockpit depending on the user you are using to access the management console. In order to create and launch new containers from Cockpit, the image must already be downloaded and existing in the local image registry.
 
-*Container Creation*
-
+.*Container Creation*
+====
 . Select the image to be used to launch the container by clicking the *Play* button.
 +
 image::Chapter2-cd516.png[title="HTTPD-Parent Image Selection", align="center"]
@@ -418,9 +419,9 @@ image::Chapter2-acd5b.png[title="Launcing a Demo Container", align="center"]
 +
 .*NOTE* Regarding *With terminal*
 [WARNING]
-====
+=====
 For several containers, you should *uncheck* the *_With terminal_* option as this could cause the container to exit unexpectedly.
-====
+=====
 . Verify container was launched
 +
 image::Chapter2-8a097.png[title="Running Container Verification", align="center"]
@@ -453,9 +454,10 @@ sh-4.4#
 image::Chapter2-6ee11.png[title="Container Console in Cockpit", align="center"]
 +
 image::Chapter2-70921.png[title="Application Verification in Firefox", align="center"]
+====
 
-*Saving a Container Image from a Runnign Container*
-
+.*Saving a Container Image from a Running Container*
+====
 . Select the container to use as a base for the image
 .. Click *Commit*
 +
@@ -469,9 +471,9 @@ image::Chapter2-b93ab.png[title="Committing image", align="center"]
 +
 .Images from a Running Container
 [TIP]
-====
+=====
 It is possible to create images from running container. If the container is running, it will be paused briefly while the image is created.
-====
+=====
 
 . Verify the image was created
 +
@@ -479,13 +481,13 @@ image::Chapter2-97e74.png[title="Image Verification", align="center"]
 +
 .Image Tags
 [IMPORTANT]
-====
+=====
 If there is no tag specified when the image is being committed, *podman* will automatically add the *_latest_* tag to the image.
+=====
 ====
 
-
-*Container Cleanup*
-
+.*Container Cleanup*
+====
 . Select the container to stop and remove.
 .. If you just want to stop a running container, click *Stop*
 .. To stop and remove the container, click the *Trashcan*
@@ -494,12 +496,13 @@ image::Chapter2-2506f.png[title="Container Cleanup", align="center"]
 +
 .Deleting a Running Container
 [TIP]
-====
+=====
 Running containers must be stopped before they can be deleted or removed. If a container is running, and you click the *Trashcan* it will stop and delete the container. This is similar to performing a *podman rm -f <Container>* as it will force stop and then remove the container.
 
 image::Chapter2-606fd.png[title="Force Removing a Running Container", align="center"]
-====
+=====
 
+====
 
 .References
 [NOTE]

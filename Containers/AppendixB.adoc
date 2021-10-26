@@ -1,0 +1,835 @@
+:pygments-style: tango
+:source-highlighter: pygments
+:toc:
+:toclevels: 7
+:sectnums:
+:sectnumlevels: 6
+:numbered:
+:chapter-label:
+:icons: font
+:imagesdir: images/
+
+
+== System Security Policy and Compliance
+
+System security and compliance is a primary concern for people when thinking about the protection of systems and integrity of data. This set of hands-on procedures will focus on obtaining the content and necessary packages to perform a basic scan and remediate the system based on scan results. As part of the lab, you will be customizing your own SCAP content for a scan, view the results, and generate an Ansible playbook based on the failed results.
+
+=== Customizing SCAP Content
+
+Red Hat includes the SCAP Workbench application as a GUI application which allows scanning, customizing, and saving SCAP scans and results. The SCAP Workbench can be used to perform scans of remote systems over an SSH connection or it can be utilized to scan the local system. Since the SCAP Workbench is a GUI application, it must run on a system with X-Windows installed.
+
+
+*_Servers to Configure_*
+
+* workstation
+
+*_Packages to Install_*
+
+* scap-workbench
+
+TIP: Since we are using an application on a VM that requires a GUI, we can use X11 forwarding with the SSH connection by specifying a *-X* on the command line.
+
+*Step 1 - SSH to Workstation*
+
+The fist step is to connect to the workstation and forward X11 traffic back to the local system.
+
+.Connecting to the Workstation VM
+====
+.Connecting to Workstation Using SSH
+[source,bash]
+----
+# ssh root@workstation -X
+----
+====
+
+*Step 2 - Install Packages*
+
+After connecting to the Workstation VM, you will need to install the SCAP Workbench and its dependencies.
+
+.Installing SCAP Workbench
+====
+.Using Yum to Install SCAP Workbench
+[source,bash]
+----
+# yum install scap-workbench
+
+Loaded plugins: langpacks, search-disabled-repos
+Resolving Dependencies
+--> Running transaction check
+---> Package scap-workbench.x86_64 0:1.1.6-1.el7 will be installed
+--> Processing Dependency: openscap-utils >= 1.2.0 for package: scap-workbench-1.1.6-1.el7.x86_64
+--> Processing Dependency: scap-security-guide for package: scap-workbench-1.1.6-1.el7.x86_64
+--> Running transaction check
+---> Package openscap-utils.x86_64 0:1.2.16-8.el7_5 will be installed
+--> Processing Dependency: openscap-containers = 1.2.16-8.el7_5 for package: openscap-utils-1.2.16-8.el7_5.x86_64
+---> Package scap-security-guide.noarch 0:0.1.36-9.el7_5 will be installed
+--> Processing Dependency: openscap-scanner >= 1.2.5 for package: scap-security-guide-0.1.36-9.el7_5.noarch
+--> Running transaction check
+---> Package openscap-containers.noarch 0:1.2.16-8.el7_5 will be installed
+---> Package openscap-scanner.x86_64 0:1.2.16-8.el7_5 will be installed
+--> Finished Dependency Resolution
+
+Dependencies Resolved
+
+================================================================================
+ Package                Arch      Version             Repository           Size
+================================================================================
+Installing:
+ scap-workbench         x86_64    1.1.6-1.el7         rhel--server-dvd    1.8 M
+Installing for dependencies:
+ openscap-containers    noarch    1.2.16-8.el7_5      rhel_updates         27 k
+ openscap-scanner       x86_64    1.2.16-8.el7_5      rhel_updates         61 k
+ openscap-utils         x86_64    1.2.16-8.el7_5      rhel_updates         27 k
+ scap-security-guide    noarch    0.1.36-9.el7_5      rhel_updates        2.6 M
+
+Transaction Summary
+================================================================================
+Install  1 Package (+4 Dependent packages)
+
+Total download size: 4.5 M
+Installed size: 64 M
+Is this ok [y/d/N]:
+----
+
+NOTE: Some things might already be installed for you, if SCAP Workbench is already installed, please move on to the next step. Also note the dependencies for SCAP Workbench as they are automatically installed.
+====
+
+*Step 3 - Launching SCAP Workbench*
+
+In order to run a scan or customize SCAP content, you will need to launch the SCAP Workbench application.
+
+TIP: You *must* use SCAP Workbench from a GUI, so it will need to run either locally or through an SSH connection with X11 forwarded.
+
+.Launching SCAP Workbench
+====
+.Using SCAP Workbench
+[source,bash]
+----
+# scap-workbench
+----
+
+image::AppendixA-d656e.png[title="SCAP Workbench Startup", align="center"]
+
+====
+
+*Step 4 - Creating Custom Content*
+
+Once SCAP Workbench has been launched, select the content to load. For this lab, we will be using the RHEL7 content.
+
+.Creating Custom Content
+====
+
+. For *Select content to load:* select "*RHEL8*", then click "*Load Content*"
+. Select the *Profile* you want to use to start customization
+
+TIP: For this example, we will use the *OSPP - Protection Profile for General Purpose Operating Systems* Baseline
+
+image::AppendixA-12524.png[title="SCAP Workbench OSPP Profile", align="center"]
+
+[start=3]
+. Click "*Customize*" to create custom SCAP content based on the chosen profile, and give it a name.
+
+image::AppendixA-7cd7e.png[title="SCAP Custom OSPP Profile Creation", align="center"]
+
+TIP: The name for this is: *xccdf_org.ssgproject.content_profile_ospp_customized*
+
+[start=4]
+. Click "Deselect All" so that you can select the items you wish to include in your custom scan profile. *NOTE:* we are doing this to also limit it to a few checks for the example.
+
+image::AppendixA-04ed6.png[title="SCAP Custom Profile Selections", align="center"]
+
+NOTE: For this lab, we will be setting the minimum password length and PAM Password quality settings
+
+[start=5]
+. Search for Password to set *minimum password length* and set the values in *login.defs*. Check *Set Password Minimum Length in login.defs* and click on the *minimum password legnth* and set the value to *18*
+
+image::AppendixA-1ddf2.png[title="SCAP Custom Profile Password Settings for Login.Defs", align="center"]
+
+
+[start=6]
+. Set password quality requirements with PAM. Search for the minlen and set it to *18*. Also, place a checkbox in *Set Password Quality Requirements with pam_quality*. Then click "OK"
+
+image::AppendixA-09b9f.png[title="SCAP Custom Profile PAM Quality Requirements", align="center"]
+
+[start=7]
+. At this point, we have taken the default settings from the OSPP profile with only the tailored pieces that we selected. The next step is to click "File => Save Customization Only" to save the custom content
+
+
+image::AppendixA-756be.png[title="SCAP Custom Profile Selected Settings View", align="center"]
+image::AppendixA-61450.png[title="SCAP Custom Profile Creation Saving", align="center"]
+image::AppendixA-421c2.png[title="SCAP Custom Profile Final View ", align="center"]
+
+[start=8]
+. Copy the custom tailoring file to the server(s) being scanned. In this case, we will want to copy the file to *servera*
+
+.Copy custom content
+[source,bash]
+----
+[root@workstation ~]# scp ssg-rhel8-ds-tailoring.xml root@servera:
+ssg-rhel8-ds-tailoring.xml                    100%   28KB  10.7MB/s   00:00
+[root@workstation ~]#
+----
+====
+
+
+=== Running a SCAP Scan with Custom Content
+
+*_Servers to Configure_*
+
+* servera
+
+*_Packages to Install_*
+
+* openscap-scanner
+* scap-security-guide
+
+*Step 1 - SSH to serverc*
+
+The fist step is to connect to the server.
+
+.Connecting to the *servera* VM
+====
+.Connecting to *servera* Using SSH
+[source,bash]
+----
+# ssh root@servera
+----
+====
+
+
+*Step 2 - Install packages on servera*
+
+The second step is to install software on the server.
+
+.Install software on *servera*
+====
+.Installing Software on *servera*
+[source,bash]
+----
+[root@servera ~]# yum install scap-security-guide
+Last metadata expiration check: 0:47:44 ago on Thu 16 Apr 2020 08:26:15 AM EDT.
+Dependencies resolved.
+================================================================================
+ Package          Arch   Version       Repository                          Size
+================================================================================
+Installing:
+ scap-security-guide
+                  noarch 0.1.42-11.el8 rhel-8.0-for-x86_64-appstream-rpms 3.4 M
+Installing dependencies:
+ openscap         x86_64 1.3.0-7.el8   rhel-8.0-for-x86_64-appstream-rpms 3.3 M
+ openscap-scanner x86_64 1.3.0-7.el8   rhel-8.0-for-x86_64-appstream-rpms  66 k
+ xml-common       noarch 0.6.3-50.el8  rhel-8.0-for-x86_64-baseos-rpms     39 k
+
+Transaction Summary
+================================================================================
+Install  4 Packages
+
+Total download size: 6.9 M
+Installed size: 132 M
+Is this ok [y/N]: y
+
+
+... output omitted ...
+
+  Verifying        : openscap-1.3.0-7.el8.x86_64                            1/4
+  Verifying        : openscap-scanner-1.3.0-7.el8.x86_64                    2/4
+  Verifying        : scap-security-guide-0.1.42-11.el8.noarch               3/4
+  Verifying        : xml-common-0.6.3-50.el8.noarch                         4/4
+
+Installed:
+  scap-security-guide-0.1.42-11.el8.noarch    openscap-1.3.0-7.el8.x86_64
+  openscap-scanner-1.3.0-7.el8.x86_64         xml-common-0.6.3-50.el8.noarch
+
+Complete!
+
+----
+====
+
+[TIP]
+.*Learning about SCAP Commands*
+====
+
+The SSG man page is a very good source of information for usage of the *oscap* tool as well as provides examples of how to use the SCAP SSG Guide profiles itself.
+
+.Looking at *SCAP Security Guide (SSG)* Man Page
+[source,bash]
+----
+# man scap-security-guide
+
+scap-security-guide(8)      System Manager's Manual     scap-security-guide(8)
+
+NAME
+       SCAP  Security Guide - Delivers security guidance, baselines, and asso‐
+       ciated validation mechanisms utilizing the Security Content  Automation
+       Protocol (SCAP).
+
+
+... output omitted ...
+
+EXAMPLES
+       To  scan  your  system utilizing the OpenSCAP utility against the ospp-
+       rhel7 profile:
+
+       oscap xccdf eval --profile  ospp-rhel7  --results  /tmp/`hostname`-ssg-
+       results.xml  --report  /tmp/`hostname`-ssg-results.html  --oval-results
+       /usr/share/xml/scap/ssg/content/ssg-rhel7-xccdf.xml
+----
+
+.Looking at *_oscap_* Man Page
+[source,bash]
+----
+# man oscap
+
+OSCAP(8)                System Administration Utilities               OSCAP(8)
+
+NAME
+       oscap - OpenSCAP command line tool
+
+SYNOPSIS
+       oscap  [general-options]  module operation [operation-options-and-argu‐
+       ments]
+
+DESCRIPTION
+       oscap is Security Content Automation Protocol (SCAP) toolkit  based  on
+       OpenSCAP  library.  It  provides  various  functions for different SCAP
+       specifications (modules).
+
+       OpenSCAP tool claims to provide capabilities of Authenticated  Configu‐
+       ration  Scanner  and  Authenticated Vulnerability Scanner as defined by
+       The National Institute of Standards and Technology.
+
+... output omitted ...
+
+EXAMPLES
+       Evaluate XCCDF content using CPE dictionary and produce html report. In
+       this  case  we  use  United  States  Government  Configuration Baseline
+       (USGCB) for Red Hat Enterprise Linux 5 Desktop.
+
+               oscap xccdf eval --fetch-remote-resources --oval-results \
+                       --profile united_states_government_configuration_baseline
+ \
+                       --report usgcb-rhel5desktop.report.html \
+                       --results usgcb-rhel5desktop-xccdf.xml.result.xml \
+                       --cpe usgcb-rhel5desktop-cpe-dictionary.xml \
+                       usgcb-rhel5desktop-xccdf.xml
+
+----
+
+====
+
+*Step 3 - Running _oscap_ scan*
+
+We will run the *oscap*  utility to generate a report and a results file that can be sent back to the *workstation* system so that we can create an Ansible playbook for remediation and view the results of the report.
+
+NOTE: Be very careful about the name of the profile as this was selected during the creation of the custom profile/tailoring file portion when doing SCAP Workbench customizations.
+
+.Scanning *servera*
+====
+.Using *oscap* and the tailoring profile to scan *servera*
+[source,bash]
+----
+# [root@servera ~]# oscap xccdf eval \
+--profile xccdf_org.ssgproject.content_profile_ospp_customized \
+--tailoring-file ssg-rhel8-ds-tailoring.xml \
+--results custom_scan_results.xml \
+/usr/share/xml/scap/ssg/content/ssg-rhel8-ds.xml
+
+Title   Set Password Minimum Length in login.defs
+Rule    xccdf_org.ssgproject.content_rule_accounts_password_minlen_login_defs
+Ident   CCE-80652-1
+Result  fail
+
+Title   Set Password Strength Minimum Different Characters
+Rule    xccdf_org.ssgproject.content_rule_accounts_password_pam_difok
+Ident   CCE-80654-7
+Result  fail
+
+Title   Set Password Strength Minimum Uppercase Characters
+Rule    xccdf_org.ssgproject.content_rule_accounts_password_pam_ucredit
+Ident   CCE-80665-3
+Result  fail
+
+Title   Set Password Minimum Length
+Rule    xccdf_org.ssgproject.content_rule_accounts_password_pam_minlen
+Ident   CCE-80656-2
+Result  fail
+
+Title   Set Password Retry Prompts Permitted Per-Session
+Rule    xccdf_org.ssgproject.content_rule_accounts_password_pam_retry
+Ident   CCE-80664-6
+Result  fail
+
+Title   Set Password Strength Minimum Different Categories
+Rule    xccdf_org.ssgproject.content_rule_accounts_password_pam_minclass
+Result  fail
+
+Title   Set Password Maximum Consecutive Repeating Characters
+Rule    xccdf_org.ssgproject.content_rule_accounts_password_pam_maxrepeat
+Result  fail
+
+Title   Set Password Strength Minimum Special Characters
+Rule    xccdf_org.ssgproject.content_rule_accounts_password_pam_ocredit
+Ident   CCE-80663-8
+Result  fail
+
+Title   Set Password Strength Minimum Lowercase Characters
+Rule    xccdf_org.ssgproject.content_rule_accounts_password_pam_lcredit
+Ident   CCE-80655-4
+Result  fail
+
+Title   Set Password Strength Minimum Digit Characters
+Rule    xccdf_org.ssgproject.content_rule_accounts_password_pam_dcredit
+Ident   CCE-80653-9
+Result  fail
+
+Title   Set Password to Maximum of Consecutive Repeating Characters from Same Character Class
+Rule    xccdf_org.ssgproject.content_rule_accounts_password_pam_maxclassrepeat
+Result  fail
+
+----
+
+[TIP]
+.*Getting Custom Profile Name from Tailoring File*
+=====
+If you need to locate the profile used for the custom scanning content from the tailoring file, you can search for it with *grep*.
+
+[source,bash]
+----
+[root@servera ~]#  grep "Profile id" ssg-rhel8-ds-tailoring.xml
+  <xccdf:Profile id="xccdf_org.ssgproject.content_profile_ospp_customized" extends="xccdf_org.ssgproject.content_profile_ospp">
+----
+=====
+====
+
+
+*Step 4 - Creating a Results Report*
+
+You can create a results report file from the results file so you have a nice HTML file that is easy to ready with the results from the SCAP scan.
+
+.Creating a SCAP Report from a Results File
+====
+.Generating a Report
+[source,bash]
+----
+[root@servera ~]# oscap xccdf generate report \
+custom_scan_results.xml > Custom_Scan_Report.html
+----
+====
+
+[CAUTION]
+.Combining Steps 3 & 4
+====
+
+It is possible to perform a custom content scan which will generate the results file and the report for transfer back to the workstation for review.
+
+*Need to Specify*
+
+* *--results*
+* *--report*
+
+.Creating a Results File and Report During Custom Content Scan
+[source,bash]
+----
+[root@servera ~]# oscap xccdf eval \
+--profile xccdf_org.ssgproject.content_profile_ospp_customized \
+--tailoring-file ssg-rhel8-ds-tailoring.xml \
+--results custom_scan_results_2.xml \
+--report Custom_Scan_Report_2.html \
+/usr/share/xml/scap/ssg/content/ssg-rhel8-ds.xml
+
+Title   Set Password Minimum Length in login.defs
+Rule    xccdf_org.ssgproject.content_rule_accounts_password_minlen_login_defs
+Ident   CCE-80652-1
+Result  fail
+
+Title   Set Password Strength Minimum Different Characters
+Rule    xccdf_org.ssgproject.content_rule_accounts_password_pam_difok
+Ident   CCE-80654-7
+Result  fail
+
+Title   Set Password Strength Minimum Uppercase Characters
+Rule    xccdf_org.ssgproject.content_rule_accounts_password_pam_ucredit
+Ident   CCE-80665-3
+Result  fail
+
+Title   Set Password Minimum Length
+Rule    xccdf_org.ssgproject.content_rule_accounts_password_pam_minlen
+Ident   CCE-80656-2
+Result  fail
+
+Title   Set Password Retry Prompts Permitted Per-Session
+Rule    xccdf_org.ssgproject.content_rule_accounts_password_pam_retry
+Ident   CCE-80664-6
+Result  fail
+
+Title   Set Password Strength Minimum Different Categories
+Rule    xccdf_org.ssgproject.content_rule_accounts_password_pam_minclass
+Result  fail
+
+Title   Set Password Maximum Consecutive Repeating Characters
+Rule    xccdf_org.ssgproject.content_rule_accounts_password_pam_maxrepeat
+Result  fail
+
+Title   Set Password Strength Minimum Special Characters
+Rule    xccdf_org.ssgproject.content_rule_accounts_password_pam_ocredit
+Ident   CCE-80663-8
+Result  fail
+
+Title   Set Password Strength Minimum Lowercase Characters
+Rule    xccdf_org.ssgproject.content_rule_accounts_password_pam_lcredit
+Ident   CCE-80655-4
+Result  fail
+
+Title   Set Password Strength Minimum Digit Characters
+Rule    xccdf_org.ssgproject.content_rule_accounts_password_pam_dcredit
+Ident   CCE-80653-9
+Result  fail
+
+Title   Set Password to Maximum of Consecutive Repeating Characters from Same Character Class
+Rule    xccdf_org.ssgproject.content_rule_accounts_password_pam_maxclassrepeat
+Result  fail
+----
+====
+
+*Step 5 - Transferring Results File and Report to Workstation*
+
+After you have the results files and the report, you should transfer it to your graphical workstation (*workstation*) for further analysis.
+
+.Transferring Results
+====
+.Transferring the Results and Report Files
+[source,bash]
+----
+[root@servera ~]# scp *.xml *.html root@workstation:
+The authenticity of host 'workstation (<no hostip for proxy command>)' can't be established.
+ECDSA key fingerprint is SHA256:pOQ1OJmyF2PFI+jxyFoOSCfi+1oWNsUruy2DZNjg+N0.
+Are you sure you want to continue connecting (yes/no)? yes
+Warning: Permanently added 'workstation' (ECDSA) to the list of known hosts.
+root@workstation's password:
+custom_scan_results_2.xml                     100% 4086KB  32.4MB/s   00:00
+custom_scan_results.xml                       100% 4086KB  60.0MB/s   00:00
+ssg-rhel8-ds-tailoring.xml                    100%   28KB  16.2MB/s   00:00
+Custom_Scan_Report_2.html                     100%  332KB  44.3MB/s   00:00
+Custom_Scan_Report.html                       100%  332KB  37.6MB/s   00:00
+[root@servera ~]#
+----
+====
+
+*Step 6 - Viewing the SCAP scan report*
+
+After you have transferred the results file to *workstation* you can open the HTML report in a web browser. In this case we will use *_firefox_* to open the file.
+
+.Viewing the SCAP Report
+====
+.Opening the SCAP HTML Report with Firefox
+[source,bash]
+----
+[root@workstation ~]# firefox Custom_Scan_Report.html
+----
+
+image::AppendixA-9416a.png[title="SCAP Scan Results Report in Firefox", align="center"]
+
+WARNING: Firefox may not open the file based on SELinux context triggers. In order to get around this you can use the command prompt and do *setenforce 0* to allow you to open the report.
+
+====
+
+
+
+=== Creating an Ansible Remediation Playbook Based on SCAP Scan Results
+
+The OpenSCAP project and content created by Red Hat can automatically remediate findings from OpenSCAP scans. The findings can be remediated in many ways (*BASH*, *Ansible*, etc.). While things are mostly complete, there are some automated remediations that have not yet been developed.
+
+WARNING: There are multiple automatic remediation methods developed, but at this time, there isn't a script to fix everything.
+
+*_Servers to Configure_*
+
+* servera
+
+NOTE: We will continue to use *workstation* as our master SCAP system as it should have Ansible and SCAP Workbench installed.
+
+*Step 1 - Creating an Ansible Playbook from Results*
+
+The first step will be to generate an Ansible playbook from the SCAP scan results for system remediation.
+
+.Generating Ansible Playbook
+====
+
+.Ansible Playbook Generation
+[source,bash]
+----
+[root@workstation ~]# oscap xccdf generate fix \
+--profile xccdf_org.ssgproject.content_profile_ospp_customized \
+--tailoring-file ssg-rhel8-ds-tailoring.xml \
+--fix-type ansible \
+--result-id "" \
+custom_scan_results.xml > Custom_Scan_Fix.yml
+----
+
+[TIP]
+.*Viewing Remediation Playbook*
+=====
+It is also a good idea to view the created playbook for the system prior to running it.
+
+[source,bash]
+----
+[root@workstation ~]# cat Custom_Scan_Fix.yml
+---
+###############################################################################
+#
+# Ansible remediation role for the results of evaluation of profile xccdf_org.ssgproject.content_profile_ospp_customized
+# XCCDF Version:  unknown
+#
+# Evaluation Start Time:  2020-04-16T09:21:32
+# Evaluation End Time:  2020-04-16T09:21:33
+#
+# This file was generated by OpenSCAP 1.3.0 using:
+# 	$ oscap xccdf generate fix --result-id xccdf_org.open-scap_testresult_xccdf_org.ssgproject.content_profile_ospp_customized --template urn:xccdf:fix:script:ansible xccdf-results.xml
+#
+# This script is generated from the results of a profile evaluation.
+# It attempts to remediate all issues from the selected rules that failed the test.
+#
+# How to apply this remediation role:
+# $ ansible-playbook -i "localhost," -c local playbook.yml
+# $ ansible-playbook -i "192.168.1.155," playbook.yml
+# $ ansible-playbook -i inventory.ini playbook.yml
+#
+###############################################################################
+
+
+ - hosts: all
+   vars:
+      var_accounts_password_minlen_login_defs: !!str 18
+      var_password_pam_difok: !!str 8
+      var_password_pam_ucredit: !!str -1
+      var_password_pam_minlen: !!str 18
+      var_password_pam_retry: !!str 3
+      var_password_pam_minclass: !!str 3
+      var_password_pam_maxrepeat: !!str 3
+      var_password_pam_ocredit: !!str -1
+      var_password_pam_lcredit: !!str -1
+      var_password_pam_dcredit: !!str -1
+      var_password_pam_maxclassrepeat: !!str 4
+   tasks:
+
+
+    - name: "Set Password Minimum Length in login.defs"
+      lineinfile:
+        dest: /etc/login.defs
+        regexp: "^PASS_MIN_LEN *[0-9]*"
+        state: present
+        line: "PASS_MIN_LEN        {{ var_accounts_password_minlen_login_defs }}"
+      tags:
+        - accounts_password_minlen_login_defs
+        - medium_severity
+        - restrict_strategy
+        - low_complexity
+        - low_disruption
+        - CCE-80652-1
+        - NIST-800-53-IA-5(f)
+        - NIST-800-53-IA-5(1)(a)
+        - NIST-800-171-3.5.7
+        - CJIS-5.6.2.1
+
+
+... Output Omitted ...
+
+    - name: Ensure PAM variable maxclassrepeat is set accordingly
+
+      lineinfile:
+        create: yes
+        dest: "/etc/security/pwquality.conf"
+        regexp: '^#?\s*maxclassrepeat'
+        line: "maxclassrepeat = {{ var_password_pam_maxclassrepeat }}"
+
+      tags:
+        - accounts_password_pam_maxclassrepeat
+        - medium_severity
+        - restrict_strategy
+        - low_complexity
+        - low_disruption
+        - NIST-800-53-IA-5
+        - NIST-800-53-IA-5(c)
+
+----
+=====
+====
+
+[WARNING]
+.*Ansible is not setup for the lab*
+====
+
+Before we can do the next steps, we will download an Ansible config file and an inventory file so we can properly run the playbook.
+
+.Error Output Message
+[source,bash]
+----
+[root@workstation ~]# ansible-playbook Custom_Scan_Fix.yml
+ [WARNING]: provided hosts list is empty, only localhost is available. Note
+that the implicit localhost does not match 'all'
+
+
+PLAY [all] *********************************************************************
+skipping: no hosts matched
+
+PLAY RECAP *********************************************************************
+[root@workstation ~]#
+----
+====
+
+*Step 2 - Downloading Ansible Config and Ansible Inventory Files*
+
+This step is needed so that our Ansible system can be configured with various configuration options and the inventory files so we can run the given playbook.
+
+.Downloading Ansible Files
+====
+
+.Downloading Ansible Files
+[source,bash]
+----
+[root@workstation ~]# wget http://people.redhat.com/~tmichett/rh354/inventory
+--2020-04-16 09:38:50--  http://people.redhat.com/~tmichett/rh354/inventory
+Resolving people.redhat.com (people.redhat.com)... 209.132.183.19
+Connecting to people.redhat.com (people.redhat.com)|209.132.183.19|:80... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 24
+Saving to: ‘inventory’
+
+inventory           100%[===================>]      24  --.-KB/s    in 0s
+
+2020-04-16 09:38:50 (2.69 MB/s) - ‘inventory’ saved [24/24]
+
+
+[root@workstation ~]# wget http://people.redhat.com/~tmichett/rh354/ansible.cfg
+--2020-04-16 09:39:34--  http://people.redhat.com/~tmichett/rh354/ansible.cfg
+Resolving people.redhat.com (people.redhat.com)... 209.132.183.19
+Connecting to people.redhat.com (people.redhat.com)|209.132.183.19|:80... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 159
+Saving to: ‘ansible.cfg’
+
+ansible.cfg         100%[===================>]     159  --.-KB/s    in 0s
+
+2020-04-16 09:39:35 (13.8 MB/s) - ‘ansible.cfg’ saved [159/159]
+
+----
+====
+
+[WARNING]
+.Reviewing Ansible Configurations
+====
+The *inventory* file provided only has a single host *servera* in there. On real systems, you must be very cautious of running remediation playbooks against an inventory file as it could apply to unintended systems. Additionally the *ansible.cfg* file provided was created for use in this lab environment. Both of these items should be taken into account when doing going through the process on production systems.
+
+[source,bash]
+----
+[root@workstation ~]# cat inventory
+servera.lab.example.com
+
+[root@workstation ~]# cat ansible.cfg
+[defaults]
+roles_path = /etc/ansible/roles:/usr/share/ansible/roles
+log_path   = /tmp/ansible.log
+inventory  = ./inventory
+
+[privilege_escalation]
+become=True
+[root@workstation ~]#
+----
+
+====
+
+
+*Step 3 - Run the Ansible Playbook*
+
+This step will utilize the *workstation* system which is configured as your Ansible management node and will run the playbook to remediate the results on the *servera* system.
+
+.Remediation of *serverc* with Ansible Playbook
+====
+
+.Running the Ansible Playbook
+[source,bash]
+----
+[root@workstation ~]# ansible-playbook Custom_Scan_Fix.yml
+
+PLAY [all] *********************************************************************
+
+TASK [Gathering Facts] *********************************************************
+ok: [servera.lab.example.com]
+
+TASK [Set Password Minimum Length in login.defs] *******************************
+changed: [servera.lab.example.com]
+
+TASK [Ensure PAM variable difok is set accordingly] ****************************
+changed: [servera.lab.example.com]
+
+TASK [Ensure PAM variable ucredit is set accordingly] **************************
+changed: [servera.lab.example.com]
+
+TASK [Ensure PAM variable minlen is set accordingly] ***************************
+changed: [servera.lab.example.com]
+
+TASK [Set Password Retry Prompts Permitted Per-Session - system-auth (change)] ***
+ok: [servera.lab.example.com]
+
+TASK [Set Password Retry Prompts Permitted Per-Session - system-auth (add)] ****
+changed: [servera.lab.example.com]
+
+TASK [Ensure PAM variable minclass is set accordingly] *************************
+changed: [servera.lab.example.com]
+
+TASK [Ensure PAM variable maxrepeat is set accordingly] ************************
+changed: [servera.lab.example.com]
+
+TASK [Ensure PAM variable ocredit is set accordingly] **************************
+changed: [servera.lab.example.com]
+
+TASK [Ensure PAM variable lcredit is set accordingly] **************************
+changed: [servera.lab.example.com]
+
+TASK [Ensure PAM variable dcredit is set accordingly] **************************
+changed: [servera.lab.example.com]
+
+TASK [Ensure PAM variable maxclassrepeat is set accordingly] *******************
+changed: [servera.lab.example.com]
+
+PLAY RECAP *********************************************************************
+servera.lab.example.com    : ok=13   changed=11   unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+----
+
+NOTE: After running the playbook, you can see that there were 10 changes that were made to the system and exactly which parameters were changed. The next thing to do is perform another scan of the system to ensure that it is now fully compliant.
+====
+
+*Step 4 - Rescan System and Review Results*
+
+.Scanning System after Fixes and Verifying Results
+====
+
+.Performing SCAP Verification Scan
+[source,bash]
+----
+[root@servera ~]# oscap xccdf eval \
+--profile xccdf_org.ssgproject.content_profile_ospp_customized \
+--tailoring-file ssg-rhel8-ds-tailoring.xml \
+--results custom_scan_results_fixed.xml \
+--report Custom_Scan_Report_Fixed.html \
+/usr/share/xml/scap/ssg/content/ssg-rhel8-ds.xml
+
+----
+
+.Copying Results to Workstation
+[source,bash]
+----
+[root@servera ~]# scp custom_scan_results_fixed.xml Custom_Scan_Report_Fixed.html workstation:
+root@workstation's password:
+custom_scan_results_fixed.xml                 100% 4086KB  60.3MB/s   00:00
+Custom_Scan_Report_Fixed.html                 100%  282KB  48.4MB/s   00:00
+----
+
+.Viewing Results on Workstation
+[source,bash]
+----
+[root@workstation ~]# firefox Custom_Scan_Report_Fixed.html
+----
+
+image::AppendixA-1bfad.png[title="Fixed SCAP Scan Results Report in Firefox", align="center"]
+
+====

@@ -9,827 +9,1013 @@
 :icons: font
 :imagesdir: images/
 
-
-== System Security Policy and Compliance
-
-System security and compliance is a primary concern for people when thinking about the protection of systems and integrity of data. This set of hands-on procedures will focus on obtaining the content and necessary packages to perform a basic scan and remediate the system based on scan results. As part of the lab, you will be customizing your own SCAP content for a scan, view the results, and generate an Ansible playbook based on the failed results.
-
-=== Customizing SCAP Content
-
-Red Hat includes the SCAP Workbench application as a GUI application which allows scanning, customizing, and saving SCAP scans and results. The SCAP Workbench can be used to perform scans of remote systems over an SSH connection or it can be utilized to scan the local system. Since the SCAP Workbench is a GUI application, it must run on a system with X-Windows installed.
+==  Running Containers
 
 
-*_Servers to Configure_*
 
-* workstation
+=== Introducing Containers
 
-*_Packages to Install_*
+==== Introducing Container Technology
 
-* scap-workbench
+Containers provide a way to package and deploy applications avoiding package conflicts and dependencies with runtime environments. A container can be a bundled package or packages that are assembled and deployed in a standard way which run isolated from the host system environment.
 
-TIP: Since we are using an application on a VM that requires a GUI, we can use X11 forwarding with the SSH connection by specifying a *-X* on the command line.
+===== Comparing Containers to Virtual Machines
 
-*Step 1 - SSH to Workstation*
+Containers provide the same benefits as VMs:
 
-The fist step is to connect to the workstation and forward X11 traffic back to the local system.
+* Security
+* Storage Isolation
+* Network Isolation
 
-.Connecting to the Workstation VM
+
+image::virtualization-vs-containers.png[title="Virtualization vs. Containers", align="center"]
+
+.Container and Virtualization Differences
+[cols="4a,4a",options=header]
+|===
+|Virtualization
+|Container
+
+|Multiple operating systems run on a single hardware platform
+|Applications run natively on the operating system and share hardware and OS resources across all containers
+
+|Uses hypervisor to allocate hardware resources into multiple virtual systems
+|Shares same OS kernel, but isolates containerized application processes from the rest of the system
+
+|Requires a complete OS in the virtual environment to support the application
+|Requires fewer hardware resources allowing for quick start/stop. Also, uses the host OS and any software that is compatible with the kernel.
+|===
+
+===== Exploring the Implementation of Containers
+
+Containers use the following core components of Linux:
+
+* *Control Groups (cgroups)* - Used for resource management
+* *Namespaces* - Used for process isolation
+* *SELinux and Secomp (Secure Computing Mode)* - Used to enforce security boundaries.
+
+
+===== Planning for Containers
+
+Containers provide reusability and portability for hosted and containerized applications. These containers can easily be moved between environments are are considered temporary. If containers rely on permanent data, persistent storage should be presented to the container.
+
+===== Running Containers from Container Images
+
+Containers are run from *images*. Images serve as blueprints for creating containers.
+
+Container images package an application together with:
+
+* System libraries
+* Programming language runtimes and libraries
+* Configuration settings
+* Static files
+
+Container images are immutable and built according to specifications such as Open Container Initiative (OCI) image format.
+
+===== Designing Container-based Architectures
+
+It is possible to install complex software applications and services in a single container, but it is often harder to manage. Instead, it is recommended to have each component of an application in a container, forming a type of microservices.
+
+==== Managing Containers with Podman
+
+To learn about containers, it is best to work with individual containers on a server which serves as a container host. The *Container Tools* package will provide the OCI tools for RHEL allowing containers to be built and run on the host.
+
+.Container Tools
+* *podman* - Manages containers and container images
+* *skopeo* - Used to inspect, copy, delete, and sign container images
+* *buildah* - Used to create new container images
+
+The tools above are compatible with the OCI and can be used to manage Linux containers created by OCI-compatible container engines such as docker.
+
+===== Running Rootless Containers
+
+The *podman* command is used to run containers as the *root* user or by non-privileged users.  Containers run by non-privileged users are called _rootless containers_.
+
+Rootless containers are more secure but can't do as much, including publishing services through the host's privileged ports (ports below 1024).
+
+.Security Concerns - Running a Container as Root
+[IMPORTANT]
 ====
-.Connecting to Workstation Using SSH
+Containers can be run directly as root, but system security is weakened as an attacker could compromise the container.
+====
+
+
+==== Managing Containers at Scale
+
+Managing containers at scale is extremely difficult. *Kubernetes* was developed as an orchestration service to assist with managing and deploying containers at scale in an enterprise environment. Red Hat provides a Kubernetes distribution called Red Hat OpenShift Container Platform (RHOCP or OCP).
+
+
+
+
+
+
+=== Running a Basic Container
+
+==== Installing Container Management Tools
+
+In RHEL8, Container Tools are in the *container-tools* module. The *container-tools* module provides the container tools needed to run containers (specifically *podman*, *skopeo*, and *buildah*).
+
+==== Selecting Container Images and Registries
+
+Container registries are repositories for storing and retrieving container images. Container images are generally uploaded or pushed to a registry by a developer. Images are downloaded or pulled from a container registry to a local system so that the can be used to run containers.
+
+.Red Hat Container Registries
+* *registry.redhat.io* - Containers based on official Red Hat products
+* *registry.connect.redhat.com* - Containers based on third-party products
+
+
+.Older Red Hat Registry
+[IMPORTANT]
+====
+Red Hat is phasing out the older *registry.access.redhat.com* container registry in favor of the new container registries.
+====
+
+.Red Hat Container Catalog
+[TIP]
+====
+The Red Hat Container Catalog (RHCC) is available at https://access.redhat.com/containers and provides a web-based interface for searching container registries for containers.
+====
+
+.Classroom Container Registry
+[NOTE]
+====
+The container registry used for the classroom *registry.lab.example.com* is a private container registry running on he
+====
+
+
+===== Container Naming Conventions
+
+Container images are based on a _fully qualified image name_ syntax as follows:
+
+*registry_name/user_name/image_name:tag*
+
+* *registry_name* - Name of registry storing the image.
+* *user_name* - Name of user or organization where the image is located
+* *image_name* - Name of the image. Must be unique in the user namespace
+* *tag* - Identifies image version. If no image tag is provided, it is assumed that the *latest* image tag is used.
+
+==== Running Containers
+
+Before running containers on a system a container image must first be pulled from a registry. Podman can be used to download an image from a container registry using the *podman pull* command.
+
+.Getting the latest UBI Image (Universal Base Image)
 [source,bash]
 ----
-# ssh root@workstation -X
-----
-====
-
-*Step 2 - Install Packages*
-
-After connecting to the Workstation VM, you will need to install the SCAP Workbench and its dependencies.
-
-.Installing SCAP Workbench
-====
-.Using Yum to Install SCAP Workbench
-[source,bash]
-----
-# yum install scap-workbench
-
-Loaded plugins: langpacks, search-disabled-repos
-Resolving Dependencies
---> Running transaction check
----> Package scap-workbench.x86_64 0:1.1.6-1.el7 will be installed
---> Processing Dependency: openscap-utils >= 1.2.0 for package: scap-workbench-1.1.6-1.el7.x86_64
---> Processing Dependency: scap-security-guide for package: scap-workbench-1.1.6-1.el7.x86_64
---> Running transaction check
----> Package openscap-utils.x86_64 0:1.2.16-8.el7_5 will be installed
---> Processing Dependency: openscap-containers = 1.2.16-8.el7_5 for package: openscap-utils-1.2.16-8.el7_5.x86_64
----> Package scap-security-guide.noarch 0:0.1.36-9.el7_5 will be installed
---> Processing Dependency: openscap-scanner >= 1.2.5 for package: scap-security-guide-0.1.36-9.el7_5.noarch
---> Running transaction check
----> Package openscap-containers.noarch 0:1.2.16-8.el7_5 will be installed
----> Package openscap-scanner.x86_64 0:1.2.16-8.el7_5 will be installed
---> Finished Dependency Resolution
-
-Dependencies Resolved
-
-================================================================================
- Package                Arch      Version             Repository           Size
-================================================================================
-Installing:
- scap-workbench         x86_64    1.1.6-1.el7         rhel--server-dvd    1.8 M
-Installing for dependencies:
- openscap-containers    noarch    1.2.16-8.el7_5      rhel_updates         27 k
- openscap-scanner       x86_64    1.2.16-8.el7_5      rhel_updates         61 k
- openscap-utils         x86_64    1.2.16-8.el7_5      rhel_updates         27 k
- scap-security-guide    noarch    0.1.36-9.el7_5      rhel_updates        2.6 M
-
-Transaction Summary
-================================================================================
-Install  1 Package (+4 Dependent packages)
-
-Total download size: 4.5 M
-Installed size: 64 M
-Is this ok [y/d/N]:
-----
-
-NOTE: Some things might already be installed for you, if SCAP Workbench is already installed, please move on to the next step. Also note the dependencies for SCAP Workbench as they are automatically installed.
-====
-
-*Step 3 - Launching SCAP Workbench*
-
-In order to run a scan or customize SCAP content, you will need to launch the SCAP Workbench application.
-
-TIP: You *must* use SCAP Workbench from a GUI, so it will need to run either locally or through an SSH connection with X11 forwarded.
-
-.Launching SCAP Workbench
-====
-.Using SCAP Workbench
-[source,bash]
-----
-# scap-workbench
-----
-
-image::AppendixA-d656e.png[title="SCAP Workbench Startup", align="center"]
-
-====
-
-*Step 4 - Creating Custom Content*
-
-Once SCAP Workbench has been launched, select the content to load. For this lab, we will be using the RHEL7 content.
-
-.Creating Custom Content
-====
-
-. For *Select content to load:* select "*RHEL8*", then click "*Load Content*"
-. Select the *Profile* you want to use to start customization
-
-TIP: For this example, we will use the *OSPP - Protection Profile for General Purpose Operating Systems* Baseline
-
-image::AppendixA-12524.png[title="SCAP Workbench OSPP Profile", align="center"]
-
-[start=3]
-. Click "*Customize*" to create custom SCAP content based on the chosen profile, and give it a name.
-
-image::AppendixA-7cd7e.png[title="SCAP Custom OSPP Profile Creation", align="center"]
-
-TIP: The name for this is: *xccdf_org.ssgproject.content_profile_ospp_customized*
-
-[start=4]
-. Click "Deselect All" so that you can select the items you wish to include in your custom scan profile. *NOTE:* we are doing this to also limit it to a few checks for the example.
-
-image::AppendixA-04ed6.png[title="SCAP Custom Profile Selections", align="center"]
-
-NOTE: For this lab, we will be setting the minimum password length and PAM Password quality settings
-
-[start=5]
-. Search for Password to set *minimum password length* and set the values in *login.defs*. Check *Set Password Minimum Length in login.defs* and click on the *minimum password legnth* and set the value to *18*
-
-image::AppendixA-1ddf2.png[title="SCAP Custom Profile Password Settings for Login.Defs", align="center"]
-
-
-[start=6]
-. Set password quality requirements with PAM. Search for the minlen and set it to *18*. Also, place a checkbox in *Set Password Quality Requirements with pam_quality*. Then click "OK"
-
-image::AppendixA-09b9f.png[title="SCAP Custom Profile PAM Quality Requirements", align="center"]
-
-[start=7]
-. At this point, we have taken the default settings from the OSPP profile with only the tailored pieces that we selected. The next step is to click "File => Save Customization Only" to save the custom content
-
-
-image::AppendixA-756be.png[title="SCAP Custom Profile Selected Settings View", align="center"]
-image::AppendixA-61450.png[title="SCAP Custom Profile Creation Saving", align="center"]
-image::AppendixA-421c2.png[title="SCAP Custom Profile Final View ", align="center"]
-
-[start=8]
-. Copy the custom tailoring file to the server(s) being scanned. In this case, we will want to copy the file to *servera*
-
-.Copy custom content
-[source,bash]
-----
-[root@workstation ~]# scp ssg-rhel8-ds-tailoring.xml root@servera:
-ssg-rhel8-ds-tailoring.xml                    100%   28KB  10.7MB/s   00:00
-[root@workstation ~]#
-----
-====
-
-
-=== Running a SCAP Scan with Custom Content
-
-*_Servers to Configure_*
-
-* servera
-
-*_Packages to Install_*
-
-* openscap-scanner
-* scap-security-guide
-
-*Step 1 - SSH to serverc*
-
-The fist step is to connect to the server.
-
-.Connecting to the *servera* VM
-====
-.Connecting to *servera* Using SSH
-[source,bash]
-----
-# ssh root@servera
-----
-====
-
-
-*Step 2 - Install packages on servera*
-
-The second step is to install software on the server.
-
-.Install software on *servera*
-====
-.Installing Software on *servera*
-[source,bash]
-----
-[root@servera ~]# yum install scap-security-guide
-Last metadata expiration check: 0:47:44 ago on Thu 16 Apr 2020 08:26:15 AM EDT.
-Dependencies resolved.
-================================================================================
- Package          Arch   Version       Repository                          Size
-================================================================================
-Installing:
- scap-security-guide
-                  noarch 0.1.42-11.el8 rhel-8.0-for-x86_64-appstream-rpms 3.4 M
-Installing dependencies:
- openscap         x86_64 1.3.0-7.el8   rhel-8.0-for-x86_64-appstream-rpms 3.3 M
- openscap-scanner x86_64 1.3.0-7.el8   rhel-8.0-for-x86_64-appstream-rpms  66 k
- xml-common       noarch 0.6.3-50.el8  rhel-8.0-for-x86_64-baseos-rpms     39 k
-
-Transaction Summary
-================================================================================
-Install  4 Packages
-
-Total download size: 6.9 M
-Installed size: 132 M
-Is this ok [y/N]: y
-
+[student@servera ~]$ podman pull registry.access.redhat.com/ubi8/ubi:latest
+Trying to pull registry.access.redhat.com/ubi8/ubi:latest...
+Getting image source signatures
+Copying blob c4d668e229cd done
 
 ... output omitted ...
 
-  Verifying        : openscap-1.3.0-7.el8.x86_64                            1/4
-  Verifying        : openscap-scanner-1.3.0-7.el8.x86_64                    2/4
-  Verifying        : scap-security-guide-0.1.42-11.el8.noarch               3/4
-  Verifying        : xml-common-0.6.3-50.el8.noarch                         4/4
+Storing signatures
+ecbc6f53bba0d1923ca9e92b3f747da8353a070fccbae93625bd8b47dbee772e
+[student@servera ~]
+----
 
-Installed:
-  scap-security-guide-0.1.42-11.el8.noarch    openscap-1.3.0-7.el8.x86_64
-  openscap-scanner-1.3.0-7.el8.x86_64         xml-common-0.6.3-50.el8.noarch
+Images that have been downlaoded with the Podman command can be seen with the *podman images* command.
 
-Complete!
+.Listing Local Images
+[source,bash]
+----
+[student@servera ~]$ podman images
+REPOSITORY                                TAG      IMAGE ID       CREATED       SIZE
+registry.access.redhat.com/ubi8/ubi       latest   ecbc6f53bba0   2 weeks ago   211 MB
+registry.lab.example.com/rhel8/httpd-24   latest   7e93f25a9468   8 weeks ago   430 MB
+----
 
+A container is created and run by using the *podman run* command. When executed, Podman creates and starts a new container based on the container image specified in the command.
+
+.Running the UBI Image
+[source,bash]
+----
+[student@servera ~]$ podman run --name ubi-demo -it registry.access.redhat.com/ubi8/ubi:latest
+
+[root@d58f1e8fb4ca /]# cat /etc/redhat-release
+Red Hat Enterprise Linux release 8.2 (Ootpa)
+----
+
+.*podman run* Options
+[NOTE]
+====
+The *podman run* command supports many options.
+
+* *-t or --tty* - Allocates a *pseudo-tty* (pseudo-terminal) to the container.
+* *i or --interactive* - Allows the container to accept standard input.
+* *-d or --detach* - Allows the container to run in the background and displays generated container ID.
+* *--name* - Allows a name to be specified to the container which must be unique, but allows access to the container with a user generated name rather than a container ID.
+====
+
+.Containers Cleanup
+[IMPORTANT]
+====
+It is important to cleanup containers and images after a container has been run. If a user is wanting to execute a quick command within a container, the *podman run --rm* command can be used in order to execute a command in the container and remove the container once the command has been completed.
+
+[source,bash]
+----
+[student@servera ~]$ podman run --rm registry.access.redhat.com/ubi8/ubi cat /etc/redhat-release
+Red Hat Enterprise Linux release 8.2 (Ootpa)
 ----
 ====
 
+==== Analyzing Container Isolation
+
+Containers provide runtime isolation of resources by utilizing Linux namespaces. Processes running in a container are isolated from all other processes on the host machine.
+
+.Viewing Processes in a Container
+[source,bash]
+----
+[student@servera ~]$ podman run -it registry.access.redhat.com/ubi7/ubi /bin/bash
+
+[root@9fd13da02e18 /]# cat /etc/redhat-release
+Red Hat Enterprise Linux Server release 7.8 (Maipo)
+
+[root@9fd13da02e18 /]# ps -eaf
+UID          PID    PPID  C STIME TTY          TIME CMD
+root           1       0  0 20:28 pts/0    00:00:00 /bin/bash
+root          15       1  0 20:29 pts/0    00:00:00 ps -eaf
+
+[root@9fd13da02e18 /]# id
+uid=0(root) gid=0(root) groups=0(root)
+----
+
+
+==== DEMO - Running a Basic Container
+
+
+.DEMO - Running a Basic Container
+=====
+
+.Before Beginning
 [TIP]
-.*Learning about SCAP Commands*
 ====
-
-The SSG man page is a very good source of information for usage of the *oscap* tool as well as provides examples of how to use the SCAP SSG Guide profiles itself.
-
-.Looking at *SCAP Security Guide (SSG)* Man Page
 [source,bash]
 ----
-# man scap-security-guide
+[student@workstation ~]$ lab containers-basic start
 
-scap-security-guide(8)      System Manager's Manual     scap-security-guide(8)
-
-NAME
-       SCAP  Security Guide - Delivers security guidance, baselines, and asso‐
-       ciated validation mechanisms utilizing the Security Content  Automation
-       Protocol (SCAP).
-
-
-... output omitted ...
-
-EXAMPLES
-       To  scan  your  system utilizing the OpenSCAP utility against the ospp-
-       rhel7 profile:
-
-       oscap xccdf eval --profile  ospp-rhel7  --results  /tmp/`hostname`-ssg-
-       results.xml  --report  /tmp/`hostname`-ssg-results.html  --oval-results
-       /usr/share/xml/scap/ssg/content/ssg-rhel7-xccdf.xml
 ----
+====
 
-.Looking at *_oscap_* Man Page
+. Install *podman* and other container tools packages
++
+.Installing Container Tools
 [source,bash]
 ----
-# man oscap
-
-OSCAP(8)                System Administration Utilities               OSCAP(8)
-
-NAME
-       oscap - OpenSCAP command line tool
-
-SYNOPSIS
-       oscap  [general-options]  module operation [operation-options-and-argu‐
-       ments]
-
-DESCRIPTION
-       oscap is Security Content Automation Protocol (SCAP) toolkit  based  on
-       OpenSCAP  library.  It  provides  various  functions for different SCAP
-       specifications (modules).
-
-       OpenSCAP tool claims to provide capabilities of Authenticated  Configu‐
-       ration  Scanner  and  Authenticated Vulnerability Scanner as defined by
-       The National Institute of Standards and Technology.
-
-... output omitted ...
-
-EXAMPLES
-       Evaluate XCCDF content using CPE dictionary and produce html report. In
-       this  case  we  use  United  States  Government  Configuration Baseline
-       (USGCB) for Red Hat Enterprise Linux 5 Desktop.
-
-               oscap xccdf eval --fetch-remote-resources --oval-results \
-                       --profile united_states_government_configuration_baseline
- \
-                       --report usgcb-rhel5desktop.report.html \
-                       --results usgcb-rhel5desktop-xccdf.xml.result.xml \
-                       --cpe usgcb-rhel5desktop-cpe-dictionary.xml \
-                       usgcb-rhel5desktop-xccdf.xml
-
+[student@servera ~]$ sudo yum module install container-tools
 ----
++
+.Container Tools
+[NOTE]
+====
+The container tools module installs many container applications.
 
+* buildah
+* Cockpit Podman
+* podman
+* runc
+* skopeo
 ====
 
-*Step 3 - Running _oscap_ scan*
-
-We will run the *oscap*  utility to generate a report and a results file that can be sent back to the *workstation* system so that we can create an Ansible playbook for remediation and view the results of the report.
-
-NOTE: Be very careful about the name of the profile as this was selected during the creation of the custom profile/tailoring file portion when doing SCAP Workbench customizations.
-
-.Scanning *servera*
-====
-.Using *oscap* and the tailoring profile to scan *servera*
+. Login to the registry
++
 [source,bash]
 ----
-# [root@servera ~]# oscap xccdf eval \
---profile xccdf_org.ssgproject.content_profile_ospp_customized \
---tailoring-file ssg-rhel8-ds-tailoring.xml \
---results custom_scan_results.xml \
-/usr/share/xml/scap/ssg/content/ssg-rhel8-ds.xml
-
-Title   Set Password Minimum Length in login.defs
-Rule    xccdf_org.ssgproject.content_rule_accounts_password_minlen_login_defs
-Ident   CCE-80652-1
-Result  fail
-
-Title   Set Password Strength Minimum Different Characters
-Rule    xccdf_org.ssgproject.content_rule_accounts_password_pam_difok
-Ident   CCE-80654-7
-Result  fail
-
-Title   Set Password Strength Minimum Uppercase Characters
-Rule    xccdf_org.ssgproject.content_rule_accounts_password_pam_ucredit
-Ident   CCE-80665-3
-Result  fail
-
-Title   Set Password Minimum Length
-Rule    xccdf_org.ssgproject.content_rule_accounts_password_pam_minlen
-Ident   CCE-80656-2
-Result  fail
-
-Title   Set Password Retry Prompts Permitted Per-Session
-Rule    xccdf_org.ssgproject.content_rule_accounts_password_pam_retry
-Ident   CCE-80664-6
-Result  fail
-
-Title   Set Password Strength Minimum Different Categories
-Rule    xccdf_org.ssgproject.content_rule_accounts_password_pam_minclass
-Result  fail
-
-Title   Set Password Maximum Consecutive Repeating Characters
-Rule    xccdf_org.ssgproject.content_rule_accounts_password_pam_maxrepeat
-Result  fail
-
-Title   Set Password Strength Minimum Special Characters
-Rule    xccdf_org.ssgproject.content_rule_accounts_password_pam_ocredit
-Ident   CCE-80663-8
-Result  fail
-
-Title   Set Password Strength Minimum Lowercase Characters
-Rule    xccdf_org.ssgproject.content_rule_accounts_password_pam_lcredit
-Ident   CCE-80655-4
-Result  fail
-
-Title   Set Password Strength Minimum Digit Characters
-Rule    xccdf_org.ssgproject.content_rule_accounts_password_pam_dcredit
-Ident   CCE-80653-9
-Result  fail
-
-Title   Set Password to Maximum of Consecutive Repeating Characters from Same Character Class
-Rule    xccdf_org.ssgproject.content_rule_accounts_password_pam_maxclassrepeat
-Result  fail
-
+[student@servera ~]$ podman login registry.lab.example.com -u admin
+Password:
+Login Succeeded!
 ----
-
-[TIP]
-.*Getting Custom Profile Name from Tailoring File*
-=====
-If you need to locate the profile used for the custom scanning content from the tailoring file, you can search for it with *grep*.
-
-[source,bash]
-----
-[root@servera ~]#  grep "Profile id" ssg-rhel8-ds-tailoring.xml
-  <xccdf:Profile id="xccdf_org.ssgproject.content_profile_ospp_customized" extends="xccdf_org.ssgproject.content_profile_ospp">
-----
-=====
-====
-
-
-*Step 4 - Creating a Results Report*
-
-You can create a results report file from the results file so you have a nice HTML file that is easy to ready with the results from the SCAP scan.
-
-.Creating a SCAP Report from a Results File
-====
-.Generating a Report
-[source,bash]
-----
-[root@servera ~]# oscap xccdf generate report \
-custom_scan_results.xml > Custom_Scan_Report.html
-----
-====
-
-[CAUTION]
-.Combining Steps 3 & 4
-====
-
-It is possible to perform a custom content scan which will generate the results file and the report for transfer back to the workstation for review.
-
-*Need to Specify*
-
-* *--results*
-* *--report*
-
-.Creating a Results File and Report During Custom Content Scan
-[source,bash]
-----
-[root@servera ~]# oscap xccdf eval \
---profile xccdf_org.ssgproject.content_profile_ospp_customized \
---tailoring-file ssg-rhel8-ds-tailoring.xml \
---results custom_scan_results_2.xml \
---report Custom_Scan_Report_2.html \
-/usr/share/xml/scap/ssg/content/ssg-rhel8-ds.xml
-
-Title   Set Password Minimum Length in login.defs
-Rule    xccdf_org.ssgproject.content_rule_accounts_password_minlen_login_defs
-Ident   CCE-80652-1
-Result  fail
-
-Title   Set Password Strength Minimum Different Characters
-Rule    xccdf_org.ssgproject.content_rule_accounts_password_pam_difok
-Ident   CCE-80654-7
-Result  fail
-
-Title   Set Password Strength Minimum Uppercase Characters
-Rule    xccdf_org.ssgproject.content_rule_accounts_password_pam_ucredit
-Ident   CCE-80665-3
-Result  fail
-
-Title   Set Password Minimum Length
-Rule    xccdf_org.ssgproject.content_rule_accounts_password_pam_minlen
-Ident   CCE-80656-2
-Result  fail
-
-Title   Set Password Retry Prompts Permitted Per-Session
-Rule    xccdf_org.ssgproject.content_rule_accounts_password_pam_retry
-Ident   CCE-80664-6
-Result  fail
-
-Title   Set Password Strength Minimum Different Categories
-Rule    xccdf_org.ssgproject.content_rule_accounts_password_pam_minclass
-Result  fail
-
-Title   Set Password Maximum Consecutive Repeating Characters
-Rule    xccdf_org.ssgproject.content_rule_accounts_password_pam_maxrepeat
-Result  fail
-
-Title   Set Password Strength Minimum Special Characters
-Rule    xccdf_org.ssgproject.content_rule_accounts_password_pam_ocredit
-Ident   CCE-80663-8
-Result  fail
-
-Title   Set Password Strength Minimum Lowercase Characters
-Rule    xccdf_org.ssgproject.content_rule_accounts_password_pam_lcredit
-Ident   CCE-80655-4
-Result  fail
-
-Title   Set Password Strength Minimum Digit Characters
-Rule    xccdf_org.ssgproject.content_rule_accounts_password_pam_dcredit
-Ident   CCE-80653-9
-Result  fail
-
-Title   Set Password to Maximum of Consecutive Repeating Characters from Same Character Class
-Rule    xccdf_org.ssgproject.content_rule_accounts_password_pam_maxclassrepeat
-Result  fail
-----
-====
-
-*Step 5 - Transferring Results File and Report to Workstation*
-
-After you have the results files and the report, you should transfer it to your graphical workstation (*workstation*) for further analysis.
-
-.Transferring Results
-====
-.Transferring the Results and Report Files
-[source,bash]
-----
-[root@servera ~]# scp *.xml *.html root@workstation:
-The authenticity of host 'workstation (<no hostip for proxy command>)' can't be established.
-ECDSA key fingerprint is SHA256:pOQ1OJmyF2PFI+jxyFoOSCfi+1oWNsUruy2DZNjg+N0.
-Are you sure you want to continue connecting (yes/no)? yes
-Warning: Permanently added 'workstation' (ECDSA) to the list of known hosts.
-root@workstation's password:
-custom_scan_results_2.xml                     100% 4086KB  32.4MB/s   00:00
-custom_scan_results.xml                       100% 4086KB  60.0MB/s   00:00
-ssg-rhel8-ds-tailoring.xml                    100%   28KB  16.2MB/s   00:00
-Custom_Scan_Report_2.html                     100%  332KB  44.3MB/s   00:00
-Custom_Scan_Report.html                       100%  332KB  37.6MB/s   00:00
-[root@servera ~]#
-----
-====
-
-*Step 6 - Viewing the SCAP scan report*
-
-After you have transferred the results file to *workstation* you can open the HTML report in a web browser. In this case we will use *_firefox_* to open the file.
-
-.Viewing the SCAP Report
-====
-.Opening the SCAP HTML Report with Firefox
-[source,bash]
-----
-[root@workstation ~]# firefox Custom_Scan_Report.html
-----
-
-image::AppendixA-9416a.png[title="SCAP Scan Results Report in Firefox", align="center"]
-
-WARNING: Firefox may not open the file based on SELinux context triggers. In order to get around this you can use the command prompt and do *setenforce 0* to allow you to open the report.
-
-====
-
-
-
-=== Creating an Ansible Remediation Playbook Based on SCAP Scan Results
-
-The OpenSCAP project and content created by Red Hat can automatically remediate findings from OpenSCAP scans. The findings can be remediated in many ways (*BASH*, *Ansible*, etc.). While things are mostly complete, there are some automated remediations that have not yet been developed.
-
-WARNING: There are multiple automatic remediation methods developed, but at this time, there isn't a script to fix everything.
-
-*_Servers to Configure_*
-
-* servera
-
-NOTE: We will continue to use *workstation* as our master SCAP system as it should have Ansible and SCAP Workbench installed.
-
-*Step 1 - Creating an Ansible Playbook from Results*
-
-The first step will be to generate an Ansible playbook from the SCAP scan results for system remediation.
-
-.Generating Ansible Playbook
-====
-
-.Ansible Playbook Generation
-[source,bash]
-----
-[root@workstation ~]# oscap xccdf generate fix \
---profile xccdf_org.ssgproject.content_profile_ospp_customized \
---tailoring-file ssg-rhel8-ds-tailoring.xml \
---fix-type ansible \
---result-id "" \
-custom_scan_results.xml > Custom_Scan_Fix.yml
-----
-
-[TIP]
-.*Viewing Remediation Playbook*
-=====
-It is also a good idea to view the created playbook for the system prior to running it.
-
-[source,bash]
-----
-[root@workstation ~]# cat Custom_Scan_Fix.yml
----
-###############################################################################
-#
-# Ansible remediation role for the results of evaluation of profile xccdf_org.ssgproject.content_profile_ospp_customized
-# XCCDF Version:  unknown
-#
-# Evaluation Start Time:  2020-04-16T09:21:32
-# Evaluation End Time:  2020-04-16T09:21:33
-#
-# This file was generated by OpenSCAP 1.3.0 using:
-# 	$ oscap xccdf generate fix --result-id xccdf_org.open-scap_testresult_xccdf_org.ssgproject.content_profile_ospp_customized --template urn:xccdf:fix:script:ansible xccdf-results.xml
-#
-# This script is generated from the results of a profile evaluation.
-# It attempts to remediate all issues from the selected rules that failed the test.
-#
-# How to apply this remediation role:
-# $ ansible-playbook -i "localhost," -c local playbook.yml
-# $ ansible-playbook -i "192.168.1.155," playbook.yml
-# $ ansible-playbook -i inventory.ini playbook.yml
-#
-###############################################################################
-
-
- - hosts: all
-   vars:
-      var_accounts_password_minlen_login_defs: !!str 18
-      var_password_pam_difok: !!str 8
-      var_password_pam_ucredit: !!str -1
-      var_password_pam_minlen: !!str 18
-      var_password_pam_retry: !!str 3
-      var_password_pam_minclass: !!str 3
-      var_password_pam_maxrepeat: !!str 3
-      var_password_pam_ocredit: !!str -1
-      var_password_pam_lcredit: !!str -1
-      var_password_pam_dcredit: !!str -1
-      var_password_pam_maxclassrepeat: !!str 4
-   tasks:
-
-
-    - name: "Set Password Minimum Length in login.defs"
-      lineinfile:
-        dest: /etc/login.defs
-        regexp: "^PASS_MIN_LEN *[0-9]*"
-        state: present
-        line: "PASS_MIN_LEN        {{ var_accounts_password_minlen_login_defs }}"
-      tags:
-        - accounts_password_minlen_login_defs
-        - medium_severity
-        - restrict_strategy
-        - low_complexity
-        - low_disruption
-        - CCE-80652-1
-        - NIST-800-53-IA-5(f)
-        - NIST-800-53-IA-5(1)(a)
-        - NIST-800-171-3.5.7
-        - CJIS-5.6.2.1
-
-
-... Output Omitted ...
-
-    - name: Ensure PAM variable maxclassrepeat is set accordingly
-
-      lineinfile:
-        create: yes
-        dest: "/etc/security/pwquality.conf"
-        regexp: '^#?\s*maxclassrepeat'
-        line: "maxclassrepeat = {{ var_password_pam_maxclassrepeat }}"
-
-      tags:
-        - accounts_password_pam_maxclassrepeat
-        - medium_severity
-        - restrict_strategy
-        - low_complexity
-        - low_disruption
-        - NIST-800-53-IA-5
-        - NIST-800-53-IA-5(c)
-
-----
-=====
-====
-
++
+.Credential Security
 [WARNING]
-.*Ansible is not setup for the lab*
+====
+While it is possible to specify the *-u* and a username on the command line as well as the *-p* and a password, normally, the password is left to be interactive to prevent the password from being stored in the shell history.
 ====
 
-Before we can do the next steps, we will download an Ansible config file and an inventory file so we can properly run the playbook.
-
-.Error Output Message
+. Download a Container image.
++
 [source,bash]
 ----
-[root@workstation ~]# ansible-playbook Custom_Scan_Fix.yml
- [WARNING]: provided hosts list is empty, only localhost is available. Note
-that the implicit localhost does not match 'all'
-
-
-PLAY [all] *********************************************************************
-skipping: no hosts matched
-
-PLAY RECAP *********************************************************************
-[root@workstation ~]#
+[student@servera ~]$ podman pull registry.lab.example.com/rhel8/httpd-24
+Trying to pull registry.lab.example.com/rhel8/httpd-24...
+Getting image source signatures
+... output omitted ...
+7e93f25a946892c9c175b74a0915c96469e3b4845a6da9f214fd3ec19c3d7070
 ----
-====
 
-*Step 2 - Downloading Ansible Config and Ansible Inventory Files*
-
-This step is needed so that our Ansible system can be configured with various configuration options and the inventory files so we can run the given playbook.
-
-.Downloading Ansible Files
-====
-
-.Downloading Ansible Files
+. List available images
++
 [source,bash]
 ----
-[root@workstation ~]# wget http://people.redhat.com/~tmichett/rh354/inventory
---2020-04-16 09:38:50--  http://people.redhat.com/~tmichett/rh354/inventory
-Resolving people.redhat.com (people.redhat.com)... 209.132.183.19
-Connecting to people.redhat.com (people.redhat.com)|209.132.183.19|:80... connected.
-HTTP request sent, awaiting response... 200 OK
-Length: 24
-Saving to: ‘inventory’
-
-inventory           100%[===================>]      24  --.-KB/s    in 0s
-
-2020-04-16 09:38:50 (2.69 MB/s) - ‘inventory’ saved [24/24]
-
-
-[root@workstation ~]# wget http://people.redhat.com/~tmichett/rh354/ansible.cfg
---2020-04-16 09:39:34--  http://people.redhat.com/~tmichett/rh354/ansible.cfg
-Resolving people.redhat.com (people.redhat.com)... 209.132.183.19
-Connecting to people.redhat.com (people.redhat.com)|209.132.183.19|:80... connected.
-HTTP request sent, awaiting response... 200 OK
-Length: 159
-Saving to: ‘ansible.cfg’
-
-ansible.cfg         100%[===================>]     159  --.-KB/s    in 0s
-
-2020-04-16 09:39:35 (13.8 MB/s) - ‘ansible.cfg’ saved [159/159]
-
+[student@servera ~]$ podman images
+REPOSITORY                                TAG      IMAGE ID       CREATED       SIZE
+registry.lab.example.com/rhel8/httpd-24   latest   7e93f25a9468   8 weeks ago   430 MB
 ----
-====
 
-[WARNING]
-.Reviewing Ansible Configurations
-====
-The *inventory* file provided only has a single host *servera* in there. On real systems, you must be very cautious of running remediation playbooks against an inventory file as it could apply to unintended systems. Additionally the *ansible.cfg* file provided was created for use in this lab environment. Both of these items should be taken into account when doing going through the process on production systems.
-
+. Run image in a container called demo
++
 [source,bash]
 ----
-[root@workstation ~]# cat inventory
-servera.lab.example.com
-
-[root@workstation ~]# cat ansible.cfg
-[defaults]
-roles_path = /etc/ansible/roles:/usr/share/ansible/roles
-log_path   = /tmp/ansible.log
-inventory  = ./inventory
-
-[privilege_escalation]
-become=True
-[root@workstation ~]#
+[student@servera ~]$ podman run --name demo registry.lab.example.com/rhel8/httpd-24 &
 ----
-
++
+[NOTE]
+====
+The Apache HTTPD container is set to run the HTTPD service in the foreground. The *&* is added to push the service to the background.
 ====
 
-
-*Step 3 - Run the Ansible Playbook*
-
-This step will utilize the *workstation* system which is configured as your Ansible management node and will run the playbook to remediate the results on the *servera* system.
-
-.Remediation of *serverc* with Ansible Playbook
-====
-
-.Running the Ansible Playbook
+. Open an interactive shell in the *demo* container.
++
 [source,bash]
 ----
-[root@workstation ~]# ansible-playbook Custom_Scan_Fix.yml
-
-PLAY [all] *********************************************************************
-
-TASK [Gathering Facts] *********************************************************
-ok: [servera.lab.example.com]
-
-TASK [Set Password Minimum Length in login.defs] *******************************
-changed: [servera.lab.example.com]
-
-TASK [Ensure PAM variable difok is set accordingly] ****************************
-changed: [servera.lab.example.com]
-
-TASK [Ensure PAM variable ucredit is set accordingly] **************************
-changed: [servera.lab.example.com]
-
-TASK [Ensure PAM variable minlen is set accordingly] ***************************
-changed: [servera.lab.example.com]
-
-TASK [Set Password Retry Prompts Permitted Per-Session - system-auth (change)] ***
-ok: [servera.lab.example.com]
-
-TASK [Set Password Retry Prompts Permitted Per-Session - system-auth (add)] ****
-changed: [servera.lab.example.com]
-
-TASK [Ensure PAM variable minclass is set accordingly] *************************
-changed: [servera.lab.example.com]
-
-TASK [Ensure PAM variable maxrepeat is set accordingly] ************************
-changed: [servera.lab.example.com]
-
-TASK [Ensure PAM variable ocredit is set accordingly] **************************
-changed: [servera.lab.example.com]
-
-TASK [Ensure PAM variable lcredit is set accordingly] **************************
-changed: [servera.lab.example.com]
-
-TASK [Ensure PAM variable dcredit is set accordingly] **************************
-changed: [servera.lab.example.com]
-
-TASK [Ensure PAM variable maxclassrepeat is set accordingly] *******************
-changed: [servera.lab.example.com]
-
-PLAY RECAP *********************************************************************
-servera.lab.example.com    : ok=13   changed=11   unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+[student@servera ~]$ podman exec -it demo /bin/bash
+bash-4.4$
 ----
 
-NOTE: After running the playbook, you can see that there were 10 changes that were made to the system and exactly which parameters were changed. The next thing to do is perform another scan of the system to ensure that it is now fully compliant.
-====
-
-*Step 4 - Rescan System and Review Results*
-
-.Scanning System after Fixes and Verifying Results
-====
-
-.Performing SCAP Verification Scan
+. Explore the container
++
+.Determine the Version of Apache
 [source,bash]
 ----
-[root@servera ~]# oscap xccdf eval \
---profile xccdf_org.ssgproject.content_profile_ospp_customized \
---tailoring-file ssg-rhel8-ds-tailoring.xml \
---results custom_scan_results_fixed.xml \
---report Custom_Scan_Report_Fixed.html \
-/usr/share/xml/scap/ssg/content/ssg-rhel8-ds.xml
-
+bash-4.4$ httpd -v
+Server version: Apache/2.4.37 (Red Hat Enterprise Linux)
+Server built:   Dec  2 2019 14:15:24
 ----
-
-.Copying Results to Workstation
++
+.Determine UID from Container
 [source,bash]
 ----
-[root@servera ~]# scp custom_scan_results_fixed.xml Custom_Scan_Report_Fixed.html workstation:
-root@workstation's password:
-custom_scan_results_fixed.xml                 100% 4086KB  60.3MB/s   00:00
-Custom_Scan_Report_Fixed.html                 100%  282KB  48.4MB/s   00:00
+bash-4.4$ id
+uid=1001(default) gid=0(root) groups=0(root)
 ----
 
-.Viewing Results on Workstation
+. Exit the container interactive shell
++
 [source,bash]
 ----
-[root@workstation ~]# firefox Custom_Scan_Report_Fixed.html
+bash-4.4$ exit
+exit
 ----
 
-image::AppendixA-1bfad.png[title="Fixed SCAP Scan Results Report in Firefox", align="center"]
+. Stop and remove container
++
+[source,bash]
+----
+[student@servera ~]$ podman rm demo --force
+[Wed Sep 16 15:47:36.131159 2020] [mpm_event:notice] [pid 1:tid 139897800703424] AH00491: caught SIGTERM, shutting down
+71aacac8f4af690b1abfb38a8426a90deb44096c3e4eb8db1f5d07189ed813f
+----
+
+.*podman ps -a* Can List All Containers on a System
+[TIP]
+====
+The *podman ps* command lists running containers. However, some containers either exit for various reasons or the system administrator has stopped the container. In these instances, the containers are not running, however, they are still available on the system. The *podman ps -a* command can show the status of all containers (running and stopped).
+
+.Listing All Containers
+[source,bash]
+----
+[student@servera ~]$ podman ps -a
+CONTAINER ID  IMAGE                                       COMMAND    CREATED             STATUS                      PORTS  NAMES
+9fd13da02e18  registry.access.redhat.com/ubi7/ubi:latest  /bin/bash  About a minute ago  Exited (0) 3 seconds ago           cool_shannon
+d58f1e8fb4ca  registry.access.redhat.com/ubi8/ubi:latest  /bin/bash  9 minutes ago       Exited (127) 4 minutes ago         ubi-demo
+----
+
+Containers can be restarted if they are *stopped* and will contain the same data. However, if a new container is launched from a container image, any data from the _stopped_ container is not accessible.
+
+Once a container is no longer of use, it should be cleaned up and removed from the system. The *podman rm* command can remove single containers by container name or container ID. It is also possible to use *podman rm -a* to remove all containers. If you want to stop and remove a container, it is possible to use the *--force* to kill a container process so that it can be removed in a single command.
+
+
+.Removing All Containers
+[source,bash]
+----
+[student@servera ~]$ podman rm -a
+9fd13da02e181d2dff09808e3f1ac860d637c1be8d57638d90080aeca179e850
+d58f1e8fb4caaf960fb51d1942861e33b98070b8af415cc414620bce43ba9f6c
+----
 
 ====
+
+
+=====
+
+
+
+
+
+
+=== Finding and Managing Container Images
+
+==== Configuring Container Registries
+
+Podman uses the *registry.conf* file on the system to retrieve information for container registries. The file is located at */etc/containers/registries.conf*. The list of registries Podman uses are configured in the *[registries.search]* section and the *[registries.insecure]* section of the configuration file.
+
+
+.Rootless Podman Configuration
+[IMPORTANT]
+====
+The system-wide *registries.conf* file located at  */etc/containers/registries.conf* can be overridden by a user's configuration file located in *$HOME/.config/containers* directory.
+====
+
+.Container Image Registries and Searching
+[TIP]
+====
+While it is best practice to specify a fully qualified image, it is possible to provide just an image name on the command line. If an image name is specified, it will search the registries in the listed order to determine which image to select.
+====
+
+The *podman info* command can display information about Podman as well as configured registries.
+
+.*podman info* Demo
+[source,bash]
+----
+[student@servera ~]$ podman info
+host:
+  arch: amd64
+
+  ... output omitted ...
+
+  registries:
+    registry.lab.example.com:
+      Blocked: false
+      Insecure: true
+      Location: registry.lab.example.com
+      MirrorByDigestOnly: false
+      Mirrors: null
+      Prefix: registry.lab.example.com
+    search:
+    - registry.lab.example.com
+----
+
+===== Registry Security
+
+Insecure registries can be listed in the *[registries.insecure]* section of the *registries.conf* file. If a registry is insecure, that means it is not protected with SSL/TLS encryption. In order for an insecure registry to be searchable, it should exist in both the [registries.search]* section and the *[registries.insecure]* section of the *registries.conf* file.
+
+.Image Repositories Requiring Authentication
+[TIP]
+====
+Some container registries require authentication. In this instance, the *podman login* command can be used to login to a container registry.
+====
+
+==== Finding Container Images
+
+The *podman search* command is used to search container registries for a specific container image.
+
+.Using *podman search* to Find UBI7 Image
+[source,bash]
+----
+[student@servera ~]$ podman search registry.redhat.io/ubi7
+INDEX       NAME                                  DESCRIPTION                                       STARS   OFFICIAL   AUTOMATED
+redhat.io   registry.redhat.io/ubi7/ubi           The Universal Base Image is designed and eng...   0
+redhat.io   registry.redhat.io/ubi7/ubi-minimal   The Universal Base Image Init is designed to...   0
+
+... output omitted ...
+----
+
+.Podman Search Options
+[cols="4a,4a",options=header]
+|===
+|Option
+|Description
+
+|*--limit <number>*
+|Limits number of listed images per registry
+
+|*--filter <filter=value>*
+|Filters output based on conditions:
+
+* *stars=<number>*: Images must contain at least X stars
+* *is-automated=<true/false>*: Show only automatically build images
+* *is-official=<true/false>*: Show only images flagged with official
+
+|*--tls-verify <true/false>*
+|Enables or disables HTTPS certificate validation. Default=*true*
+
+|===
+
+
+===== Using the Red Hat Container Catalog
+
+Repositories maintained by Red Hat containing certified container images. The standard *podman* command is compatible with the repositories referenced by the Red Hat Container Catalog (RHCC).
+
+==== Inspecting Container Images
+
+Information about images can be obtained before downloading them to the system by using the *skopeo inspect* command to inspect images in a container registry and display information about the image.
+
+.*skopeo inspect*
+[TIP]
+====
+The *skopeo inspect* command can inspect different image formats from multiple sources including remote registries or local directories. The *docker://* transport mechanism instructs skopeo to query a container image registry.
+====
+
+.Inspecting an Image
+[source,bash]
+----
+[student@servera ~]$ skopeo inspect docker://registry.redhat.io/ubi7/ubi
+{
+    "Name": "registry.redhat.io/ubi7/ubi",
+
+... output omitted ...
+
+    "Created": "2020-08-03T09:32:22.835719Z",
+    "DockerVersion": "1.13.1",
+
+... output omitted ..
+
+        "description": "The Universal Base Image is designed and engineered to be the base layer for all of your containerized applications, middleware and utilities. This base image is freely redistributable, but Red Hat only supports Red Hat technologies through subscriptions for Red Hat products. This image is maintained by Red Hat and updated regularly.",
+
+... output omitted ..
+----
+
+==== Removing Local Container Images
+
+Container images are immutable and do not change. In oder to update software in a container, a new image is created to replace the old image. The newest image will always have the *latest* tag associated with it. As container images are replaced with new images, it becomes necessary for older images to be removed from the system to manage storage and images effectively. The *podman rmi* command can remove and delete the images from the local system. The *podman images* command can be used to list local images, and then the *podman rmi* command can remove the image from the system.
+
+.Performing Image Cleanup
+[source,bash]
+----
+[student@servera ~]$ podman images
+REPOSITORY                                TAG      IMAGE ID       CREATED       SIZE
+registry.access.redhat.com/ubi8/ubi       latest   ecbc6f53bba0   2 weeks ago   211 MB
+registry.access.redhat.com/ubi7/ubi       latest   87dd8ec61bbc   6 weeks ago   215 MB
+registry.lab.example.com/rhel8/httpd-24   latest   7e93f25a9468   8 weeks ago   430 MB
+
+[student@servera ~]$ podman rmi registry.access.redhat.com/ubi7/ubi
+Untagged: registry.access.redhat.com/ubi7/ubi:latest
+Deleted: 87dd8ec61bbc977ed1b2bd29ba089489a8a0281e2e0f62bf43c3fb9c20414194
+
+[student@servera ~]$ podman images
+REPOSITORY                                TAG      IMAGE ID       CREATED       SIZE
+registry.access.redhat.com/ubi8/ubi       latest   ecbc6f53bba0   2 weeks ago   211 MB
+registry.lab.example.com/rhel8/httpd-24   latest   7e93f25a9468   8 weeks ago   430 MB
+----
+
+==== DEMO - Finding and Managing Container Images
+
+.DEMO - *Finding and Managing Container Images*
+=====
+
+. Verify that the registries are configured
++
+[source,bash]
+----
+[student@servera ~]$ cat .config/containers/registries.conf
+unqualified-search-registries = ['registry.lab.example.com']
+
+[[registry]]
+location = "registry.lab.example.com"
+insecure = true
+blocked = false
+----
+
+. Search for an image
++
+[source,bash]
+----
+[student@servera ~]$ podman search registry.lab.example.com/nginx
+INDEX         NAME                                     DESCRIPTION   STARS   OFFICIAL   AUTOMATED
+example.com   registry.lab.example.com/library/nginx                 0
+----
+
+. Inspect the image with Skopeo
++
+[source,bash]
+----
+[student@servera ~]$ skopeo inspect docker://registry.lab.example.com/library/nginx
+{
+    "Name": "registry.lab.example.com/library/nginx"
+
+    ... output omitted ...
+
+----
++
+[TIP]
+====
+It may be necessary to login and authenticate to the container registry.
+
+.Autentication to Container Registry
+[source,bash]
+----
+[student@servera ~]$ podman login registry.lab.example.com
+----
+====
+
+. Pull the image down
++
+[source,bash]
+----
+[student@servera ~]$ podman pull registry.lab.example.com/nginx
+Trying to pull registry.lab.example.com/nginx...
+
+... output omitted ...
+
+Storing signatures
+4bb46517cac397bdb0bab6eba09b0e1f8e90ddd17cf99662997c3253531136f8
+----
+
+. Inspect the image with *podman inspect*
++
+[source,bash]
+----
+[student@servera ~]$ podman inspect registry.lab.example.com/nginx
+[
+    {
+        "Id": "4bb46517cac397bdb0bab6eba09b0e1f8e90ddd17cf99662997c3253531136f8",
+
+  ... output omitted ...
+----
+
+. Run the image as a container
++
+[source,bash]
+----
+[student@servera ~]$ podman run -d --name nginxdemo registry.lab.example.com/nginx
+b90de12239975532a66bae67e87dcc487252765bee018970be45bd0ed71115af
+----
+
+. Verify Image is Running
++
+[source,bash]
+----
+[student@servera ~]$ podman ps
+CONTAINER ID  IMAGE                                  COMMAND               CREATED         STATUS             PORTS  NAMES
+b90de1223997  registry.lab.example.com/nginx:latest  nginx -g daemon o...  29 seconds ago  Up 29 seconds ago         nginxdemo
+----
+
+. Delete image and running container in a single command.
++
+[source,bash]
+----
+[student@servera ~]$ podman rmi registry.lab.example.com/nginx --force
+Untagged: registry.lab.example.com/nginx:latest
+Deleted: 4bb46517cac397bdb0bab6eba09b0e1f8e90ddd17cf99662997c3253531136f8
+----
+
+. Verify container was stopped and image was deleted and removed
+
+.Source Description
+[source,bash]
+----
+[student@servera ~]$ podman ps -a
+CONTAINER ID  IMAGE  COMMAND  CREATED  STATUS  PORTS  NAMES
+
+[student@servera ~]$ podman images
+REPOSITORY                                TAG      IMAGE ID       CREATED       SIZE
+registry.access.redhat.com/ubi8/ubi       latest   ecbc6f53bba0   2 weeks ago   211 MB
+registry.lab.example.com/rhel8/httpd-24   latest   7e93f25a9468   8 weeks ago   430 MB
+----
+
+
+=====
+
+
+
+
+=== Performing Advanced Container Management
+
+==== Administering Containers with Podman
+
+The *podman* command can be used to manage running or stopped containers.
+
+==== Configuring Containers
+
+The *podman run* command can start containers from an image. It can also be used to provide network access, container storage, and pass environment variables and settings to the container instead of modifying the container image.
+
+===== Mapping Container Host Ports to the Container
+
+When a network port on the container host is mapped to a port in the container, network traffic sent to the host port is redirected and received by the container. The *podman run -p* is used to map network ports from the host to a container port. Another reminder is that the *-d* option can cause a container to run in detached mode (daemon / background mode).
+
+.Running Apache and Mapping Network Ports
+[source,bash]
+----
+[student@servera ~]$ podman run -d -p 8000:8080 --name webdemo registry.redhat.io/rhel8/httpd-24
+----
+
+.Verifying the Port Mapping
+[source,bash]
+----
+[student@servera ~]$ podman port -a
+0d1d688ebbbd	8080/tcp -> 0.0.0.0:8000
+----
+
+.Container Host Firewall
+[IMPORTANT]
+====
+It is important to note that while there is no firewall service running in the container, the container host must allow the network traffic on whatever port has been forwarded to the container.
+
+.Using FirewallD on Container Host
+[source,bash]
+----
+[student@servera ~]$ sudo firewall-cmd --add-port=8000/tcp
+[sudo] password for student:
+success
+----
+
+A rootless container cannot open ports on the container host below 1024. Ports above 1024 can be mapped from the container host to any port in the container even when running a rootless container.
+====
+
+===== Passing Environment Variables to Configure a Container
+
+Environment variables can be used to pass values to a container without modifying the container image. In order to see the environment variables a container image accepts, you can use the *podman inspect* command. There are different ways on obtaining information a container can use ... one is to look at the *URL* which will point to a web page documenting the possible environment variables and how to use the container image.
+
+The other method of determining possible environment variables can be the *usage* portion returned from *podman inspect* as this will often show how to run the container and provide environment variables with the *-e* on the command line.
+
+
+.Inspecting a Container
+[source,bash]
+----
+[student@servera ~]$ podman pull registry.redhat.io/rhel8/mariadb-103:1-102
+
+[student@servera ~]$ podman inspect registry.redhat.io/rhel8/mariadb-103:1-102 | grep url
+                "io.openshift.s2i.scripts-url": "image:///usr/libexec/s2i",
+                "io.s2i.scripts-url": "image:///usr/libexec/s2i",
+                "url": "https://access.redhat.com/containers/#/registry.access.redhat.com/rhel8/mariadb-103/images/1-102",
+
+[student@servera ~]$ podman inspect registry.redhat.io/rhel8/mariadb-103:1-102 | grep usage
+                "usage": "podman run -d -e MYSQL_USER=user -e MYSQL_PASSWORD=pass -e MYSQL_DATABASE=db -p 3306:3306 rhel8/mariadb-103",
+----
+
+The *podman run -e VARNAME=Value* will pass environment variables to the container and process this inside the container image.
+
+==== Managing Containers
+
+
+The *podman ps* command will list running containers while the *podman ps -a* command will list all containers, even if they have been stopped.
+
+.Podman Commands
+[cols="4a,4a",options=header]
+|===
+|Podman Command
+|IP addresses
+
+|*podman run*
+|Starts a container based on a given container image and accepts other parameters such as *--name* specifying container name, *-d* for daemon/detached mode, *-p* to perform port forwarding, *it* to allow interactive commands, and more.
+
+|*podman stop*
+|Stops a container gracefully by name or container ID. The *podman stop --all* can stop all running containers
+
+|*podman rm*
+|The *podman rm <ContainerName/ID>* removes the stopped container from the host. Using *podman rm -a* will remove all stopped containers. It is also possible to use the *podman rm -a -f* to force stop and remove containers from the system.
+
+|*podman rmi / podman image rm*
+|Removes the specified image from the system.
+
+|*podman restart*
+|Restarts a stopped container. Creating a new container with same container ID and reuses the container state and filesystem.
+
+|*podman kill*
+|Sends UNIX signals to main process in the container. These signals are the same as those used by the *kill* command.
+
+|===
+
+.Removing a Container and an Image
+[IMPORTANT]
+====
+It is possible to delete an image for a running container if you use the *-f* option with *podman rmi* command. This will stop and remove the containers using the image and it will then delete the image from the local system.
+====
+
+.*podman stop* Note
+[TIP]
+====
+The *podman stop* command will attempt to stop the container gracefully, but if the stop command fails, it send a *SIGTERM* and *SIGKILL* signal to the container.
+====
+
+==== Running Commands in a Container
+
+In addition to running commands when launching the container with the *-it* option, it is possible to launch an interactive shell in order to debug a container or inspect the contents and other items in a container. The *podman exec* command can be used on a running container to provide an interactive shell within the container.
+
+.Using *podman exec*
+[source,bash]
+----
+[student@servera ~]$ podman exec -it demo /bin/bash
+bash-4.4$
+
+bash-4.4$ id
+uid=1001(default) gid=0(root) groups=0(root)
+
+bash-4.4$ exit
+exit
+----
+
+==== DEMO - Performing Advanced Container Management
+
+.DEMO - Advanced Container Management
+=====
+
+. Login to the Registry
++
+[source,bash]
+----
+[student@servera ~]$ podman login registry.lab.example.com
+Username: admin
+Password: redhat321
+Login Succeeded!
+----
+
+. Launch a MySQL Database
++
+[source,bash]
+----
+[student@servera ~]$ podman run -d --name demodb -e MYSQL_USER=demouser -e MYSQL_PASSWORD=redhat -e MYSQL_DATABASE=items -e MYSQL_ROOT_PASSWORD=redhat -p 3306:3306 registry.lab.example.com/rhel8/mariadb-103:1-102
+----
+
+. List running containers
++
+[source,bash]
+----
+[student@servera ~]$ podman ps
+CONTAINER ID  IMAGE                                             COMMAND     CREATED         STATUS             PORTS                   NAMES
+9a9bf84dcaab  registry.lab.example.com/rhel8/mariadb-103:1-102  run-mysqld  19 seconds ago  Up 19 seconds ago  0.0.0.0:3306->3306/tcp  demodb
+----
+
+. List Port Forwards
++
+[source,bash]
+----
+[student@servera ~]$ podman port -a
+9a9bf84dcaab	3306/tcp -> 0.0.0.0:3306
+----
+
+. Attempt to connect to MySQL Instance
++
+.Install MariaDB Client Package
+[source,bash]
+----
+[student@servera ~]$ sudo yum install mariadb
+----
++
+.Connect to MySQL Instance
+[source,bash]
+----
+[student@servera ~]$ mysql -u demouser -p --port=3306 --host=127.0.0.1
+Enter password:
+Welcome to the MariaDB monitor.  Commands end with ; or \g.
+Your MariaDB connection id is 8
+Server version: 10.3.17-MariaDB MariaDB Server
+
+Copyright (c) 2000, 2018, Oracle, MariaDB Corporation Ab and others.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+MariaDB [(none)]> show databases;
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| items              |
+| test               |
++--------------------+
+3 rows in set (0.002 sec)
+----
+
+. Stop the Container
++
+[source,bash]
+----
+[student@servera ~]$ podman stop demodb
+9a9bf84dcaabf794ed5bc965df38a6ab5ff8856ea5608b46165ad32f48589744
+----
+
+. List running containers
++
+[source,bash]
+----
+[student@servera ~]$ podman ps
+CONTAINER ID  IMAGE  COMMAND  CREATED  STATUS  PORTS  NAMES
+----
+
+. Restart SQL Container
++
+[source,bash]
+----
+[student@servera ~]$ podman restart demodb
+9a9bf84dcaabf794ed5bc965df38a6ab5ff8856ea5608b46165ad32f48589744
+[student@servera ~]$ podman ps
+CONTAINER ID  IMAGE                                             COMMAND     CREATED        STATUS            PORTS                   NAMES
+9a9bf84dcaab  registry.lab.example.com/rhel8/mariadb-103:1-102  run-mysqld  6 minutes ago  Up 2 seconds ago  0.0.0.0:3306->3306/tcp  demodb
+----
+
+. Verify connectivity and data
++
+[source,bash]
+----
+[student@servera ~]$ podman ps
+CONTAINER ID  IMAGE                                             COMMAND     CREATED        STATUS            PORTS                   NAMES
+9a9bf84dcaab  registry.lab.example.com/rhel8/mariadb-103:1-102  run-mysqld  6 minutes ago  Up 2 seconds ago  0.0.0.0:3306->3306/tcp  demodb
+[student@servera ~]$ mysql -u demouser -p --port=3306 --host=127.0.0.1
+Enter password:
+Welcome to the MariaDB monitor.  Commands end with ; or \g.
+Your MariaDB connection id is 8
+Server version: 10.3.17-MariaDB MariaDB Server
+
+Copyright (c) 2000, 2018, Oracle, MariaDB Corporation Ab and others.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+MariaDB [(none)]> show databases;
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| items              |
+| test               |
++--------------------+
+3 rows in set (0.001 sec)
+----
+
+. List runnign containers
++
+[source,bash]
+----
+[student@servera ~]$ podman ps
+CONTAINER ID  IMAGE                                             COMMAND     CREATED         STATUS            PORTS                   NAMES
+9a9bf84dcaab  registry.lab.example.com/rhel8/mariadb-103:1-102  run-mysqld  10 minutes ago  Up 4 minutes ago  0.0.0.0:3306->3306/tcp  demodb
+----
+
+. Delete and stop container
++
+[source,bash]
+----
+[student@servera ~]$ podman rm demodb -f
+9a9bf84dcaabf794ed5bc965df38a6ab5ff8856ea5608b46165ad32f48589744
+----
+
+. Verify container was stopped and removed
++
+[source,bash]
+----
+[student@servera ~]$ podman ps -a
+CONTAINER ID  IMAGE                                     COMMAND               CREATED      STATUS                     PORTS                   NAMES
+0d1d688ebbbd  registry.redhat.io/rhel8/httpd-24:latest  /usr/bin/run-http...  3 hours ago  Exited (0) 41 minutes ago  0.0.0.0:8000->8080/tcp  webdemo
+----
+=====
+
+
+
+
+
+
+
+=== Attaching Persistent Storage to a Container
+
+==== Preparing Permanent Storage Locations
+
+Container storage is _ephemeral_ meaning any data is gone once the container has been removed. If you want data to be persistent and preserved, then you must provide and mount persistent storage to the container.
+
+==== Providing Persistent Storage from the Container Host
+
+The easiest way to provide persistent storage to a container is to use a directory on the container host and mount it to the container for persistent storage. Conceptually, this is similar to adding a remote network volume and mounting it to the host file system. When the container is removed/deleted, files from the persistent storage volume remain on the container host filesystem.
+
+===== Preparing the Host Directory
+
+When providing storage to a container, it must be configured so container processes can access the storage. This generally involves:
+
+* Configuring ownership and directory permissions
+* Setting appropriate SELinux contexts
+
+The user account within container application must have access to the host directory. Additionally, SELinux context types should be set for *container_file_t* as podman uses this SELinux context type to control what files on a host system the container can access. This is very important for applicaitons running as *root* inside a root container. Without the SELinux contexts being provided and setup correct, it is possible for the container and application to have *root* access on the host system.
+
+===== Mounting a Volume
+
+After creating and configuring the host directory, it is possible to mount the directory to the container using *--volume or -v* and specifying the *_HostDir_ : _ContainerDir_:Z*  which will automatically apply the SELinux *container_file_t* context type to the host directory.
+
+
+==== DEMO - Attaching Persistent Storage to a Container
+
+.DEMO - Adding Persistent Storage to a Container
+=====
+
+. Create a directory for the container storage
++
+[source,bash]
+----
+[student@servera ~]$ mkdir -p webfiles/html
+----
+
+. Place content in the directory for the webserver container
++
+[source,bash]
+----
+[student@servera ~]$ echo "This is a demo website" > webfiles/html/index.html
+----
+
+. Launch a container with the Apache Service
++
+[source,bash]
+----
+[student@servera ~]$ podman run --name webdemo -d -p 8000:8080 -v ~/webfiles:/var/www:Z registry.lab.example.com/rhel8/httpd-24:1-104
+----
+
+. Verify Website is Running
++
+[source,bash]
+----
+[student@servera ~]$ curl http://localhost:8000
+This is a demo website
+----
+
+. Stop and Remove the container
++
+[source,bash]
+----
+[student@servera ~]$ podman rm webdemo -f
+7c8616095932675d32ba3f7adc0e678375a317c293591b4adb62d7735c176ac7
+----
+=====

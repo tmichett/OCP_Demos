@@ -11,9 +11,320 @@ ifdef::env-github[]
 endif::[]
 
 
-== Containers as System Services
+== Managing Containers as System Services
+
+=== Starting Containers Automatically with the Server
+
+*Systemd* user unit files can be created for rootless containers allowing them to be managed with *systemctl* commands similar to regular Linux services. By enabling the services, the associated containers can start when the host machine starts. Furthermore, by running in "rootless" mode the services can be managed from a non-privileged account.
+
+=== Running *Systemd* Services as a Regular User
+
+In addition to managing system services, *SystemD* can also manage user services. Users can create their own unit files for their services which can be managed with *systemctl* without requiring *root* access.
+
+When services are enabled as a user service (non-root user), the service automatically starts when you open your first session. The service will stop when you've closed your last session.
+
+.Forcing User-Enabled Services to Start/Stop with the Server
+[TIP]
+====
+It is possible to change the default behavior of user services (*systemd.units*) by using *loginctl enable-linger* command to override the behavior and enable the *Linger* feature. It can be disabled with *loginctl disable-linger*. It is possible to show the *Linger* status for a user using the *loginctl show-user _username_* command.
+====
 
 
+===== Creating and Managing Systemd User Services
+
+In order to define *systemd* user services, the *~/.config/systemd/user* directory must be created to store the unit files. User *systemd.unit* files have the same syntax as a regular system unit file.
+
+.More Information on SYSTEMD
+[NOTE]
+====
+For more information the *systemd.unit* and *systemd.service* man pages should be used.
+====
+
+.User Services with *systemctl*
+
+User services can be controlled with the *systemctl* command. However, the *--user* option must be provided on the command line before the [enable, start, stop, reload] or other options and the service name.
+
+.Using *systemctl --user* Commands
+[IMPORTANT]
+====
+In order for the *systemctl --user* command to function properly, you must be logged in directly as using *sudo* or *su* commands will not work. The *systemctl* command interacts with a per user *systemd --user* process.
+====
+
+.Classroom Machines
+[cols="4a,4a,4a",options=header]
+|===
+|SystemD Tasks
+|System Services
+|User Services
+
+|*Storing custom unit files*
+|/etc/systemd/system/unit.service
+|~/.config/systemd/user/unit.service
+
+
+
+|*Reloading unit files*
+|systemctl daemon-reload
+|systemctl --user daemon-reload
+
+
+|*Starting and stopping a service*
+|systemctl start UNIT
+
+systemctl stop UNIT
+|systemctl --user start UNIT
+
+systemctl --user stop UNIT
+
+
+|*Starting a service when the machine starts*
+|systemctl enable UNIT
+|loginctl enable-linger
+
+systemctl --user enable UNIT
+
+
+|===
+
+
+==== Managing Containers Using *Systemd* Services
+
+With a single container host, running small number of containers, user-based *systemd* files can be configured to automatically start the containers with the server. For larger and production based systems, Red Hat OpenShift should be used.
+
+
+===== Creating a Dedicated User Account to Run Containers
+
+To simplify management of rootless containers a dedicated container user account can be created for running all containers.
+
+.A Container User Account
+[IMPORTANT]
+====
+If you are creating a user account for containers, the user account and group should be a regular user account. It cannot be created with the *--system* option as it would then be considered a system account and out of the reserved account IDs for regular user accounts.
+====
+
+===== Creating the Systemd Unit File
+
+It is possible to use *podman* to generate the *systemd* unit files. In order to generate a *systemd* unit file, you will use *podman generate systemd* command. This works best when you are in the *~/.config/systemd/user/* directory.
+
+
+.Generating *systemd* Files with Podman
+[IMPORTANT]
+====
+The *podman generate systemd*  uses a container as a model to create the configuration file, so the container must be deleted after the creation of the *systemd* file as *systemd* expect the container to not already exist.
+====
+
+.*podman generate systemd* Command Options
+
+* *--name _ContainerName_* - Specifies name of container to use as a model for generating the unit file. This also defines the name of the container built from the *systemd* unit file.
+
+* *--files* - Instructs Podman to create the unit file in the current directory
+
+* *--new* - Instructs Podman to configure the *systemd* service to create the container when the service starts and delete the container when the service stops. Without the *--new* option, Podman configures the service to start/stop the existing container without deleting it.
+
+
+===== Starting and Stopping Containers Using Systemd
+
+The *systemctl* command can control containers.
+
+.Avoid using *podman* for SystemD containers
+[CAUTION]
+====
+Containers managed with *systemctl* commands are controlled by *systemd*. *systemd* monitors the container status and restarts if a failure is detected. Never use *podman* to start/stop *systemd* containers.
+====
+
+===== Configuring Containers to Start When the Host Machine Starts
+
+By default, *systemd* user services start when a user opens the first session and stops when a users closes the last session on a container host. It is possible to enable the service to start/stop with the server. In order to enable starting/stopping automatically *loginctl enable-linger* must be run.
+
+.Enable Login Linger
+[source,bash]
+----
+loginctl enable-linger
+----
+
+.Enable a Container to Start Automatically
+[source,bash]
+----
+systemctl --user enable container-web
+----
+
+.Disable a Container to Starting Automatically
+[source,bash]
+----
+systemctl --user disable container-web
+----
+
+
+==== Managing Containers Running as Root with Systemd
+
+It is also possible to configure containers that should be run as *root* to be managed with *SystemD* unit files. The advantage to using containers as services running as root is that they work exactly like normal system unit files.
+
+.Configuring *root* SystemD Container Files
+
+* No dedicated user needed
+* When *podman generate systemd* is run, it should be in the */etc/systemd/
+system* directory so that the *systemd* unit file is in the correct directory.
+* You can use *systemctl* and do not need the *--user* option
+* There is no need to enable *Linger* with the *loginctl enable-linger* command.
+
+
+==== Orchestrating Containers at Scale
+
+Red Hat Training offers other courses, starting with the free technical overview course Deploying Containerized Applications (DO080) and continuing with Introduction to Containers, Kubernetes, and OpenShift (DO180). For more information, visit https://www.redhat.com/training.
+
+A number of resources are available there, including ways to try out OpenShift for yourself using tools like CodeReady Containers [https://developers.redhat.com/products/ codeready-containers/overview]. See https://www.openshift.com/try for more information.
+
+==== DEMO - Managing Containers as Services
+
+.DEMO - Managing Containers as Services
+=====
+
+. Create a Container User
++
+[source,bash]
+----
+[root@servera ~]# useradd cuser
+[root@servera ~]# passwd cuser
+Changing password for user cuser.
+New password: redhat
+BAD PASSWORD: The password is shorter than 8 characters
+Retype new password: redhat
+passwd: all authentication tokens updated successfully
+----
+
+. Login to *servera* with the *cuser* that was just created
++
+[source,bash]
+----
+[student@workstation ~]$ ssh cuser@servera
+Activate the web console with: systemctl enable --now cockpit.socket
+
+This system is not registered to Red Hat Insights. See https://cloud.redhat.com/
+To register this system, run: insights-client --register
+
+[cuser@servera ~]$
+----
+
+. Create Directories and Config Files for Container Registry
++
+[source,bash]
+----
+[cuser@servera ~]$ mkdir -p ~/.config/containers/
+
+[cuser@servera ~]$ cd ~/.config/containers/
+
+[cuser@servera containers]$ wget http://classroom.example.com/content/courses/rhcsa650e/rhel8.2/materials/registries.conf
+----
+
+. Create Content for Webserver
++
+[source,bash]
+----
+[cuser@servera ~]$ mkdir -p ~/www/html
+
+[cuser@servera ~]$ echo "I am a demo webserver" > ~/www/html/index.html
+----
+
+. Login to the container registry
++
+[source,bash]
+----
+[cuser@servera ~]$ podman login registry.lab.example.com
+Username: admin
+Password: redhat321
+Login Succeeded!
+----
+
+. Create and Run Reference Container
++
+[source,bash]
+----
+[cuser@servera ~]$ podman run -d --name demoweb -p 8080:8080 -v ~/www:/var/www:Z registry.lab.example.com/rhel8/httpd-24:1-105
+----
+
+. Verify webserver is running
++
+[source,bash]
+----
+[cuser@servera ~]$ curl localhost:8080
+I am a demo webserver
+----
+
+. Prepare the directory and create a *systemd* unit file
++
+[source,bash]
+----
+[cuser@servera ~]$ mkdir -p ~/.config/systemd/user/
+
+[cuser@servera ~]$ cd ~/.config/systemd/user/
+
+[cuser@servera user]$ podman generate systemd --name demoweb --files --new
+/home/cuser/.config/systemd/user/container-demoweb.service
+----
+
+. View *systemd* Unit File
++
+[source,bash]
+----
+[cuser@servera user]$ cat /home/cuser/.config/systemd/user/container-demoweb.service
+# container-demoweb.service
+# autogenerated by Podman 1.9.3
+# Fri Sep 18 14:24:15 EDT 2020
+
+[Unit]
+Description=Podman container-demoweb.service
+Documentation=man:podman-generate-systemd(1)
+Wants=network.target
+After=network-online.target
+
+[Service]
+Environment=PODMAN_SYSTEMD_UNIT=%n
+Restart=on-failure
+ExecStartPre=/usr/bin/rm -f %t/%n-pid %t/%n-cid
+ExecStart=/usr/bin/podman run --conmon-pidfile %t/%n-pid --cidfile %t/%n-cid --cgroups=no-conmon -d --name demoweb -p 8080:8080 -v /home/cuser/www:/var/www:Z registry.lab.example.com/rhel8/httpd-24:1-105
+ExecStop=/usr/bin/podman stop --ignore --cidfile %t/%n-cid -t 10
+ExecStopPost=/usr/bin/podman rm --ignore -f --cidfile %t/%n-cid
+PIDFile=%t/%n-pid
+KillMode=none
+Type=forking
+
+[Install]
+WantedBy=multi-user.target default.target
+----
+
+. Remove the Reference Container and Verify
++
+[source,bash]
+----
+[cuser@servera user]$ podman rm demoweb -f
+b53201444570b95d4306289a72120e3b883480c22dd5280b9429a02b7f850153
+
+[cuser@servera user]$ podman ps -a
+CONTAINER ID  IMAGE  COMMAND  CREATED  STATUS  PORTS  NAMES
+----
+
+. Use *systemctl* to Start and Enable the Container Service
++
+[source,bash]
+----
+[cuser@servera user]$ systemctl --user enable container-demoweb --now
+Created symlink /home/cuser/.config/systemd/user/multi-user.target.wants/container-demoweb.service → /home/cuser/.config/systemd/user/container-demoweb.service.
+Created symlink /home/cuser/.config/systemd/user/default.target.wants/container-demoweb.service → /home/cuser/.config/systemd/user/container-demoweb.service.
+----
+
+. Verify Container is Running
++
+[source,bash]
+----
+[cuser@servera user]$ curl localhost:8080
+I am a demo webserver
+
+[cuser@servera user]$ podman ps
+CONTAINER ID  IMAGE                                          COMMAND               CREATED         STATUS             PORTS                   NAMES
+4f9af684d605  registry.lab.example.com/rhel8/httpd-24:1-105  /usr/bin/run-http...  29 seconds ago  Up 29 seconds ago  0.0.0.0:8080->8080/tcp  demowe
+----
+
+=====
 
 .References
 [NOTE]
