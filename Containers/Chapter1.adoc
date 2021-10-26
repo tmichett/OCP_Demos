@@ -253,6 +253,12 @@ How to create systemd service unit in Linux: https://linuxconfig.org/how-to-crea
 ====
 
 
+.References
+[NOTE]
+======
+*Systemd Timers for Scheduling Tasks*:  https://fedoramagazine.org/systemd-timers-for-scheduling-tasks/
+======
+
 === FirewallD
 
 Beginning in RHEL 8.0, Red Hat moved away from *iptables* as the back-end firewall implementation and instead moved to NFTables. However, the introduction of FirewallD and the *firewall-cmd* management commands implemented in RHEL 7.x have evolved and leveraging FirewallD is still the preferred firewall management solution in RHEL 8.x.

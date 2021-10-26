@@ -44,6 +44,9 @@ endif::[]
 * *Github - Open Repository for Container Tools*
 ** https://github.com/containers
 
+* *Systemd Timers for Scheduling Tasks*
+** https://fedoramagazine.org/systemd-timers-for-scheduling-tasks/
+
 == Podman References
 
 * *What is Podman?*
@@ -142,6 +145,13 @@ endif::[]
 
 * *Podman to the Rescue?*
 ** https://matthewegunter.medium.com/podman-to-the-rescue-b90ae74a35e0
+
+* *podman-auto-update*
+** https://docs.podman.io/en/latest/markdown/podman-auto-update.1.html
+
+* *podman-generate-systemd*
+** https://docs.podman.io/en/latest/markdown/podman-generate-systemd.1.html
+
 
 
 == Buildah References
