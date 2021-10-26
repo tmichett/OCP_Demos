@@ -44,7 +44,7 @@ All deployment scenarios allow the use of creating SSL/TLS certificates to secur
 |80/TCP
 
 |Quay HTTPS
-|8443/TCP
+|443/TCP
 
 |Postgresql Quay
 |5432/TCP
@@ -113,6 +113,420 @@ All deployment scenarios allow the use of creating SSL/TLS certificates to secur
 
 
 === Installing the Quay Image Registry Manually
+
+The Quay registry can be installed as a PoC locally. There is a manual process documented at https://access.redhat.com/documentation/en-us/red_hat_quay/3/html/deploy_red_hat_quay_for_proof-of-concept_non-production_purposes/index and there is an automated method with Ansible and playbooks created for an Ansible Workshop at https://github.com/tmichett/quay_lab_poc.
+
+.Quay Server Requirements
+* RHEL8 Server with Podman Installed
+* Access to *registry.redhat.io*
+* Firewall ports opened
+* */etc/hosts* or DNS entry for Quay server
+* Postgresql and Redis containers for Quay
+* Postresql container for Clair (if using scanning)
+
+For this workshop, the setup to prepare the environment in Chapter 1 provided the changes for the network needed to be able to successfully install Quay and register the FQDN as *quay.local* on both the *workstation* and *server* systems.
+
+==== Preparing the Server for Quay and Running Supporting Containers
+
+The server needs prepared to run Quay as a service. Firewall ports will need to be opened and the infrastructure containers and components need setup.
+
+.Preparing Infrastructure
+
+. SSH to *server* as the root user
++
+[source,bash]
+----
+[student@workstation ~]$ ssh root@server
+----
+
+. Configure Firewall Ports
++
+[source,bash]
+----
+[root@server ~]# firewall-cmd --add-port=80/tcp --add-port=8080/tcp --add-port=443/tcp --add-port=8443/tcp --permanent ; firewall-cmd --reload
+success
+success
+----
+
+. Create Mountpoint and directory and initialize the Quay variable
++
+[source,bash]
+----
+[root@server ~]# mkdir Quay ; export QUAY=/Quay
+----
+
+. Create Postgresql Directory for Persistent Storage
++
+.Creating Directory
+[source,bash]
+----
+[root@server ~]# mkdir -p $QUAY/postgres-quay
+----
++
+.Setting up ACL
+[source,bash]
+----
+[root@server ~]# setfacl -m u:26:-wx $QUAY/postgres-quay
+----
+
+.Setting up Infrastructure Containers
+
+. Install *container-tools* Module
++
+[source,bash]
+----
+[root@server ~]# yum module install container-tools
+----
+
+. Login to the container registry
++
+[source,bash]
+----
+[root@server ~]# podman login registry.redhat.io
+Username: tmichett@redhat.com
+Password:
+Login Succeeded!
+----
+
+. Launch the *Postgresql* container
++
+[source,bash]
+----
+[root@server ~]# podman run -d --rm --name postgresql-quay \
+> -e POSTGRESQL_USER=quayuser \
+> -e POSTGRESQL_PASSWORD=quaypass \
+> -e POSTGRESQL_DATABASE=quay \
+> -e POSTGRESQL_ADMIN_PASSWORD=adminpass \
+> -p 5432:5432 \
+> -v $QUAY/postgres-quay:/var/lib/pgsql/data:Z \
+> registry.redhat.io/rhel8/postgresql-10:1
+Trying to pull registry.redhat.io/rhel8/postgresql-10:1...
+
+... OUTPUT OMITTED ...
+
+Writing manifest to image destination
+Storing signatures
+c21bf1231538b75d5510b4bd81732ad8f56fa61a98582b985124bd3d5de2ae04
+----
+
+. Modify the *Postgresql* database to ensure that *pg_trgm* module has been installed.
++
+[source,bash]
+----
+[root@server ~]# podman exec -it postgresql-quay \
+> /bin/bash -c \
+> 'echo "CREATE EXTENSION IF NOT EXISTS pg_trgm" \
+> | psql -d quay -U postgres'
+----
+
+. Setup the *Redis* Container
++
+[source,bash]
+----
+[root@server ~]# podman run -d --rm --name redis \
+>  -p 6379:6379 \
+> -e REDIS_PASSWORD=strongpassword \
+> registry.redhat.io/rhel8/redis-5:1
+Trying to pull registry.redhat.io/rhel8/redis-5:1...
+
+... OUTPUT OMITTED ...
+
+Storing signatures
+c847b459ded23acdd30e2a6ec1acfdeb3dd79f1457f7f99082cedb0a40447d73
+----
+
+.Launch the Quay Configuration Container
+
+. Run the Quay container in configuration mode
++
+[source,bash]
+----
+[root@server ~]# podman run --rm -it --name quay_config \
+> -p 8080:8080 \
+> registry.redhat.io/quay/quay-rhel8:v3.6.0-62 config secret
+Trying to pull registry.redhat.io/quay/quay-rhel8:v3.6.0-62...
+
+... OUTPUT OMITTED ...
+
+2021-10-26 17:54:08,319 INFO success: config-editor entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+config-editor stdout | time="2021-10-26T17:54:07Z" level=warning msg="An error occurred loading TLS: No public key provided for HTTPS. Server falling back to HTTP."
+config-editor stdout | time="2021-10-26T17:54:07Z" level=info msg="Running the configuration editor with HTTP on port 8080 with username quayconfig"
+----
+
+. Access a Web Browser and begin the Quay Configuration
+.. URL: *quay.local*
+.. UN: *quayconfig*
+.. PW: *secret*
++
+image::Chapter7-9e1d0.png[title="Quay Configuration Login", align="center"]
++
+image::Chapter7-b5326.png[title="Quay Configuration Site", align="center"]
+
+. Setup the Server Configuration
+.. Server Hostname: *quay.local*
++
+image::Chapter7-ac09c.png[title="Quay Server Hostname", align="center"]
+
+
+. Setup Postgresql Database
+.. Postgresql Database Server: *quay.local*
+.. Postresql User: *quayuser*
+.. Postgresql Password: *quaypass*
+.. Postgresql Database: *quay*
+.. Postrgresql Admin Password: *adminpass*
++
+image::Chapter7-d61cd.png[title="Quay Postgresql DB Setup", align="center"]
+
+. Setup Redis Information
+.. Redis Hostname: quay.local
+.. Redis Port: 63779
+.. Redis Password: strongpassword
++
+image::Chapter7-55ad6.png[title="Quay Redis Setup", align="center"]
++
+[IMPORTANT]
+======
+At this point, there is enough configuration to validate and download the Quay config file for launching and running Quay. We will continue to setup *Repository Mirroring*, *Clair Image Scanning*, and *Admin Accounts*.
+======
+
+.Setting up Repository Mirroring
+
+. Enable Repository Mirroring
++
+image::Chapter7-7569a.png[title="Quay Mirroring Setup", align="center"]
++
+[WARNING]
+======
+Remember to disable SSL as SSL isn't being used for this setup.
+======
+
+.Setting up Security Scanning
+
+. Select *Enable Security Scanning*
+.. Endpont: *http://quay.local:8081*
+.. Select *Generate PSK* (Make note of this as it will need to be used)
+.. We will use the PSK of: *MTU5YzA4Y2ZkNzJoMQ==*
++
+image::Chapter7-4b13c.png[title="Quay Clair Image Scanning Setup", align="center"]
++
+[IMPORTANT]
+======
+You *MUST* use the Pre-Shared-Key (PSK) of *MTU5YzA4Y2ZkNzJoMQ==* as we will be leveraging a pre-build CLAIR config.yml file.
+======
+
+
+.Configuring Super Users (Admins)
+
+. Add superusers to the system
+.. UN: *quayadmin*
+.. UN: *_<your_username>_*
++
+image::Chapter7-f07c3.png[title="Quay Superuser Setup", align="center"]
++
+image::Chapter7-6ac80.png[title="Quay Superuser Setup - Validation", align="center"]
+
+.Completing Quay Configuration - Validating and Download Configuration File
+
+. Validate Configuration Changes
++
+image::Chapter7-e60f7.png[title="Quay Setup - Validation", align="center"]
+
+. Download Quay Configuration File
++
+image::Chapter7-08c54.png[title="Quay Configuration - File Download", align="center"]
+
+. Stop and Remove the Quay_Config Container
++
+.Killing the Container from *server* by hitting _CTRL-C_
+[source,bash]
+----
+... OUTPUT OMITTED ...
+
+Engine"
+config-editor stdout | time="2021-10-26T18:30:52Z" level=debug msg="Validating ElasticSearch"
+config-editor stdout | time="2021-10-26T18:30:52Z" level=debug msg="Validating ActionLogArchiving"
+config-editor stdout | time="2021-10-26T18:30:52Z" level=debug msg="Validating Email"
+config-editor stdout | time="2021-10-26T18:30:52Z" level=debug msg="Validating OIDC"
+
+^C
+
+2021-10-26 18:36:55,589 WARN received SIGINT indicating exit request
+2021-10-26 18:36:56,591 INFO waiting for stdout, config-editor to die
+2021-10-26 18:36:57,596 INFO stopped: config-editor (terminated by SIGTERM)
+2021-10-26 18:36:59,599 INFO waiting for stdout to die
+2021-10-26 18:37:01,603 INFO stopped: stdout (terminated by SIGTERM")
+----
+
+
+
+.Quay Next Steps
+[TIP]
+======
+Based on the options in the Quay deployment configuration, it is necessary to setup and configure the Clair Image scanning services before starting the Quay container.
+======
+
+==== Preparing Quay and Clair Containers
+
+It is necessary to create a storage location for Quay container images and images that will be loaded into the registry. It is also necessary to copy the Quay configuration file and Clair Configuration files and label them appropriately for use. The Clair scanner will use and leverage Postgresql, so it will also be necessary to setup and configure a Postgresql container for Clair.
+
+.Prepare Quay Storage
+
+. Create Directory for Quay Config
++
+[source,bash]
+----
+[root@server ~]#  mkdir $QUAY/config
+----
+
+. Copy download configuration file to $QUAY/config
++
+[source,bash]
+----
+[root@server ~]# scp student@workstation:~/Downloads/quay-config.tar.gz $QUAY/config
+----
+
+. Extract the files for use
++
+[source,bash]
+----
+[root@server ~]# cd $QUAY/config ; tar xvf quay-config.tar.gz
+extra_ca_certs/
+config.yaml
+----
+
+. Verify Files and Return to *Home* directory
++
+[source,bash]
+----
+[root@server config]# ls ; cd
+config.yaml  extra_ca_certs  quay-config.tar.gz
+----
+
+. Create and Prepare Local storage
++
+[source,bash]
+----
+[root@server ~]#  mkdir $QUAY/storage ; setfacl -m u:1001:-wx $QUAY/storage
+----
+
+.Prepare and Launch Clair
+
+. Create the Clair Postgres Storage
++
+[source,bash]
+----
+[root@server ~]# mkdir -p $QUAY/postgres-clairv4 ; setfacl -m u:26:-wx $QUAY/postgres-clairv4
+----
+
+. Launch *Postgresql* Container
++
+[source,bash]
+----
+[root@server ~]# podman run -d --rm --name postgresql-clairv4 \
+> -e POSTGRESQL_USER=clairuser \
+> -e POSTGRESQL_PASSWORD=clairpass \
+> -e POSTGRESQL_DATABASE=clair \
+> -e POSTGRESQL_ADMIN_PASSWORD=adminpass \
+> -p 5433:5432 \
+> -v $QUAY/postgres-clairv4:/var/lib/pgsql/data:Z \
+> registry.redhat.io/rhel8/postgresql-10:1
+e0db014a5a2f35cc895ef4ad136695a56ae2cda81c86db804810082ad38b9529
+----
+
+. Install *Postgres uuid-ossp module*
++
+[source,bash]
+----
+[root@server ~]# podman exec -it postgresql-clairv4 \
+> /bin/bash -c \
+> 'echo "CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\"" \
+> | psql -d clair -U postgres'
+----
+
+. Create Clair Configuration File and place at */etc/clairv4/config/config.yml*
+.. https://github.com/quay/clair/blob/main/Documentation/reference/config.md
+.. Use the one already created from *https://github.com/tmichett/quay_lab_poc*
++
+.Make the */etc/clairv4/config* Directory
+[source,bash]
+----
+[root@server ~]# mkdir -p /etc/clairv4/config/
+----
++
+.Copying Config File from Workstation
+[source,bash]
+----
+[root@server ~]# scp student@workstation:~/github/quay_lab_poc/files/clair_config/config.yaml /etc/clairv4/config/
+student@workstation's password':
+config.yaml                                         100%  845   559.3KB/s   00:00
+----
++
+[IMPORTANT]
+======
+The PSK from earlier is used in this file. Please ensure you use the same PSK.
+======
+
+. Deploy the Clair Container
++
+[source,bash]
+----
+[root@server ~]# podman run -d --rm --name clairv4 \
+> -p 8081:8081 -p 8089:8089 \
+> -e CLAIR_CONF=/clair/config.yaml -e CLAIR_MODE=combo \
+> -v /etc/clairv4/config:/clair:Z \
+> registry.redhat.io/quay/clair-rhel8:v3.6.0-70
+Trying to pull registry.redhat.io/quay/clair-rhel8:v3.6.0-70...
+
+... OUTPUT OMITTED ...
+
+Storing signatures
+7f5ec8bd697c83fc2ad9277fd76d4c8c8b48048ec45d59f948cd58f87e03295e
+----
+
+===== Starting Quay and the Mirroring Containers
+
+. Launch the Quay Container
++
+[source,bash]
+----
+[root@server ~]# podman run -d --rm -p 80:8080 \
+> --name=quay \
+> -v $QUAY/config:/conf/stack:Z \
+> -v $QUAY/storage:/datastorage:Z \
+> registry.redhat.io/quay/quay-rhel8:v3.6.0-62
+0357e5cfd31fa0336cdc0561bd2d39e332451ba781671abd5b6f2fac2b24c7f0
+----
+
+. Launch the Quay Mirroring Container
++
+[source,bash]
+----
+[root@server ~]# podman run -d --name mirroring-worker \
+> -v $QUAY/config:/conf/stack:Z \
+> registry.redhat.io/quay/quay-rhel8:v3.6.0-62 repomirror
+adcd500ae3e0ca7510134d91b4389812cc55ebb2f1f2ebefcfc318f7ce2f6fd9
+----
+
+. Verify all containers are running
++
+[source,bash]
+----
+[root@server ~]# podman ps
+CONTAINER ID  IMAGE                                          COMMAND         CREATED            STATUS                PORTS                                           NAMES
+c21bf1231538  registry.redhat.io/rhel8/postgresql-10:1       run-postgresql  About an hour ago  Up About an hour ago  0.0.0.0:5432->5432/tcp                          postgresql-quay
+c847b459ded2  registry.redhat.io/rhel8/redis-5:1             run-redis       About an hour ago  Up About an hour ago  0.0.0.0:6379->6379/tcp                          redis
+e0db014a5a2f  registry.redhat.io/rhel8/postgresql-10:1       run-postgresql  20 minutes ago     Up 20 minutes ago     0.0.0.0:5433->5432/tcp                          postgresql-clairv4
+7f5ec8bd697c  registry.redhat.io/quay/clair-rhel8:v3.6.0-70                  6 minutes ago      Up 6 minutes ago      0.0.0.0:8081->8081/tcp, 0.0.0.0:8089->8089/tcp  clairv4
+0357e5cfd31f  registry.redhat.io/quay/quay-rhel8:v3.6.0-62   registry        3 minutes ago      Up 3 minutes ago      0.0.0.0:80->8080/tcp                            quay
+444cf7561b02  registry.redhat.io/quay/quay-rhel8:v3.6.0-62   repomirror      3 seconds ago      Up 3 seconds ago                                                      mirroring-worker
+----
+
+.Quay Setup Completed
+[CAUTION]
+======
+At this point the Quay setup has been completed with the Mirroring Worker and Clair v4 Image Scanner. You can proceed to the next steps and skip the section called: *Installing the Quay Image Registry with Ansible*. You should proceed to the section titled *Setting up the Quay Web Console and Testing Quay*.
+======
+
 
 === Installing the Quay Image Registry with Ansible
 
@@ -239,11 +653,11 @@ The *./files/quay-config.tar.gz* file will be used and deployed to control the c
 [student@workstation quay_lab_poc]$ ansible-playbook Quay_Mirror_Deploy.yml
 ----
 
-==== Setting up the Quay Web Console
+=== Setting up the Quay Web Console and Testing Quay
 
 After all Quay containers have been configured and installed, it is necessary to setup the Admin (Superuser) for Quay as well as test out the system for both image scanning and the ability to mirror container images from upstream repositories.
 
-===== Configuring the Quay Super User
+==== Configuring the Quay Super User
 
 After the Quay registry has been deployed, it is important to finish configuring the super users (admins) that were defined as part of the setup and configuration file (*config.yaml*) that was created during the Quay preparation section.
 
@@ -263,10 +677,9 @@ SUPER_USERS:
 ----
 ====
 
-. Open the Quay web console by navigating to it in your favorite browser using *http://Quay-FQDN:8080*
+. Open the Quay web console by navigating to it in your favorite browser using *http://Quay-FQDN*
 +
-image::README-6d4f6.png[]
-
+image::Chapter7-77f15.png[title="Quay Login Page", align="center"]
 
 . Click *Create Account* to create the administrator/superuser accounts for Quay as defined in the *config.yaml* file.
 ** Repeat this step for all super users in the *config.yaml* file.
@@ -285,7 +698,7 @@ image::README-6c250.png[]
 
 In order to test the scanning capabilities and ensure that things function properly, update a basic image into the Quay Repository
 
-. Login to Quay Repository
+. Login to Local Quay Repository (test authentication and account)
 +
 .*podman* Authentication
 [source,bash]
@@ -297,49 +710,67 @@ Login Succeeded!
 ----
 
 . Pull and Download an Image, Tag it, then upload to repository
+.. Image to download: *quay.io/redhattraining/httpd-parent:2.4*
+.. Tag Name: **
 +
 .Downloading image
 [source,bash]
 ----
-[root@quay ~]# podman pull ubuntu:20.04
-Resolved "ubuntu" as an alias (/etc/containers/registries.conf.d/000-shortnames.conf)
-Trying to pull docker.io/library/ubuntu:20.04...
+[root@server ~]# podman pull quay.io/redhattraining/httpd-parent:2.4
+Trying to pull quay.io/redhattraining/httpd-parent:2.4...
 Getting image source signatures
-Copying blob 16ec32c2132b done
-Copying config 1318b700e4 done
+Copying blob a3ed95caeb02 done
+Copying blob a3ed95caeb02 done
+Copying blob a3ed95caeb02 done
+Copying blob 787f47dbeaac done
+Copying blob a3ed95caeb02 skipped: already exists
+Copying blob a3ed95caeb02 skipped: already exists
+Copying blob a3ed95caeb02 skipped: already exists
+Copying blob 6a5240d60dc4 done
+Copying blob 408208567b9a done
+Copying blob 08b8c9fdec44 done
 Writing manifest to image destination
 Storing signatures
-1318b700e415001198d1bf66d260b07f67ca8a552b61b0da02b3832c778f221b
+3639ce1374d3611e80ed66decd7d5467b72d010c21e19e4f193cd8b944e8c9f5
 ----
 +
 .Tagging image
 [source,bash]
 ----
-[root@quay ~]# podman tag docker.io/library/ubuntu:20.04 quay.local/travis/ubuntu:20.04
+[root@server ~]# podman tag quay.io/redhattraining/httpd-parent:2.4 quay.local/travis/httpd-parent:2.4
 ----
 +
 .Push image
 [source,bash]
 ----
-[root@quay ~]# podman push --tls-verify=false quay.local:8080/travis/ubuntu:20.04
+[root@server ~]# podman push --tls-verify=false quay.local/travis/httpd-parent:2.4
 Getting image source signatures
-Copying blob 7555a8182c42 done
-Copying config 1318b700e4 done
+Copying blob c613b100be16 done
+Copying blob a3ed95caeb02 done
+Copying blob a3ed95caeb02 done
+Copying blob a3ed95caeb02 done
+Copying blob 574bcc187eda done
+Copying blob 24d85c895b6b done
+Copying blob a3ed95caeb02 done
+Copying blob a3ed95caeb02 skipped: already exists
+Copying blob a3ed95caeb02 skipped: already exists
+Copying blob 7f9108fde4a1 done
 Writing manifest to image destination
 Storing signatures
 ----
 
 . Verify image exists in Quay
 +
-image::README-45241.png[]
+image::Chapter7-357d1.png[title="HTTPD Parent Image", align="center"]
+
 
 . Navigate to image tags and see if the security scan has completed
 +
-image::README-6ecb7.png[]
+image::Chapter7-a96b8.png[title="HTTPD Parent Image - Image Tags", align="center"]
 
 . Click on Security scan to view the vulnerabilities
 +
-image::README-8b2ee.png[]
+image::Chapter7-d95ad.png[title="HTTPD Parent Image - Image Vulnerabilities", align="center"]
 
 ==== Testing Repository Mirroring
 
@@ -382,7 +813,7 @@ image::README-4189e.png[]
 image::README-de19a.png[]
 
 
-=== Using the Quay Image Registry
+==== Using the Quay Image Registry
 
 
 === Inspecting Images with Skopeo on Remote Registries
