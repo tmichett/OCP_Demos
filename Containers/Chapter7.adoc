@@ -209,7 +209,7 @@ The *./files/config/config.yaml* file will be used and deployed to control the c
 .TAR File Configuration Method
 [source,bash]
 ----
-
+[student@workstation quay_lab_poc]$ ansible-playbook Quay_Config_Deploy_Tar.yml
 ----
 +
 .TAR-Based Configuration Considerations
@@ -290,7 +290,7 @@ In order to test the scanning capabilities and ensure that things function prope
 .*podman* Authentication
 [source,bash]
 ----
-[root@quay ~]# podman login --tls-verify=false quay.local:8080
+[root@quay ~]# podman login --tls-verify=false quay.local
 Username: travis
 Password:
 Login Succeeded!
@@ -315,7 +315,7 @@ Storing signatures
 .Tagging image
 [source,bash]
 ----
-[root@quay ~]# podman tag docker.io/library/ubuntu:20.04 quay.local:8080/travis/ubuntu:20.04
+[root@quay ~]# podman tag docker.io/library/ubuntu:20.04 quay.local/travis/ubuntu:20.04
 ----
 +
 .Push image
