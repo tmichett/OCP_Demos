@@ -46,15 +46,15 @@
     - name: Modify /etc/hosts to have the quay.local
       lineinfile:
         path: /etc/hosts
-        regexp: '^172.25.250.251 quay.local quay'
-        line: '172.25.250.251 quay.local quay'
+        regexp: '^172.25.250.251 quay.local quay server server.lab.example.com'
+        line: '172.25.250.251 quay.local quay server server.lab.example.com'
 
 ## Modify the /etc/hosts file on Workstation
     - name: Modify /etc/hosts to have the quay.local
       lineinfile:
         path: /etc/hosts
-        regexp: '^172.25.250.251 quay.local quay'
-        line: '172.25.250.251 quay.local quay'
+        regexp: '^172.25.250.251 quay.local quay server server.lab.example.com'
+        line: '172.25.250.251 quay.local quay server server.lab.example.com'
       delegate_to: localhost
 
 ## Install Bash completion, tree, vim, and other apps
