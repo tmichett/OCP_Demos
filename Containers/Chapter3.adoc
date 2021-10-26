@@ -540,14 +540,12 @@ REPOSITORY   TAG   IMAGE ID   CREATED   SIZE
 
 *Podman: Managing pods and containers in a local container runtime*: https://developers.redhat.com/blog/2019/01/15/podman-managing-containers-pods#
 
-*_man pages_*
-
-_podman-system-prune_, _podman-container-cleanup_, _podman-pod-prune_, _podman-container-prune_, _podman-image-prune_, and _podman-volume-prune_.
-
 *Stefano's Project on Github*: https://github.com/sstagnaro/rht-contrib
 
 *Spinning up and Managing Pods with multiple containers with Podman*: https://mohitgoyal.co/2021/04/23/spinning-up-and-managing-pods-with-multiple-containers-with-podman/
 
-
 *What is a dangling image and what is an unused image?*: https://newbedev.com/what-is-a-dangling-image-and-what-is-an-unused-image
+
+*_man pages_*: _podman-system-prune_, _podman-container-cleanup_, _podman-pod-prune_, _podman-container-prune_, _podman-image-prune_, and _podman-volume-prune_.
+
 ====
