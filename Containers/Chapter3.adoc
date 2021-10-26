@@ -108,7 +108,7 @@ e18e307bab06  rht-demo  Running  3 minutes ago  3113f296524c  2
 [root@server ~]# podman ps
 CONTAINER ID  IMAGE                                         COMMAND               CREATED             STATUS                 PORTS                 NAMES
 3113f296524c  registry.access.redhat.com/ubi8/pause:latest                        3 minutes ago       Up About a minute ago  0.0.0.0:8080->80/tcp  e18e307bab06-infra <3>
-deeb7e789eaf  quay.io/redhattraining/httpd-parent           /bin/sh -c /usr/s...  About a minute ago  Up About a minute ago  0.0.0.0:8080->80/tcp  webserver
+deeb7e789eaf  quay.io/redhattraining/httpd-parent           /bin/sh -c /usr/s...  About a minute ago  Up About a minute ago  0.0.0.0:8080->80/tcp  webserver <4>
 ----
 <1> Create the Pod and port forwards for the Pod
 <2> Create a container to run in the Pod. The port forward comes from the *pod* definition.
@@ -267,11 +267,9 @@ Storing signatures
 ----
 [root@server ~]# podman pod ps --ctr-names
 POD ID        NAME                STATUS   CREATED         INFRA ID      <no value>
-5cbe751d69a9  wordpress_pod_demo  Running  13 minutes ago  893b2d69c740  wp <1>,5cbe751d69a9-infra <2>,db <3>
+5cbe751d69a9  wordpress_pod_demo  Running  13 minutes ago  893b2d69c740  wp ,5cbe751d69a9-infra ,db <1>
 ----
-<1> The *wp* container is running for Wordpress
-<2> The *infra* container is running for the Pod
-<3> The *db* container is running to provide the database for Wordpress
+<1> The *wp* container is running for Wordpress. The *infra* container is running for the Pod. The *db* container is running to provide the database for Wordpress
 
 . Verify Website from CLI
 +
@@ -379,12 +377,9 @@ e67dea0b982076219db520581f6e9d1a02e1fe168c2992507f9e0bd973d7d1ed
 ----
 [root@server Buildah]# podman ps -a
 CONTAINER ID  IMAGE                           COMMAND               CREATED        STATUS                         PORTS                 NAMES
-e67dea0b9820  localhost/demo-container-image  /usr/sbin/httpd -...  2 minutes ago  Exited (0) About a minute ago  0.0.0.0:8880->80/tcp  demo-container-buildah <4>
+e67dea0b9820  localhost/demo-container-image  /usr/sbin/httpd -...  2 minutes ago  Exited (0) About a minute ago  0.0.0.0:8880->80/tcp  demo-container-buildah <1>
 ----
-<1> Looking at images and verifying image exists
-<2> Attempting to *prune* images
-<3> Image remains after pruning
-<4> Image attached to a running or *stopped* container
+<1> Image attached to a running or *stopped* container
 
 .Cleanup of Containers
 
