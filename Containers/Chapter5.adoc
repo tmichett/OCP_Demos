@@ -30,7 +30,7 @@ It is possible to change the default behavior of user services (*systemd.units*)
 ====
 
 
-===== Creating and Managing Systemd User Services
+==== Creating and Managing Systemd User Services
 
 In order to define *systemd* user services, the *~/.config/systemd/user* directory must be created to store the unit files. User *systemd.unit* files have the same syntax as a regular system unit file.
 
@@ -174,7 +174,7 @@ Red Hat Training offers other courses, starting with the free technical overview
 
 A number of resources are available there, including ways to try out OpenShift for yourself using tools like CodeReady Containers [https://developers.redhat.com/products/ codeready-containers/overview]. See https://www.openshift.com/try for more information.
 
-==== DEMO - Managing Containers as Services
+=== DEMO - Managing Containers as Services
 
 .DEMO - Managing Containers as Services
 =====
