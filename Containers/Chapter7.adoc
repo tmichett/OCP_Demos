@@ -815,6 +815,197 @@ image::README-de19a.png[]
 
 ==== Using the Quay Image Registry
 
+After testing the initial Quay image registry, we will need to use the registry similar to the one located at Quay.io. It is important to understand that since this repository/registry is local, it is fully maintained by the adminstrators that installed it. There were one or more *Superuser* accounts created as part of the installation process. These accounts can create organizations or modify permissions to organizations as well as maintain the infrastructure.
+
+===== Configuring Quay as the *Superuser*
+
+. Login to the Quay site and open the *Super User Admin Panel*
++
+image::Chapter7-31b2b.png[title="Quay Superuser Panel Access", align="center"]
++
+image::Chapter7-43ffe.png[title="Quay Superuser - User Management", align="center"]
+
+. Explore the various items on the left-hand menu.
+
+. Navigate to "Messages" and click *Create Message* to create a system-wide message
++
+image::Chapter7-51245.png[title="Quay Superuser - System Message", align="center"]
+
+. Create a system message
+.. SYSTEM Message:
+... **Attention** The system will be scheduled for maintenance on October 31, 2021. It will be in read-only mode for 24-hours. During this time, you can pull existing containers, but accounts and organizations cannot be created and new images will not be able to be published.
++
+image::Chapter7-ae3cc.png[title="Quay Superuser - System Message Creation", align="center"]
++
+image::Chapter7-90b34.png[title="System Message Verification", align="center"]
+
+
+===== Creating Organizations
+
+Organizations can be created so that multiple users can share container images. After creating an organization, users can be added to the organization so that they can manage images within that organization.
+
+. Click *Create New Organization*
++
+image::Chapter7-d9382.png[title="Creating an Organization", align="center"]
+
+. Provide name for Organization and click *Create Organization*
++
+image::Chapter7-7e401.png[title="Red Hat Training Organization", align="center"]
++
+[IMPORTANT]
+======
+When naming the organization, it is important to use all lowercase letters and not have any spaces. Additionally it should be noted that only newer registry versions support naming with "-" and "." in the name.
+======
+
+. Manage teams and membership
++
+image::Chapter7-6d5f3.png[title="Red Hat Training Organization - Membership", align="center"]
+
+. Create a team
++
+image::Chapter7-8049d.png[title="Red Hat Training Organization - Creating a Team", align="center"]
++
+image::Chapter7-8dd06.png[title="Red Hat Training Organization - Team Creation", align="center"]
++
+image::Chapter7-0f988.png[title="Red Hat Training Organization - Membership Verification", align="center"]
+
+. Add members to the team by clicking the gear and then clicking *Manage Team Members*
++
+image::Chapter7-fab2a.png[title="devteam - Membership Modification", align="center"]
+
+. Search for and add team members and add a team description
++
+image::Chapter7-1da3d.png[title="devteam - Edit team and members", align="center"]
++
+image::Chapter7-eb3fb.png[title="devteam - Final Team Details", align="center"]
+
+. Create default organization permissions
++
+image::Chapter7-0a6c2.png[title="Red Hat Training Organization - Permissions", align="center"]
++
+image::Chapter7-63094.png[title="Red Hat Training Organization - Dev Team with Write Permissions", align="center"]
++
+image::Chapter7-7cfbf.png[title="Red Hat Training Organization - Permission Verification", align="center"]
+
+===== Testing Organizations
+
+Once an organization has been created it is important to test the organization and ensure that members can login and create repositories and are also able to push images to those repositories.
+
+. Login to *quay.local* from the workstation machine
++
+[source,bash]
+----
+[student@workstation ~]$ podman login quay.local --tls-verify=false
+Username: travis
+Password:
+Login Succeeded!
+----
+
+. Pull an image down from Quay.io
++
+[source,bash]
+----
+[student@workstation ~]$ podman pull quay.io/redhattraining/hello-world-nginx
+Trying to pull quay.io/redhattraining/hello-world-nginx...
+Getting image source signatures
+
+... OUTPUT OMITTED ...
+
+Writing manifest to image destination
+Storing signatures
+8d990e08937e299ce1d9e629e4df86ef824744e9c9d2057a8883553650d25ba9
+----
+
+. Tag image for upload to *quay.local*
++
+[source,bash]
+----
+[student@workstation ~]$ podman tag quay.io/redhattraining/hello-world-nginx quay.local/redhattraining/hello-world-nginx
+----
+
+. Verify images and tags
++
+[source,bash]
+----
+[student@workstation ~]$ podman images
+REPOSITORY                                    TAG      IMAGE ID       CREATED       SIZE
+quay.io/redhattraining/hello-world-nginx      latest   8d990e08937e   2 years ago   269 MB
+quay.local/redhattraining/hello-world-nginx   latest   8d990e08937e   2 years ago   269 MB
+----
+
+. Upload (push) image to *Quay.local* Repository in the *redhattraining* Organization
++
+[source,bash]
+----
+[student@workstation ~]$ podman push quay.local/redhattraining/hello-world-nginx --tls-verify=false
+Getting image source signatures
+
+... OUTPUT OMITTED ...
+
+Writing manifest to image destination
+Storing signatures
+----
+
+. Verify repository appears in Quay WebUI
++
+image::Chapter7-1ebf5.png[title="Hello World NGINX Container Image Repository", align="center"]
+
+. Verify the security scanning worked on image
++
+image::Chapter7-befee.png[title="hello-world-nginx - Image Tags and Scan Results", align="center"]
+
+. Observe the status of the repository
++
+image::Chapter7-bb7cb.png[title="hello-world-nginx - Private (Locked) Repository", align="center"]
+
+. Unlock Repository for Public Use of Image
++
+image::Chapter7-94320.png[title="hello-world-nginx - Making Repository Public", align="center"]
++
+image::Chapter7-d7a65.png[title="hello-world-nginx - Verifying Unlocked", align="center"]
+
+. SSH to *server* as root
++
+[source,bash]
+----
+[student@workstation ~]$ ssh root@server
+----
+
+. Login to the Quay registry
++
+[source,bash]
+----
+[root@server ~]# podman login quay.local --tls-verify=false
+Username: travis
+Password:
+Login Succeeded!
+----
+
+. Launch container from the *quay.local/redhattraining/hello-world-nginx* container image.
++
+[source,bash]
+----
+[root@server ~]# podman run -d --name quay_test_nginx -p 10080:8080 quay.local:80/redhattraining/hello-world-nginx
+Trying to pull quay.local:80/redhattraining/hello-world-nginx:latest.
+
+... OUTPUT OMITTED ...
+
+Storing signatures
+9c9251222721e8ebbd1e38b8a9623b035ba1d814cbfc4dd25fc0256fded25777
+----
+
+. Verify webserver is running
++
+[source,bash]
+----
+[root@server ~]# curl localhost:10080
+<html>
+  <body>
+    <h1>Hello, world from nginx!</h1>
+  </body>
+</html>
+----
+
 
 === Inspecting Images with Skopeo on Remote Registries
 
@@ -824,9 +1015,18 @@ image::README-de19a.png[]
 ====
 
 *Deploy Red Hat Quay for proof-of-concept (non-production) purposes*: https://access.redhat.com/documentation/en-us/red_hat_quay/3/html/deploy_red_hat_quay_for_proof-of-concept_non-production_purposes/index
-Deploying Quay as a local registry server using local storage and containerized services.
+
+*Deploying Quay as a local registry server using local storage and containerized services.*
 
 *Quay Lab PoC*: https://github.com/tmichett/quay_lab_poc
 Deploying the Quay Registry locally based on the Proof-of-Concept local deployment.
+
+*Skopeo - Exercise from redhatgov.io*: http://redhatgov.io/workshops/security_openshift/exercise1.4/
+
+*Skopeo on Github*: https://github.com/containers/skopeo
+
+*How to run Skopeo in a container*: https://www.redhat.com/sysadmin/how-run-skopeo-container
+
+*Introduction to using buildah, podman and skopeo to work on containers*: http://redhatgov.io/workshops/rhel_8/exercise1.8/
 
 ====
