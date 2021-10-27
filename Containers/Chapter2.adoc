@@ -504,6 +504,71 @@ image::Chapter2-606fd.png[title="Force Removing a Running Container", align="cen
 
 ====
 
+===== Using Cockpit to Manage Containers (Rootless)
+
+Just as Podman can manage containers as a "rootless" user, it is also possible to manage containers within Cockpit as a "rootless" user. All the same principles apply in Cockpit as they do with *podman*. Additionally, Cockpit has multiple options if the user happens to be in the *sudoers* file.
+
+.Exploring Cockpit Containers as the *student* User
+====
+. Login to Cockpit as the Student user
++
+image::Chapter2-068eb.png[title="Cockpit Student Login", align="center"]
+
+. Navigate to the *Podman containers* section
++
+image::Chapter2-4a213.png[title="Podman containers plugin", align="center"]
+
+. Click *Start podman*
++
+image::Chapter2-02c9f.png[title="Podman containers - Owner All View", align="center"]
++
+image::Chapter2-0c745.png[title="Podman containers - Owner *student* View", align="center"]
++
+image::Chapter2-26455.png[title="Podman containers - Owner *System* View", align="center"]
++
+[IMPORTANT]
+======
+The *student* user is able to become root as it exists in the *sudoers* file. Based on Cockpit's abilities, the *student* user can see both containers and images owned by *student*, but it can also see containers and images owned by *system*.
+======
+
+====
+
+Launching and managing containers is also performed the same way as the student user.
+
+.Working with Containers in Cockpit as *student.
+====
+
+. Download a container image.
+.. Registry: *registry.access.redhat.com*
+.. Image: *ubi7*
++
+image::Chapter2-df30d.png[title="UBI7 Image Download", align="center"]
+
+. Launch a Container with the UBI7 Image
+.. Container Name: ubi7-test
+.. Image: *registry.access.redhat.com/ubi7/ubi:latest*
++
+image::Chapter2-297ed.png[title="UBI7 Image - Local Repository", align="center"]
++
+image::Chapter2-d3056.png[][title="UBI7 Container Launch Parameters", align="center"]
+
+. Explore the *ubi7-test* Container
++
+image::Chapter2-35cbc.png[title="UBI7 Container - Interactive Console", align="center"]
+
+. Cleanup running Container (_force delete_)
++
+image::Chapter2-f3100.png[title="UBI7 Container - Deletion", align="center"]
+
+
+. Cleanup unneeded images
++
+image::Chapter2-1b4f6.png[title="UBI7 Image - Deletion", align="center"]
+
+
+====
+
+
 .References
 [NOTE]
 ====
