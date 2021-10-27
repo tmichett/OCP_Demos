@@ -445,11 +445,11 @@ Actual container image cleanup is performed with the *podman rmi ** command whic
 ====
 
 
-
+.Managing Containers and Images
 ====
 
-
-.Install Podman Containers Collection
+. Install Podman Containers Collection
++
 [source,bash]
 ----
 [student@workstation Pods]$ ansible-galaxy collection install -r requirements.yml -p collections
@@ -458,14 +458,16 @@ Starting collection install process
 Installing 'containers.podman:1.8.1' to '/home/student/github1/OCP_Demos/Containers/labs/Pods/collections/ansible_collections/containers/podman
 ----
 
-.Create the Registry Credentials File
+. Create the Registry Credentials File
++
 [source,bash]
 ----
 [student@workstation Pods]$ cp vars/registry_login_demo.yml vars/registry_login.yml
 [student@workstation Pods]$ vim vars/registry_login.yml
 ----
 
-.Launch a Container
+. Launch a Container
++
 [source,bash]
 ----
 [student@workstation Pods]$ ansible-playbook Deploy_Container_Demo.yml
@@ -475,7 +477,8 @@ PLAY [Deploy HTTPD Server Demo] ************************************************
 ... OUTPUT OMITTED ...
 ----
 
-.Identify Containers on Workstation
+. Identify Containers on Workstation
++
 [source,bash]
 ----
 [student@workstation Pods]$ sudo podman ps
@@ -484,14 +487,16 @@ CONTAINER ID  IMAGE                                    COMMAND               CRE
 ----
 
 
-.Stop Container on Workstation
+. Stop Container on Workstation
++
 [source,bash]
 ----
 [student@workstation Pods]$ sudo podman stop Website_Demo
 51ed5c1fc601e3722b9a6288e7ec879c75e0b4eefb03707ffd8f83056d9654c5
 ----
 
-.Prune Containers on Workstation
+. Prune Containers on Workstation
++
 [source,bash]
 ----
 [student@workstation Pods]$ sudo podman container prune
@@ -499,13 +504,14 @@ CONTAINER ID  IMAGE                                    COMMAND               CRE
 ----
 
 
-.Prune Images on Workstation
+. Prune Images on Workstation
++
 [source,bash]
 ----
 [student@workstation Pods]$ sudo podman image prune
 ----
 
-.List and Delete Images on Workstation
+. List and Delete Images on Workstation
 +
 [source,bash]
 ----
@@ -525,6 +531,166 @@ REPOSITORY   TAG   IMAGE ID   CREATED   SIZE
 <3> Ensuring image was removed
 
 ====
+
+=== Using Podman to Create YAML Resource Files
+
+Kubernetes and container orchestration tools typically require custom resource definition file (CRDs) that will fully describe the deployment and all settings. These YAML files are a description of what takes place in a declarative language, much like Ansible.
+
+Just as Kubernetes and Openshift manages containers by creating and managing Pods, so too does Podman. Newer upgrades and features to Podman allow the generation of these YAML files to make transitioning to/from Kubernetes much easier. Additionally, Podman can use these local pod/container definition files to launch and run services locally using Podman.
+
+==== Creating a Deployment File from a Container
+
+It is possible to create a deployment file for Podman from a running container. These files can simplify things when launching a job multiple times. It isn't necessary to author a bash script to leverage Podman to start and run the jobs.
+
+.Creating a Deployment File from a Container
+====
+
+. SSH to *root@server*
++
+[source,bash]
+----
+[student@workstation ~]$ ssh root@server
+----
+
+. Create a running container from HTTPD-Parent
++
+[source,bash]
+----
+[root@server ~]# podman run -d --name yaml-web-demo -p 8888:80 quay.io/redhattraining/httpd-parent:2.4
+fc626111af2376dc25fb3b397fce2c6536b5a3aa45db577d28d0ee41f7cdc791
+----
+
+. Test that the website is running in the container
++
+[source,bash]
+----
+[root@server ~]# curl localhost:8888
+Hello from the httpd-parent container!
+----
+
+. Generate the YAML file
++
+[source,bash]
+----
+[root@server ~]# podman generate kube yaml-web-demo > yaml-web-demo.yml
+----
+
+. Inspect the YAML file
++
+[source,bash]
+----
+[root@server ~]# cat yaml-web-demo.yml
+# Generation of Kubernetes YAML is still under development!
+#
+# Save the output of this file and use kubectl create -f to import
+# it into Kubernetes.
+#
+# Created with podman-3.0.2-dev
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: "2021-10-27T15:41:06Z"
+  labels:
+    app: yaml-web-demo
+  name: yaml-web-demo <1>
+spec:
+  containers:
+  - command:
+    - /bin/sh
+    - -c
+    - /usr/sbin/httpd -DFOREGROUND
+    env:
+    - name: PATH
+      value: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+    - name: TERM
+      value: xterm
+    - name: container
+      value: oci
+    - name: DOCROOT
+      value: /var/www/html
+    image: quay.io/redhattraining/httpd-parent:2.4 <2>
+    name: yaml-web-demo
+    ports:
+    - containerPort: 80
+      hostPort: 8888 <3>
+      protocol: TCP
+    resources: {}
+    securityContext:
+      allowPrivilegeEscalation: true
+      capabilities:
+        drop:
+        - CAP_MKNOD
+        - CAP_AUDIT_WRITE
+      privileged: false
+      readOnlyRootFilesystem: false
+      runAsGroup: 0
+      runAsUser: 0
+      seLinuxOptions: {}
+    workingDir: /
+  dnsConfig: {}
+status: {}
+----
+<1> Container name is defined
+<2> Container image is defined
+<3> Container port mapping is defined
+
+. Stop and Remove Container
++
+[source,bash]
+----
+[root@server ~]# podman rm yaml-web-demo -f
+fc626111af2376dc25fb3b397fce2c6536b5a3aa45db577d28d0ee41f7cdc791
+----
+
+. Start a new container with the *podman play kube* command
++
+[source,bash]
+----
+[root@server ~]# podman play kube ./yaml-web-demo.yml <1>
+a container exists with the same name ("yaml-web-demo") as the pod in your YAML file; changing pod name to yaml-web-demo_pod
+Pod: <2>
+72f468000f4899e89d0def7add5859c0c2cc75c9f0be49c85f4a7db401feed07
+Container: <3>
+72d22f1867e9b8f56921a5f6bba460e2c9fc123db0ed7a119974cfd46ce3305f
+----
+<1> *podman play kube* will attempt to create and start both a pod and a container because Kubernetes/Openshift is meant to manage pods
+<2> A Pod has been created for the resource
+<3> The *yaml-web-demo* container is created
+
+
+. Test and verify website
++
+[source,bash]
+----
+[root@server ~]# curl localhost:8888
+Hello from the httpd-parent container!
+----
+
+. Show running containers and Pods
++
+[source,bash]
+----
+[root@server ~]# podman pod ps <1>
+POD ID        NAME               STATUS   CREATED        INFRA ID      # OF CONTAINERS
+72f468000f48  yaml-web-demo_pod  Running  2 minutes ago  c6b8cb2eda97  2
+
+[root@server ~]# podman ps | grep yaml <2>
+72d22f1867e9  quay.io/redhattraining/httpd-parent:2.4                        3 minutes ago      Up 3 minutes ago      0.0.0.0:8888->80/tcp                            yaml-web-demo_pod-yaml-web-demo
+----
+<1> Showing the *yaml-web-demo_pod* pod
+<2> Showing the *yaml-web-demo* in the *yaml-web-demo_pod*
+
+. Stop and remove the *yaml-web-demo_pod* and all containers
++
+[source,bash]
+----
+[root@server ~]# podman pod rm yaml-web-demo_pod -f
+72f468000f4899e89d0def7add5859c0c2cc75c9f0be49c85f4a7db401feed07
+----
+
+====
+
+==== Creating a Deployment file from a Pod
 
 
 .References
