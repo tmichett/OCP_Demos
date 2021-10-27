@@ -1,0 +1,50 @@
+# Generation of Kubernetes YAML is still under development!
+#
+# Save the output of this file and use kubectl create -f to import
+# it into Kubernetes.
+#
+# Created with podman-3.0.2-dev
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: "2021-10-27T15:41:06Z"
+  labels:
+    app: yaml-web-demo
+  name: yaml-web-demo
+spec:
+  containers:
+  - command:
+    - /bin/sh
+    - -c
+    - /usr/sbin/httpd -DFOREGROUND
+    env:
+    - name: PATH
+      value: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+    - name: TERM
+      value: xterm
+    - name: container
+      value: oci
+    - name: DOCROOT
+      value: /var/www/html
+    image: quay.io/redhattraining/httpd-parent:2.4
+    name: yaml-web-demo
+    ports:
+    - containerPort: 80
+      hostPort: 8888
+      protocol: TCP
+    resources: {}
+    securityContext:
+      allowPrivilegeEscalation: true
+      capabilities:
+        drop:
+        - CAP_MKNOD
+        - CAP_AUDIT_WRITE
+      privileged: false
+      readOnlyRootFilesystem: false
+      runAsGroup: 0
+      runAsUser: 0
+      seLinuxOptions: {}
+    workingDir: /
+  dnsConfig: {}
+status: {}
+

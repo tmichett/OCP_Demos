@@ -1,0 +1,152 @@
+# Generation of Kubernetes YAML is still under development!
+#
+# Save the output of this file and use kubectl create -f to import
+# it into Kubernetes.
+#
+# Created with podman-3.0.2-dev
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: "2021-10-27T16:08:16Z"
+  labels:
+    app: wordpresspoddemo
+  name: wordpress_pod_demo
+spec:
+  containers:
+  - args:
+    - apache2-foreground
+    command:
+    - docker-entrypoint.sh
+    env:
+    - name: PATH
+      value: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+    - name: TERM
+      value: xterm
+    - name: container
+      value: podman
+    - name: PHP_LDFLAGS
+      value: -Wl,-O1 -Wl,--hash-style=both -pie
+    - name: APACHE_ENVVARS
+      value: /etc/apache2/envvars
+    - name: WORDPRESS_SHA1
+      value: e3edcb1131e539c2b2e10fed37f8b6683c824a98
+    - name: PHP_URL
+      value: https://www.php.net/get/php-7.3.12.tar.xz/from/this/mirror
+    - name: WORDPRESS_DB_HOST
+      value: 127.0.0.1:3306
+    - name: PHP_EXTRA_CONFIGURE_ARGS
+      value: --with-apxs2 --disable-cgi
+    - name: WORDPRESS_VERSION
+      value: "5.3"
+    - name: WORDPRESS_DB_USER
+      value: wordpress
+    - name: WORDPRESS_DB_PASSWORD
+      value: wordpress
+    - name: PHP_CPPFLAGS
+      value: -fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
+    - name: PHP_ASC_URL
+      value: https://www.php.net/get/php-7.3.12.tar.xz.asc/from/this/mirror
+    - name: PHPIZE_DEPS
+      value: "autoconf \t\tdpkg-dev \t\tfile \t\tg++ \t\tgcc \t\tlibc-dev \t\tmake \t\tpkg-config \t\tre2c"
+    - name: PHP_SHA256
+      value: aafe5e9861ad828860c6af8c88cdc1488314785962328eb1783607c1fdd855df
+    - name: PHP_EXTRA_BUILD_DEPS
+      value: apache2-dev
+    - name: PHP_CFLAGS
+      value: -fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
+    - name: PHP_VERSION
+      value: 7.3.12
+    - name: GPG_KEYS
+      value: CBAF69F173A0FEA4B537F470D66C9593118BCCB6 F38252826ACD957EF380D39F2F7956BC5DA04B5D
+    - name: PHP_MD5
+    - name: PHP_INI_DIR
+      value: /usr/local/etc/php
+    - name: APACHE_CONFDIR
+      value: /etc/apache2
+    - name: WORDPRESS_DB_NAME
+      value: wordpress
+    image: quay.io/redhattraining/wordpress:5.3.0
+    name: wp
+    ports:
+    - containerPort: 80
+      hostPort: 9999
+      protocol: TCP
+    resources: {}
+    securityContext:
+      allowPrivilegeEscalation: true
+      capabilities:
+        drop:
+        - CAP_MKNOD
+        - CAP_AUDIT_WRITE
+      privileged: false
+      readOnlyRootFilesystem: false
+      seLinuxOptions: {}
+    workingDir: /var/www/html
+  - args:
+    - run-mysqld
+    command:
+    - container-entrypoint
+    env:
+    - name: PATH
+      value: /opt/app-root/src/bin:/opt/app-root/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+    - name: TERM
+      value: xterm
+    - name: container
+      value: oci
+    - name: BASH_ENV
+      value: /usr/share/container-scripts/mysql/scl_enable
+    - name: PLATFORM
+      value: el7
+    - name: PROMPT_COMMAND
+      value: . /usr/share/container-scripts/mysql/scl_enable
+    - name: APP_ROOT
+      value: /opt/app-root
+    - name: MYSQL_ROOT_PASSWORD
+      value: somewordpress
+    - name: MYSQL_USER
+      value: wordpress
+    - name: MYSQL_PASSWORD
+      value: wordpress
+    - name: HOME
+      value: /var/lib/mysql
+    - name: STI_SCRIPTS_PATH
+      value: /usr/libexec/s2i
+    - name: STI_SCRIPTS_URL
+      value: image:///usr/libexec/s2i
+    - name: MYSQL_DATABASE
+      value: wordpress
+    - name: ENV
+      value: /usr/share/container-scripts/mysql/scl_enable
+    - name: SUMMARY
+      value: MySQL 5.7 SQL database server
+    - name: ENABLED_COLLECTIONS
+      value: rh-mysql57
+    - name: DESCRIPTION
+      value: MySQL is a multi-user, multi-threaded SQL database server. The container image provides a containerized packaging of the MySQL mysqld daemon and client application. The mysqld server daemon accepts connections from clients and provides access to content from MySQL databases on behalf of the clients.
+    - name: MYSQL_PREFIX
+      value: /opt/rh/rh-mysql57/root/usr
+    - name: CONTAINER_SCRIPTS_PATH
+      value: /usr/share/container-scripts/mysql
+    - name: APP_DATA
+      value: /opt/app-root/src
+    - name: MYSQL_VERSION
+      value: "5.7"
+    image: registry.access.redhat.com/rhscl/mysql-57-rhel7:latest
+    name: db
+    resources: {}
+    securityContext:
+      allowPrivilegeEscalation: true
+      capabilities:
+        drop:
+        - CAP_MKNOD
+        - CAP_AUDIT_WRITE
+      privileged: false
+      readOnlyRootFilesystem: false
+      runAsGroup: 27
+      runAsUser: 27
+      seLinuxOptions: {}
+    workingDir: /opt/app-root/src
+  dnsConfig: {}
+  restartPolicy: Never
+status: {}
+
