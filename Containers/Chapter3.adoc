@@ -546,6 +546,12 @@ REPOSITORY   TAG   IMAGE ID   CREATED   SIZE
 
 *What is a dangling image and what is an unused image?*: https://newbedev.com/what-is-a-dangling-image-and-what-is-an-unused-image
 
+*Podman can now ease the transition to Kubernetes and CRI-O*: https://developers.redhat.com/blog/2019/01/29/podman-kubernetes-yaml#
+
+*Moving from docker-compose to Podman pods*: https://www.redhat.com/sysadmin/compose-podman-pods
+
+*Working with pods with podman generate and podman play*: https://mohitgoyal.co/2021/05/10/working-with-pods-with-podman-generate-and-podman-play/
+
 *_man pages_*: _podman-system-prune_, _podman-container-cleanup_, _podman-pod-prune_, _podman-container-prune_, _podman-image-prune_, and _podman-volume-prune_.
 
 ====

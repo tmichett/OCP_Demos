@@ -152,7 +152,17 @@ endif::[]
 * *podman-generate-systemd*
 ** https://docs.podman.io/en/latest/markdown/podman-generate-systemd.1.html
 
+* *Podman can now ease the transition to Kubernetes and CRI-O*
+** https://developers.redhat.com/blog/2019/01/29/podman-kubernetes-yaml#
 
+* *Moving from docker-compose to Podman pods*
+** https://www.redhat.com/sysadmin/compose-podman-pods
+
+* *Working with pods with podman generate and podman play*
+** https://mohitgoyal.co/2021/05/10/working-with-pods-with-podman-generate-and-podman-play/
+
+* *Spinning up and Managing Pods with multiple containers with Podman*
+** https://mohitgoyal.co/2021/04/23/spinning-up-and-managing-pods-with-multiple-containers-with-podman/
 
 == Buildah References
 
