@@ -565,7 +565,9 @@ image::Chapter2-f3100.png[title="UBI7 Container - Deletion", align="center"]
 +
 image::Chapter2-1b4f6.png[title="UBI7 Image - Deletion", align="center"]
 
-
+. Verify both the container and image have been deleted
++
+image::Chapter2-d83d0.png[title="Cleanup Successful", align="center"]
 ====
 
 
