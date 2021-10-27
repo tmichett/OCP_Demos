@@ -1009,6 +1009,234 @@ Storing signatures
 
 === Inspecting Images with Skopeo on Remote Registries
 
+Skopeo is another new command-line utility that can work in conjunction with both Podman, and Buildah. Skopeo can be run as a regular user or root-level user to interact with container images. While both Podman and Buildah work with container images, Skopeo is designed to work with container images and image repositories. Podman is only able to inspect images in the local image registry whereas Skopeo can inspect both local and remote images.
+
+In addition to gaining information about images from remote registries, Skopeo can also perform a wide array of tasks.
+
+.Skopeo Abilities
+* Delete images from local or remote image repositories
+* Copy images from one image registry to another
+* Inspecting remote images
+* Syncing images for offline copying to internal registries (air-gapped / isolated environments)
+* Login and authenticate to registries
+
+==== Using Skopeo to Inspect Images and Copy Images
+
+The following exercises will leverage Skopeo to inspect the *quay.local/redhattraining/hello-world-nginx* image remotely. They will also copy the image from the *quay.local/redhattraining* to your private repository.
+
+. SSH to *server*
++
+[source,bash]
+----
+[student@workstation ~]$ ssh root@server
+----
+
+. Login to *quay.local* with Skopeo
++
+[source,bash]
+----
+[root@server ~]# skopeo login quay.local --tls-verify=false
+Authenticating with existing credentials... <1>
+Existing credentials are valid. Already logged in to quay.local
+----
+<1> Skopeo capable of using cached credentials from Podman
+
+. Inspect the Container from Remote Registry
++
+[source,bash]
+----
+[root@server ~]# skopeo inspect docker://quay.local:80/redhattraining/hello-world-nginx
+{
+    "Name": "quay.local:80/redhattraining/hello-world-nginx",
+    "Tag": "latest",
+    "Digest": "sha256:72b6f8c7f24e852f6307661bbb0d7bc153137c2c23aa49f6dd16cfd0a8e8093b",
+    "RepoTags": [
+        "latest"
+    ],
+    "Created": "2019-06-26T22:59:13.751737399Z",
+    "DockerVersion": "",
+    "Labels": {
+        "architecture": "x86_64",
+        "authoritative-source-url": "registry.access.redhat.com",
+        "build-date": "2019-04-25T16:26:03.051400",
+        "com.redhat.build-host": "cpt-0013.osbs.prod.upshift.rdu2.redhat.com",
+        "com.redhat.component": "ubi8-container",
+        "com.redhat.license_terms": "https://www.redhat.com/licenses/eulas",
+        "description": "The Universal Base Image is designed and engineered to be the base layer for all of your containerized applications, middleware and utilities. This base image is freely redistributable, but Red Hat only supports Red Hat technologies through subscriptions for Red Hat products. This image is maintained by Red Hat and updated regularly.",
+        "distribution-scope": "public",
+        "io.k8s.description": "The Universal Base Image is designed and engineered to be the base layer for all of your containerized applications, middleware and utilities. This base image is freely redistributable, but Red Hat only supports Red Hat technologies through subscriptions for Red Hat products. This image is maintained by Red Hat and updated regularly.",
+        "io.k8s.display-name": "Red Hat Universal Base Image 8",
+        "io.openshift.expose-services": "",
+        "io.openshift.tags": "base rhel8",
+        "maintainer": "Red Hat, Inc.",
+        "name": "ubi8",
+        "release": "122",
+        "summary": "Provides the latest release of Red Hat Universal Base Image 8.",
+        "url": "https://access.redhat.com/containers/#/registry.access.redhat.com/ubi8/images/8.0-122",
+        "vcs-ref": "d5ff1490fad8f1b57e451d384d3b331e94cf6fe4",
+        "vcs-type": "git",
+        "vendor": "Red Hat, Inc.",
+        "version": "8.0"
+    },
+    "Architecture": "amd64",
+    "Os": "linux",
+    "Layers": [
+        "sha256:4fc3a6f12060dda18cbd448606cbd27c8dee5e0179f9f76a50a8a1de9e5aa827",
+        "sha256:cf8bdd5396ac2c59b14aec87491c8d3c3e6c7be355804b6423f8feeffccbda41",
+        "sha256:d5072897bb5d09c20671d4a3714bf9203b13887a3e97df6e7770c65e8e5d949d",
+        "sha256:e0ed7e500605c8a40f7717871e9b359e65b239236a094544b89d7b2dda95ba3c",
+        "sha256:2eb03ea4690d1339f41ef5082b8644ef44e265b73a008c0e05996f1badeca761",
+        "sha256:8e4505e250a0379536b9f1a681943a8585bf258e6c218e29f4f4f70ffee8519a",
+        "sha256:a8ab12e20ea0ea02fe1f4b0962365d0c146b988c914a112cdd43605f48a44dc1",
+        "sha256:1dbcab28ce46b65c0174e5e82658492107396fead31e9144c343e6bc96e471c7",
+        "sha256:1dbcab28ce46b65c0174e5e82658492107396fead31e9144c343e6bc96e471c7",
+        "sha256:1dbcab28ce46b65c0174e5e82658492107396fead31e9144c343e6bc96e471c7"
+    ],
+    "Env": [
+        "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+        "container=oci"
+    ]
+}
+----
+
+. Use Skopeo to inspect configuration and layers of the container
++
+[source,bash]
+----
+[root@server ~]# skopeo inspect --config docker://quay.local:80/redhattraining/hello-world-nginx
+{
+    "created": "2019-06-26T22:59:13.751737399Z",
+    "architecture": "amd64",
+    "os": "linux",
+    "config": {
+        "User": "1001",
+        "ExposedPorts": {
+            "8080/tcp": {}
+        },
+        "Env": [
+            "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+            "container=oci"
+        ],
+        "Cmd": [
+            "/bin/sh",
+            "-c",
+            "nginx -g \"daemon off;\""
+        ],
+        "Labels": {
+            "architecture": "x86_64",
+            "authoritative-source-url": "registry.access.redhat.com",
+            "build-date": "2019-04-25T16:26:03.051400",
+            "com.redhat.build-host": "cpt-0013.osbs.prod.upshift.rdu2.redhat.com",
+            "com.redhat.component": "ubi8-container",
+            "com.redhat.license_terms": "https://www.redhat.com/licenses/eulas",
+            "description": "The Universal Base Image is designed and engineered to be the base layer for all of your containerized applications, middleware and utilities. This base image is freely redistributable, but Red Hat only supports Red Hat technologies through subscriptions for Red Hat products. This image is maintained by Red Hat and updated regularly.",
+            "distribution-scope": "public",
+            "io.k8s.description": "The Universal Base Image is designed and engineered to be the base layer for all of your containerized applications, middleware and utilities. This base image is freely redistributable, but Red Hat only supports Red Hat technologies through subscriptions for Red Hat products. This image is maintained by Red Hat and updated regularly.",
+            "io.k8s.display-name": "Red Hat Universal Base Image 8",
+            "io.openshift.expose-services": "",
+            "io.openshift.tags": "base rhel8",
+            "maintainer": "Red Hat, Inc.",
+            "name": "ubi8",
+            "release": "122",
+            "summary": "Provides the latest release of Red Hat Universal Base Image 8.",
+            "url": "https://access.redhat.com/containers/#/registry.access.redhat.com/ubi8/images/8.0-122",
+            "vcs-ref": "d5ff1490fad8f1b57e451d384d3b331e94cf6fe4",
+            "vcs-type": "git",
+            "vendor": "Red Hat, Inc.",
+            "version": "8.0"
+        }
+    },
+    "rootfs": {
+        "type": "layers",
+        "diff_ids": [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+        ]
+    },
+    "history": [
+        {
+            "created": "2019-04-25T16:26:20.260497942Z",
+            "comment": "Imported from -"
+        },
+        {
+            "created": "2019-04-25T16:26:28.425556Z"
+        },
+        {
+            "created": "2019-06-26T22:33:55.170741575Z",
+            "created_by": "/bin/sh -c yum install -y --disableplugin=subscription-manager --nodocs nginx   \u0026\u0026 yum clean all"
+        },
+        {
+            "created": "2019-06-26T22:34:02.362527585Z",
+            "created_by": "/bin/sh -c #(nop) ADD index.html /usr/share/nginx/html"
+        },
+        {
+            "created": "2019-06-26T22:59:11.622403847Z",
+            "created_by": "/bin/sh -c #(nop) ADD nginxconf.sed /tmp/"
+        },
+        {
+            "created": "2019-06-26T22:59:12.412697298Z",
+            "created_by": "/bin/sh -c sed -i -f /tmp/nginxconf.sed /etc/nginx/nginx.conf"
+        },
+        {
+            "created": "2019-06-26T22:59:13.277995379Z",
+            "created_by": "/bin/sh -c touch /run/nginx.pid   \u0026\u0026 chgrp -R 0 /var/log/nginx /run/nginx.pid   \u0026\u0026 chmod -R g+rwx /var/log/nginx /run/nginx.pid"
+        },
+        {
+            "created": "2019-06-26T22:59:13.414802016Z",
+            "created_by": "/bin/sh -c #(nop) EXPOSE 8080"
+        },
+        {
+            "created": "2019-06-26T22:59:13.593338162Z",
+            "created_by": "/bin/sh -c #(nop) USER 1001"
+        },
+        {
+            "created": "2019-06-26T22:59:13.751737399Z"
+        }
+    ]
+}
+----
+
+. Copy *hello-world-nginx* to your private repository
++
+[source,bash]
+----
+[root@server ~]# skopeo copy --tls-verify=false docker://quay.local/redhattraining/hello-world-nginx docker://quay.local/travis/hello-world-nginx
+WARN[0000] '--tls-verify' is deprecated, please set this on the specific subcommand
+Getting image source signatures
+Copying blob e0ed7e500605 done
+Copying blob cf8bdd5396ac done
+Copying blob 8e4505e250a0 done
+Copying blob d5072897bb5d done
+Copying blob a8ab12e20ea0 done
+Copying blob 1dbcab28ce46 done
+Copying blob 1dbcab28ce46 skipped: already exists
+Copying blob 1dbcab28ce46 skipped: already exists
+Copying blob 4fc3a6f12060 done
+Copying blob 2eb03ea4690d done
+Writing manifest to image destination
+Storing signatures
+----
++
+[TIP]
+======
+Ensure you are logged in
+
+[source,bash]
+----
+[root@server ~]# skopeo login quay.local --tls-verify=false
+Username: travis
+Password:
+Login Succeeded!
+----
+======
 
 .References
 [NOTE]
