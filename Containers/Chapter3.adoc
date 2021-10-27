@@ -540,7 +540,7 @@ Just as Kubernetes and Openshift manages containers by creating and managing Pod
 
 ==== Creating a Deployment File from a Container
 
-It is possible to create a deployment file for Podman from a running container. These files can simplify things when launching a job multiple times. It isn't necessary to author a bash script to leverage Podman to start and run the jobs.
+It is possible to create a deployment file for Podman from a running container. These files can simplify things when launching a job multiple times. It isn't necessary to author a bash script to leverage Podman to start and run the jobs. The resulting deployment file will create a pod with the needed container when running the *podman play kube* command as a *_pod_* is the smallest unit that can be managed and Kubernetes/Openshift doesn't manage anything smaller than the pod-level.
 
 .Creating a Deployment File from a Container
 ====
@@ -688,9 +688,317 @@ POD ID        NAME               STATUS   CREATED        INFRA ID      # OF CONT
 72f468000f4899e89d0def7add5859c0c2cc75c9f0be49c85f4a7db401feed07
 ----
 
+. Verify that the pod and container has been removed
++
+[source,bash]
+----
+[root@server ~]# podman ps -a | grep yaml
+
+[root@server ~]# podman pod ps
+POD ID  NAME    STATUS  CREATED  INFRA ID  # OF CONTAINERS
+----
+
 ====
 
 ==== Creating a Deployment file from a Pod
+
+It is possible to create a deployment file for Podman from a running pod. This deployment file will contain information about all containers running in the pod and can be used for later deployments.
+
+.Deployment YAML File for a Pod with Multiple Containers
+====
+
+For this lab, we will be creating a *Wordpress Demo Pod* like we did above but exposing port 9999. Instead of using a script, we will have a YAML file which can deploy the application.
+
+. SSH to *root@server*
++
+[source,bash]
+----
+[student@workstation ~]$ ssh root@server
+----
+
+. Create a running Pod
++
+[source,bash]
+----
+[root@server ~]# podman pod create --name wordpress_pod_demo -p 9999:80
+6690272e241f1155dde5ddc276e8fc5587c6258cf83b6701038713b95ae24971
+----
+
+. Create a Database Container in the Running Pod
++
+[source,bash]
+----
+[root@server ~]# podman run -d --name db \
+> -e MYSQL_USER=wordpress \
+> -e MYSQL_PASSWORD=wordpress \
+> -e MYSQL_DATABASE=wordpress \
+> -e MYSQL_ROOT_PASSWORD=somewordpress \
+> --pod wordpress_pod_demo registry.access.redhat.com/rhscl/mysql-57-rhel7
+----
+
+. Create the Wordpress Container in the Running Pod
++
+[source,bash]
+----
+[root@server ~]# podman run -d --name wp \
+> -e WORDPRESS_DB_HOST=127.0.0.1:3306 \
+> -e WORDPRESS_DB_USER=wordpress \
+> -e WORDPRESS_DB_PASSWORD=wordpress \
+> -e WORDPRESS_DB_NAME=wordpress \
+> --pod wordpress_pod_demo quay.io/redhattraining/wordpress:5.3.0
+----
+
+. Verify Podman and Container Status
++
+[source,bash]
+----
+[root@server ~]# podman pod ps --ctr-names
+POD ID        NAME                STATUS   CREATED        INFRA ID      <no value>
+6690272e241f  wordpress_pod_demo  Running  3 minutes ago  43def184da95  6690272e241f-infra,wp,db
+----
+
+. Verify Website Status
++
+[source,bash]
+----
+[root@server ~]#  curl -I http://127.0.0.1:9999/wp-admin/install.php
+HTTP/1.1 200 OK
+Date: Wed, 27 Oct 2021 16:06:26 GMT
+Server: Apache/2.4.38 (Debian)
+X-Powered-By: PHP/7.3.12
+Expires: Wed, 11 Jan 1984 05:00:00 GMT
+Cache-Control: no-cache, must-revalidate, max-age=0
+Content-Type: text/html; charset=utf-8
+----
+
+. Create YAML File for the Running Pod
++
+[source,bash]
+----
+[root@server ~]# podman generate kube wordpress_pod_demo > wordpress_pod_demo.yml
+----
+
+. Examine the *wordpress_pod_demo.yml* file
++
+[source,bash]
+----
+[root@server ~]# cat wordpress_pod_demo.yml
+# Generation of Kubernetes YAML is still under development!
+#
+# Save the output of this file and use kubectl create -f to import
+# it into Kubernetes.
+#
+# Created with podman-3.0.2-dev
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: "2021-10-27T16:08:16Z"
+  labels:
+    app: wordpresspoddemo
+  name: wordpress_pod_demo <1>
+spec:
+  containers:
+  - args:
+    - apache2-foreground
+    command:
+    - docker-entrypoint.sh
+    env:
+    - name: PATH
+      value: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+    - name: TERM
+      value: xterm
+    - name: container
+      value: podman
+    - name: PHP_LDFLAGS
+      value: -Wl,-O1 -Wl,--hash-style=both -pie
+    - name: APACHE_ENVVARS
+      value: /etc/apache2/envvars
+    - name: WORDPRESS_SHA1
+      value: e3edcb1131e539c2b2e10fed37f8b6683c824a98
+    - name: PHP_URL
+      value: https://www.php.net/get/php-7.3.12.tar.xz/from/this/mirror
+    - name: WORDPRESS_DB_HOST
+      value: 127.0.0.1:3306
+    - name: PHP_EXTRA_CONFIGURE_ARGS
+      value: --with-apxs2 --disable-cgi
+    - name: WORDPRESS_VERSION
+      value: "5.3"
+    - name: WORDPRESS_DB_USER
+      value: wordpress
+    - name: WORDPRESS_DB_PASSWORD
+      value: wordpress
+    - name: PHP_CPPFLAGS
+      value: -fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
+    - name: PHP_ASC_URL
+      value: https://www.php.net/get/php-7.3.12.tar.xz.asc/from/this/mirror
+    - name: PHPIZE_DEPS
+      value: "autoconf \t\tdpkg-dev \t\tfile \t\tg++ \t\tgcc \t\tlibc-dev \t\tmake \t\tpkg-config \t\tre2c"
+    - name: PHP_SHA256
+      value: aafe5e9861ad828860c6af8c88cdc1488314785962328eb1783607c1fdd855df
+    - name: PHP_EXTRA_BUILD_DEPS
+      value: apache2-dev
+    - name: PHP_CFLAGS
+      value: -fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
+    - name: PHP_VERSION
+      value: 7.3.12
+    - name: GPG_KEYS
+      value: CBAF69F173A0FEA4B537F470D66C9593118BCCB6 F38252826ACD957EF380D39F2F7956BC5DA04B5D
+    - name: PHP_MD5
+    - name: PHP_INI_DIR
+      value: /usr/local/etc/php
+    - name: APACHE_CONFDIR
+      value: /etc/apache2
+    - name: WORDPRESS_DB_NAME
+      value: wordpress
+    image: quay.io/redhattraining/wordpress:5.3.0
+    name: wp <2>
+    ports:
+    - containerPort: 80
+      hostPort: 9999 <3>
+      protocol: TCP
+    resources: {}
+    securityContext:
+      allowPrivilegeEscalation: true
+      capabilities:
+        drop:
+        - CAP_MKNOD
+        - CAP_AUDIT_WRITE
+      privileged: false
+      readOnlyRootFilesystem: false
+      seLinuxOptions: {}
+    workingDir: /var/www/html
+  - args:
+    - run-mysqld
+    command:
+    - container-entrypoint
+    env:
+    - name: PATH
+      value: /opt/app-root/src/bin:/opt/app-root/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+    - name: TERM
+      value: xterm
+    - name: container
+      value: oci
+    - name: BASH_ENV
+      value: /usr/share/container-scripts/mysql/scl_enable
+    - name: PLATFORM
+      value: el7
+    - name: PROMPT_COMMAND
+      value: . /usr/share/container-scripts/mysql/scl_enable
+    - name: APP_ROOT
+      value: /opt/app-root
+    - name: MYSQL_ROOT_PASSWORD
+      value: somewordpress
+    - name: MYSQL_USER
+      value: wordpress
+    - name: MYSQL_PASSWORD
+      value: wordpress
+    - name: HOME
+      value: /var/lib/mysql
+    - name: STI_SCRIPTS_PATH
+      value: /usr/libexec/s2i
+    - name: STI_SCRIPTS_URL
+      value: image:///usr/libexec/s2i
+    - name: MYSQL_DATABASE
+      value: wordpress
+    - name: ENV
+      value: /usr/share/container-scripts/mysql/scl_enable
+    - name: SUMMARY
+      value: MySQL 5.7 SQL database server
+    - name: ENABLED_COLLECTIONS
+      value: rh-mysql57
+    - name: DESCRIPTION
+      value: MySQL is a multi-user, multi-threaded SQL database server. The container image provides a containerized packaging of the MySQL mysqld daemon and client application. The mysqld server daemon accepts connections from clients and provides access to content from MySQL databases on behalf of the clients.
+    - name: MYSQL_PREFIX
+      value: /opt/rh/rh-mysql57/root/usr
+    - name: CONTAINER_SCRIPTS_PATH
+      value: /usr/share/container-scripts/mysql
+    - name: APP_DATA
+      value: /opt/app-root/src
+    - name: MYSQL_VERSION
+      value: "5.7"
+    image: registry.access.redhat.com/rhscl/mysql-57-rhel7:latest
+    name: db <4>
+    resources: {}
+    securityContext:
+      allowPrivilegeEscalation: true
+      capabilities:
+        drop:
+        - CAP_MKNOD
+        - CAP_AUDIT_WRITE
+      privileged: false
+      readOnlyRootFilesystem: false
+      runAsGroup: 27
+      runAsUser: 27
+      seLinuxOptions: {}
+    workingDir: /opt/app-root/src
+  dnsConfig: {}
+  restartPolicy: Never
+status: {}
+----
+<1> Pod Name for the *Wordpress_Pod_Demo* Pod
+<2> Container name for Wordpress Container *wp*
+<3> Container port for the Wordpress Container *9999*
+<4> Container name for the Database Container *db*
+
+. Remove Running Pod and all Containers
++
+[source,bash]
+----
+[root@server ~]# podman pod rm wordpress_pod_demo -f
+6690272e241f1155dde5ddc276e8fc5587c6258cf83b6701038713b95ae24971
+----
+
+. Verify Pod and Containers Removed
++
+[source,bash]
+----
+[root@server ~]# podman pod ps
+POD ID  NAME    STATUS  CREATED  INFRA ID  # OF CONTAINERS
+
+[root@server ~]# podman ps -a | grep wp
+
+[root@server ~]# podman ps -a | grep db
+----
+
+. Deploy Wordpress Pod from YAML File with *podman play kube* command
++
+[source,bash]
+----
+[root@server ~]# podman play kube ./wordpress_pod_demo.yml
+
+... OUTPUT OMITTED ...
+
+Pod:
+8bfbdaaf4c17a60180fa918b8fe426f568e697e72f68c22da7a3b70b592756eb
+Containers:
+b044e3cbc3cbdfaae6a74c3646a43fda971ec044fe1b566f97802688307aae7a
+8a4e1ce9e3375d945ad82a503490472b9f955350098afed7716d3a1a13e76c53
+----
+
+. Verify Pod Status
++
+[source,bash]
+----
+[root@server ~]# podman pod ps --ctr-names
+POD ID        NAME                STATUS   CREATED             INFRA ID      <no value>
+8bfbdaaf4c17  wordpress_pod_demo  Running  About a minute ago  0a19088da270  8bfbdaaf4c17-infra,wordpress_pod_demo-db,wordpress_pod_demo-wp
+----
+
+. Verify Website
++
+[source,bash]
+----
+[root@server ~]# curl -I http://127.0.0.1:9999/wp-admin/install.php
+HTTP/1.1 200 OK
+Date: Wed, 27 Oct 2021 16:16:37 GMT
+Server: Apache/2.4.38 (Debian)
+X-Powered-By: PHP/7.3.12
+Expires: Wed, 11 Jan 1984 05:00:00 GMT
+Cache-Control: no-cache, must-revalidate, max-age=0
+Content-Type: text/html; charset=utf-8
+----
+
+====
 
 
 .References
