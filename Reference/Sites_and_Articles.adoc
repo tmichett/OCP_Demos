@@ -47,6 +47,12 @@ endif::[]
 * *Systemd Timers for Scheduling Tasks*
 ** https://fedoramagazine.org/systemd-timers-for-scheduling-tasks/
 
+
+== Containers
+
+* *A Comparison Of Linux Container Images*
+** http://crunchtools.com/comparison-linux-container-images/
+
 == Podman References
 
 * *What is Podman?*
@@ -164,6 +170,9 @@ endif::[]
 * *Spinning up and Managing Pods with multiple containers with Podman*
 ** https://mohitgoyal.co/2021/04/23/spinning-up-and-managing-pods-with-multiple-containers-with-podman/
 
+* *Podman - Kubernetes by Example*
+** https://kubebyexample.com/en/learning-paths/container-fundamentals/tools/podman
+
 == Buildah References
 
 * *Buildah Tutorial*
@@ -184,6 +193,9 @@ endif::[]
 
 * *Building and managing container images with Buildah*
 ** https://mohitgoyal.co/2021/05/16/building-and-managing-container-images-with-buildah/
+
+* *Buidah - Kube by example*
+** https://kubebyexample.com/en/learning-paths/container-fundamentals/tools/buidah
 
 == Skopeo References
 
@@ -266,6 +278,17 @@ endif::[]
 
 * Living with Kubernetes: Debug Clusters in 8 Commands
 ** https://thenewstack.io/living-with-kubernetes-debug-clusters-in-8-commands/
+
+* *How to use Podman inside of Kubernetes*
+** https://www.redhat.com/sysadmin/podman-inside-kubernetes
+
+* *From Docker Compose to Kubernetes with Podman*
+** https://www.redhat.com/sysadmin/compose-kubernetes-podman
+
+* *What is Kubernetes?*
+** https://www.redhat.com/en/topics/containers/what-is-kubernetes
+
+
 
 == Docker References
 
