@@ -184,6 +184,27 @@ Error: pod e18e307bab06dd45d3cc5a90472ea075979aacb3adfc2071dfd68dca284b03a3 has 
 ====
 In this exercise, you will be creating a pod to run the Wordpress application. This pod will contain multiple containers, namely Wordpress and MySQL/MariaDB.
 
+. Change to the *github/OCP_Demos/Containers/labs/Pods* on Workstation
++
+[source,bash]
+----
+[student@workstation ~]$ cd github/OCP_Demos/Containers/labs/Pods/
+----
+
+. Execute the *Deploy_Exercise_Files* Playbook
++
+[source,bash]
+----
+[student@workstation Pods]$ ansible-playbook Deploy_Exercise_Files.yml
+----
+
+. SSH to the *server* as root
++
+[source,bash]
+----
+[student@workstation ~]$ ssh root@server
+----
+
 . Create the pod for running the Wordpress web application
 +
 [source,bash]
@@ -447,6 +468,15 @@ Actual container image cleanup is performed with the *podman rmi ** command whic
 
 .Managing Containers and Images
 ====
+
+Playbooks have been setup to create and launch pods as well as various scripts to perform the launching.
+
+. Change to the *github/OCP_Demos/Containers/labs/Pods* on Workstation
++
+[source,bash]
+----
+[student@workstation ~]$ cd github/OCP_Demos/Containers/labs/Pods/
+----
 
 . Install Podman Containers Collection
 +
