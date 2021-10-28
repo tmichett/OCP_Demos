@@ -9,7 +9,7 @@ ifdef::env-github[]
 :warning-caption: :warning:
 :imagesdir: images/
 endif::[]
-
+:imagesdir: images/
 
 == Container Management with Ansible
 
@@ -172,9 +172,19 @@ https://docs.ansible.com/ansible/latest/collections/containers/podman/podman_con
 
 There are multiple methods for the Podman collection to be installed, however, for this course and the exercises, the collection will be installed locally to the *./collections* sub-folder using a requirements.yml file. The *ansible.cfg* will point to this as already available in the path and the Ansible playbooks being utilized will reference the *collections* at the top of the playbook similar to Ansible roles so that throughout the playbook tasks, the shorter module name can be referenced.
 
+.*LAB: Installing the _containers.podman_ Collection*
+====
+
 .Installing the Podman Collection
 
 Similar to installation of Ansible Roles, Ansible Collections can be installed in the local working directory in a sub-directory called *collections*. The collections needed for the Ansible projects can be specified in a *requirements.yml* file and installed just like Ansible Roles.
+
+. Change to the *github/OCP_Demos/Containers/labs/Ansible_Image/* Directory
++
+[source,bash]
+----
+[student@workstation ~]$ cd github/OCP_Demos/Containers/labs/Ansible_Image/
+----
 
 . Create a *requirements.yml* File
 +
@@ -182,8 +192,9 @@ Similar to installation of Ansible Roles, Ansible Collections can be installed i
 [source,yaml]
 ----
 collections:
-- name: containers.podman
+- name: containers.podman <1>
 ----
+<1> Listing of collections to download an install
 
 . Install the roles/collections from the *requirements.yml* File
 +
@@ -221,7 +232,7 @@ collections/
 
 64 directories, 146 files
 ----
-
+====
 
 .Using Collections
 [TIP]
@@ -260,7 +271,18 @@ Referencing the *collection* and using shorter module names. This allows a clean
 
 The *podman_image* module from the *containers.podman* collection is needed in order to work with an manipulate container images. In order to build images, it is necessary to have either a valid *Containerfile* or valid *Dockerfile* for image building.
 
+.*LAB: Building Container Images with Ansible*
+====
+
 .Building Podman Container Images with Ansible
+
+. Change to the *github/OCP_Demos/Containers/labs/Ansible_Image/* Directory
++
+[source,bash]
+----
+[student@workstation ~]$ cd github/OCP_Demos/Containers/labs/Ansible_Image/
+----
+
 
 . Verify the *ansible.cfg* file for proper collection usage
 +
@@ -314,7 +336,7 @@ tasks:
         dest: "{{ registry_url }}/{{ registry_un }}"
 ----
 <1> Initial task to login to registry
-<2> Task using the *podman image* module to build and push an image
+<2> Task using the *podman_image* module to build and push an image
 <3> Name/Tag of the image being built
 <4> Path to the *Containerfile* or *Dockerfile*
 <5> Define whether or not to push to remote image registry
@@ -322,11 +344,23 @@ tasks:
 <7> Registry Password
 <8> Arguments used for pushing to remote registry. Works in conjunction with *push: yes*. Must have registry URL specified along with the location (_which is generally the repository username_).
 
+====
+
 === Deploying Podman Containers Using Ansible
 
 The *podman_container* module from the *containers.podman* collection is needed in order to create/run/remove containers. In order to create containers from container images, it is necessary to have access to the container images locally.
 
+.*LAB: Creating and Running Containers with Ansible*
+====
+
 .Creating and Running Podman Containers with Ansible
+
+. Change to the */home/student/github/OCP_Demos/Containers/labs/Ansible_Container* Directory
++
+[source,bash]
+----
+[student@workstation ~]$ cd /home/student/github/OCP_Demos/Containers/labs/Ansible_Container
+----
 
 . Verify the *ansible.cfg* file for proper collection usage
 +
@@ -337,6 +371,53 @@ The *podman_container* module from the *containers.podman* collection is needed 
 remote_user = root
 inventory = inventory
 COLLECTIONS_PATHS = ~/.ansible/collections:/usr/share/ansible/collections:./collections
+----
+
+. Create a *requirements.yml* File
++
+.Podman Collection *requirements.yml* File
+[source,yaml]
+----
+collections:
+- name: containers.podman <1>
+----
+<1> Listing of collections to download an install
+
+. Install the roles/collections from the *requirements.yml* File
++
+.Installing the Collections
+[source,bash]
+----
+[student@workstation Ansible_Image]$ ansible-galaxy collection install -r requirements.yml -p ./collections
+Process install dependency map
+Starting collection install process
+Installing 'containers.podman:1.8.1' to '/home/student/github/OCP_Demos/Containers/labs/Ansible_Image/collections/ansible_collections/containers/podman'
+----
+
+. Verify the collection(s) are installed
++
+.Verifying Installed Collections
+[source,bash]
+----
+[student@workstation Ansible_Image]$ tree collections/
+collections/
+└── ansible_collections
+    └── containers
+        └── podman
+            ├── ansible-collection-containers-podman.spec
+            ├── CHANGELOG.rst
+            ├── changelog
+
+... OUTPUT OMITTED ...
+
+└── sanity
+    ├── ignore-2.10.txt
+    ├── ignore-2.11.txt
+    ├── ignore-2.12.txt
+    ├── ignore-2.9.txt
+    └── requirements.txt
+
+64 directories, 146 files
 ----
 
 . Start with the top playbook definitions and directives
@@ -384,7 +465,9 @@ tasks:
         - "/Webhosting:/var/www/html:Z"
 ----
 
-. Analyzing Running Containers with Ansible
+====
+
+==== Analyzing Running Containers with Ansible
 
 The *podman collection* has several components to manage and collect information from containers. The *podman_container_info* module can be used to get information about running containers. It requires the name of the container and collects all information as a list/dictionary.
 
@@ -418,7 +501,7 @@ It is also important to know that in order to access specific elements from the 
 <3> Displaying the information from the set fact
 ====
 
-. Controlling Running Containers with Ansible
+==== Controlling Running Containers with Ansible
 
 The *podman collection* has several components to manage and collect information from containers. The *podman_container* module can be used to interact with containers.
 
