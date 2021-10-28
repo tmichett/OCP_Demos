@@ -488,6 +488,81 @@ success
 </zone>
 ----
 
+.*LAB: Creating a Quay Firewall Service*
+====
+In preparation of the Quay exercises, this lab will be used to create a custom service file for use with FirewallD.
+
+.Network Ports for Firewalls and Port Mapping for Quay
+[cols="4a,4a",options=header]
+|===
+|Service Name
+|Network Port
+
+|Quay HTTPS
+|8443/TCP
+
+|Quay HTTP
+|8080/TCP
+
+|Quay HTTP
+|80/TCP
+
+|Quay HTTPS
+|443/TCP
+
+|Postgresql Quay
+|5432/TCP
+
+|Postgresql ClairV4
+|5433/TCP
+
+|Redis for Quay
+|6379
+
+|ClairV4 HTTP
+|8081/TCP
+
+|===
+
+
+. Copy the *ssh.xml* to *quay_lab.xml* as a template.
++
+[source,bash]
+----
+[student@workstation ~]$ cp /usr/lib/firewalld/services/ssh.xml ~/quay_lab.xml
+----
+
+. Modify and edit the *quay_lab.xml* with the needed firewall ports.
++
+[source,bash]
+----
+[student@workstation ~]$ vim quay_lab.xml
+<service>
+  <short>QUAY-LAB</short>
+  <description>This service has been created for the Quay Lab PoC. It will be used for deploying Quay, Quay Mirroring, and the ClairV4 image scanning service. It is also designed to support the Postgres and Redis supporting services.</description>
+  <port protocol="tcp" port="80"/>
+  <port protocol="tcp" port="8080"/>
+  <port protocol="tcp" port="8443"/>
+  <port protocol="tcp" port="443"/>
+  <port protocol="tcp" port="5432"/>
+  <port protocol="tcp" port="5433"/>
+  <port protocol="tcp" port="6379"/>
+  <port protocol="tcp" port="8081"/>
+</service>
+----
+
+. Copy the file to the *server* for later use
++
+[source,bash]
+----
+[student@workstation ~]$ scp quay_lab.xml root@server:/etc/firewalld/services/
+quay_lab.xml                                     100%  627   247.8KB/s   00:00
+----
+====
+
+
+
+
 === Cockpit
 
 Another change with RHEL 8.x was with the graphical server and the desktop manager. The X11 project and XWindows has been replaced largely with Wayland/Gnome3 as the graphical rendering environment of choice. These changes introduced some dependencies on the graphical management of several system services and components. The Wayland change no longer supports the X11 forwarding, so it was necessary to build tools or extend existing tools to be managed differently. The *cockpit* project was utilized and implemented in RHEL 8 as the new Red Hat Web Management Console which brought in numerous plugins allowing these services to be managed graphically within a standard web browser.
@@ -543,6 +618,7 @@ image::Chapter3-c05bc.png[title="Red Hat Web Console (cockpit)", align="center"]
 image::Chapter3-cfa22.png[title="Adding Additional machines", align="center"]
 
 . Verify the System Fingerprint and click *Connect*
++
 image::Chapter3-87075.png[title="Fingerprint Verification", align="center"]
 
 . It is now possible to switch systems from the System Drop-down menu

@@ -147,6 +147,18 @@ The server needs prepared to run Quay as a service. Firewall ports will need to 
 success
 success
 ----
++
+[IMPORTANT]
+======
+If you completed and created the *quay_lab.xml* custom firewall service, you can use the following command.
+
+[source,bash]
+----
+[root@server ~]# firewall-cmd --add-service=quay_lab --permanent ; firewall-cmd --reload
+success
+success
+----
+======
 
 . Create Mountpoint and directory and initialize the Quay variable
 +
