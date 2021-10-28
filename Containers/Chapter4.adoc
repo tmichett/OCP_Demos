@@ -425,7 +425,123 @@ We will be completing the steps from above where we build a demo container as a 
 .Change to Proper Directory
 [source,bash]
 ----
+[student@workstation ~]$ cd github/OCP_Demos/Containers/labs/Buildah/
+----
++
+.Run Ansible Playbook
+[source,bash]
+----
+[student@workstation Buildah]$ ansible-playbook Deploy_Exercise_Files.yml
 
+... OUTPUT OMITTED ...
+
+PLAY RECAP **********************************************************************
+server                     : ok=2    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+----
+
+. SSH to the *server* system as *Student*
++
+[source,bash]
+----
+[student@workstation Buildah]$ ssh student@server
+student@server's password:
+----
+
+. Build the container image using the *rootless_buildah_demo.sh* script and Buildah in *rootless* mode
++
+[source,bash]
+----
+[student@server ~]$ buildah unshare ./rootless_buildah_demo.sh
+----
+
+. Verify image was built and exists
++
+[source,bash]
+----
+[student@server ~]$ buildah images
+REPOSITORY        TAG      IMAGE ID       CREATED          SIZE
+localhost/demo-container-image   latest   c283aa80afa7   52 seconds ago   553 MB
+----
+
+. Inspect the Image
++
+[source,bash]
+----
+[student@server ~]$ buildah inspect localhost/demo-container-image
+{
+    "Type": "buildah 0.0.1",
+    "FromImage": "localhost/demo-container-image:latest",
+
+... OUTPUT OMITTED ...
+
+        "history": [
+            {
+                "created": "2021-10-28T19:39:43.657057139Z",
+                "created_by": "/bin/sh",
+                "author": "Travis Michette <tmichett@redhat.com>"
+            }
+        ]
+    },
+    "Docker": {
+        "created": "2021-10-28T19:39:37.118906563Z",
+        "container_config": {
+            "Hostname": "",
+            "Domainname": "",
+            "User": "",
+            "AttachStdin": false,
+            "AttachStdout": false,
+            "AttachStderr": false,
+            "ExposedPorts": {
+                "80/tcp": {}
+            },
+            "Tty": false,
+            "OpenStdin": false,
+            "StdinOnce": false,
+            "Env": null,
+            "Cmd": [
+                "/usr/sbin/httpd",
+                "-DFOREGROUND"
+
+... OUTPUT OMITTED ...
+
+        "author": "Travis Michette <tmichett@redhat.com>",
+        "config": {
+            "Hostname": "",
+            "Domainname": "",
+            "User": "",
+            "AttachStdin": false,
+            "AttachStdout": false,
+            "AttachStderr": false,
+            "ExposedPorts": {
+                "80/tcp": {}
+            },
+            "Tty": false,
+            "OpenStdin": false,
+            "StdinOnce": false,
+            "Env": null,
+            "Cmd": [
+                "/usr/sbin/httpd",
+                "-DFOREGROUND"
+
+... OUTPUT OMITTED ...
+
+        "history": [
+            {
+                "created": "2021-10-28T19:39:43.657057139Z",
+                "author": "Travis Michette <tmichett@redhat.com>",
+                "created_by": "/bin/sh"
+            }
+... OUTPUT OMITTED ...
+
+    "History": [
+        {
+            "created": "2021-10-28T19:39:43.657057139Z",
+            "created_by": "/bin/sh",
+            "author": "Travis Michette <tmichett@redhat.com>"
+        }
+    ],
+    "Devices": null
+}
 ----
 
 ====

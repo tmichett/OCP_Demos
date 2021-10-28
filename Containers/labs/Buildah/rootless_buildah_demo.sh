@@ -23,4 +23,4 @@ yum clean all --installroot $mnt
 
 ## Unmount and Commit Image
 buildah unmount $ctr
-buildah commit $ctr myapp
+buildah commit $ctr demo-container-image
