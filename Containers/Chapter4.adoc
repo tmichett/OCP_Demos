@@ -13,7 +13,166 @@ endif::[]
 
 == Container Images
 
+Container images are required and the basis of all running containers. Container images can be built from scratch using various methods, build by extending existing containers (either manually or through Dockerfiles/Containerfiles), or they can be build as part of a CI/CD pipeline with OpenShift or other Source-to-Image (s2i) tools. With the introduction of Podman into the RHEL8 *container-tools* packages also came *buildah*. *Buildah* is capable of creating container images from scratch as well as building and creating images from Docerfiles/Container files.
+
+
+=== Introduction to Buildah
+
+While Podman allows building of containers with Dockerfiles/Container files or committing a running container into a new custom container image, *Buildah* provides a much cleaner approach. Using *Buildah* to construct and publish a container interactively allows much more control over the process and can result in a clean image being committed. Buildah also includes the *buildah config* which is able to commit and add various parameters to the container just like you would in the Dockerfile/Containerfile.
+
+*Buildah*: A low-level tool for building and manipulating container images. Provides additional tools for building container images and *buildah* libraries are used by *podman* allowing it to have *podman build*. On the back-end, *podman* is using *Buildah* to build the container images.
+
+OpenShift Source-to-Image process also leverages *Buildah* to construct and build the container images. There are also other projects and applications that rely on *Buildah* to construct and build container images such as *ansible-blender*. In Chapter 6, we will be using a simple playbook leveraging Ansible Collections to build and publish an image to a container registry from a *Containerfile*.
+
+Buildah is capable of producing very small OCI comtainer images as it doesn't include any of the build tools within the image itself. Additionally, the resulting container image also doesn't include any compilers or other tools thereby making the image smaller and more secure. Since Buildah images are OCI images, they are portable and can run on a variety of different container images.
+
+==== Buildah Commands and Overview
+
+Just like Podman, *buildah* commands have very similar options.
+
+.Buildah Commands
+
+* *buildah inspect*: Inspects an image
+* *buildah from scratch*: Builds a new container image from scratch
+* *buildah containers*: View containers
+* *buildah images*: View images in local registry
+* *buildah rm*: Removes container
+* *buildah rmi*: Removes container image
+* *buildah from*: Pulls image from remote registry
+* *buildah push*: Pushes image to remote registry
+* *buildah commit*: Saves and tags the image to the local image registry
+* *buildah bud* or *buildah build-using-dockerfile*: Builds container image from Dockerfile/Containerfile
+
+Almost all *Buildah* commands have the equivalent syntax and options to Podman. There are some slight exceptions and any help with *Buildah* commands is available in the man pages or using *buildah _<command>_ --help*
+
+.The *buildah images* Command
+[source,bash]
+----
+[root@server ~]# buildah images
+REPOSITORY                                        TAG         IMAGE ID       CREATED         SIZE
+quay.local:80/redhattraining/hello-world-nginx    latest      8d990e08937e   2 years ago     269 MB
+quay.io/redhattraining/httpd-parent               2.4         3639ce1374d3   2 years ago     236 MB
+quay.local/travis/httpd-parent                    2.4         3639ce1374d3   2 years ago     236 MB
+----
+
+.The *buildah inspect* Command
+[source,bash]
+----
+[root@server ~]# buildah inspect quay.local:80/redhattraining/hello-world-nginx
+{
+    "Type": "buildah 0.0.1",
+    "FromImage": "quay.local:80/redhattraining/hello-world-nginx:latest",
+
+... OUTPUT OMITTED ...
+
+    "OCIv1": {
+        "created": "2019-06-26T22:59:13.751737399Z",
+        "architecture": "amd64",
+        "os": "linux",
+        "config": {
+            "User": "1001",
+            "ExposedPorts": {
+                "8080/tcp": {}
+            },
+            "Env": [
+                "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+                "container=oci"
+            ],
+            "Cmd": [
+                "/bin/sh",
+                "-c",
+                "nginx -g \"daemon off;\""
+
+... OUTPUT OMITTED ...
+
+        },
+        "history": [
+            {
+                "created": "2019-04-25T16:26:20.260497942Z",
+                "comment": "Imported from -"
+            },
+            {
+                "created": "2019-04-25T16:26:28.425556Z"
+            },
+            {
+                "created": "2019-06-26T22:33:55.170741575Z",
+                "created_by": "/bin/sh -c yum install -y --disableplugin=subscription-manager --nodocs nginx   && yum clean all"
+            },
+            {
+                "created": "2019-06-26T22:34:02.362527585Z",
+                "created_by": "/bin/sh -c #(nop) ADD index.html /usr/share/nginx/html"
+            },
+            {
+                "created": "2019-06-26T22:59:11.622403847Z",
+                "created_by": "/bin/sh -c #(nop) ADD nginxconf.sed /tmp/"
+            },
+            {
+                "created": "2019-06-26T22:59:12.412697298Z",
+                "created_by": "/bin/sh -c sed -i -f /tmp/nginxconf.sed /etc/nginx/nginx.conf"
+            },
+            {
+                "created": "2019-06-26T22:59:13.277995379Z",
+                "created_by": "/bin/sh -c touch /run/nginx.pid   && chgrp -R 0 /var/log/nginx /run/nginx.pid   && chmod -R g+rwx /var/log/nginx /run/nginx.pid"
+            },
+            {
+                "created": "2019-06-26T22:59:13.414802016Z",
+                "created_by": "/bin/sh -c #(nop) EXPOSE 8080"
+            },
+            {
+                "created": "2019-06-26T22:59:13.593338162Z",
+                "created_by": "/bin/sh -c #(nop) USER 1001"
+            },
+            {
+                "created": "2019-06-26T22:59:13.751737399Z"
+            }
+        ]
+    },
+    "Docker": {
+        "created": "2019-06-26T22:59:13.751737399Z",
+        "container_config": {
+            "Hostname": "",
+            "Domainname": "",
+            "User": "1001",
+            "AttachStdin": false,
+            "AttachStdout": false,
+            "AttachStderr": false,
+            "ExposedPorts": {
+                "8080/tcp": {}
+            },
+
+... OUTPUT OMITTED ...
+
+        "config": {
+            "Hostname": "",
+            "Domainname": "",
+            "User": "1001",
+            "AttachStdin": false,
+            "AttachStdout": false,
+            "AttachStderr": false,
+            "ExposedPorts": {
+                "8080/tcp": {}
+            },
+            "Tty": false,
+            "OpenStdin": false,
+            "StdinOnce": false,
+            "Env": [
+                "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+                "container=oci"
+            ],
+            "Cmd": [
+                "/bin/sh",
+                "-c",
+                "nginx -g \"daemon off;\""
+            ],
+
+... OUTPUT OMITTED ...
+
+}
+----
+
 === Building Containers with Buildah
+
+The DO180 course has taught how to build containers with an existing Dockerfile/Containerfile using Podman as well as taking a running container and using *podman commit* to create the new container image. Since *podman build* essentially uses *Buildah* on the back-end, we will only be exploring using Buildah to build containers from *scratch* interactively on the system and then publishing those containers.
 
 ==== Building images as the *root* user
 
@@ -141,6 +300,13 @@ It is a poor practice to have unneeded items, packages, and documentation in con
 [root@server ~]# buildah config --port 80/tcp working-container
 ----
 
+. Set and Configure the Container Image Author
++
+[source,bash]
+----
+[root@server ~]# buildah config --author "Travis Michette <tmichett@redhat.com>" working-container
+----
+
 . Cleanup unneeded files to conserve space on container image.
 +
 .Clean up yum data to minimize required disk space
@@ -248,8 +414,100 @@ fb5387521fd7b0c9f6dd567ca0f76222178f0ffbcf38fc990df9d49a60079e18
 
 ==== Building an Image Using Buildah Rootless
 
+Just like *Podman*, *Buildah* can be used to build container images in *Rootless* mode. The same setup and system configuration applies to building an image in *_rootless_* mode. The biggest problem with leveraging *Buildah* in rootless mode is the *buildah mount* command. *Buildah* must be used in the *_userspace_* of the system just like FUSEFS with rootless-podman. Therefore, the *buildah mount* command must be used in conjunction with *buildah unshare* as *buildah unshare* provides the "magic" to allow *buildah* to enter the user namespace.
+
+
 
 === Managing Images and System Storage
+
+Podman doesn't have inherent orchestration and management components. It is extremely important that both developers and administrators be aware of the storage space that leftover containers and container images leave behind as well as the possible impact on the system and system resources/performance.
+
+When building multiple images on a workstation or server, it is important to push those images to a remote registry for permanent storage. It is also equally important to clean up any unused images from the system. You've already learned about some of the *podman prune* operations, but it is also necessary to use either *buildah* or *podman* commands to remove images that were built, tested, and pushed to production that are no longer needed on the developement system.
+
+==== Pushing Images to an Image Registry with Buildah
+
+Normally after building images and testing the images locally on the developer's workstation, these images should be pushed to a remote container registry for use in production and other environments. We will be leveraging *Buildah* to push the images to the remote container registry.
+
+.Pushing Image to Remote Container Registry
+====
+
+. Tag the image with *Buildah*
++
+[source,bash]
+----
+[root@server ~]# buildah tag localhost/demo-container-image quay.io/tmichett/demo-container-image
+----
+
+. Login to Container Registry
++
+[source,bash]
+----
+[root@server ~]# buildah login quay.io
+Username: tmichett
+Password:
+Login Succeeded!
+----
+
+. Push the *demo-container-image* to the remote registry
++
+[source,bash]
+----
+[root@server ~]# buildah push quay.io/tmichett/demo-container-image
+Getting image source signatures
+Copying blob 5b447f9f7dfc done
+Copying config bb055dc001 done
+Writing manifest to image destination
+Copying config bb055dc001 [--------------------------------------] 0.0b / 538.0b
+Writing manifest to image destination
+Storing signatures
+----
+
+.Image and Storage Management
+[TIP]
+======
+Generally container images are built locally on a developer workstation. It is important to keep the workstation clean of container images not being used. Once built and pushed to the remote registry, it is a good practice to delete the images that might no longer be needed.
+======
+
+====
+
+==== Deleting Images from the local image registry with Buildah
+
+In a previous chapter and examples, we've used the *podman rmi* command to remove and delete images and image tags from the local image repository. We will now be using those same options with the *buildah* command to cleanup images built that are no longer needed.
+
+.Using *buildah rmi* to Remove Images
+====
+We will be using various Buildah commands to list images and remove any unneeded/unused images from the system. We need to ensure that we get all tags removed for an image as well to officially and permanently remove the image from local storage.
+
+. List local images with the *Buildah* commands
++
+[source,bash]
+----
+[root@server ~]# buildah images
+quay.io/tmichett/demo-container-image             latest      bb055dc001a5   14 minutes ago   553 MB <1>
+localhost/demo-container-image                    latest      bb055dc001a5   14 minutes ago   553 MB <2>
+----
+<1> Tagged Demo image for pushing
+<2> Original tagged image built using Buildah
++
+[IMPORTANT]
+======
+While it appears there are two images, both of the *tagged* images have the same image ID of *bb055dc001a5*. In order to remove the image completely, both tags must be used or the image must be removed by the image ID.
+======
+
+. Remove image by image ID
++
+[source,bash]
+----
+[root@server ~]# buildah rmi -f bb055dc001a5
+bb055dc001a5c469f7d49d656889250bbc8bd5c60687dcbb25b437b09d950373
+----
++
+[IMPORTANT]
+======
+In order to remove an image by ID that has multiple tags, it is necessary to use the *-f* option to force image removal.
+======
+
+====
 
 
 .References
@@ -268,7 +526,10 @@ fb5387521fd7b0c9f6dd567ca0f76222178f0ffbcf38fc990df9d49a60079e18
 
 *podman-container-prune* https://docs.podman.io/en/latest/markdown/podman-container-prune.1.html
 
+*Build Containers the Hard Way*: https://github.com/tmichett/build-containers-the-hard-way
+
+*Ansible Blender Project*: https://github.com/TomasTomecek/ansible-bender
+
 *Man Pages*: _man podman-image-prune_, _man podman-system-prune_, _man podman-container-prune_, _man buildah_, _man podman_
 
-*Build Containers the Hard Way*: https://github.com/tmichett/build-containers-the-hard-way
 ====
