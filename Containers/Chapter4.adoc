@@ -416,6 +416,21 @@ fb5387521fd7b0c9f6dd567ca0f76222178f0ffbcf38fc990df9d49a60079e18
 
 Just like *Podman*, *Buildah* can be used to build container images in *Rootless* mode. The same setup and system configuration applies to building an image in *_rootless_* mode. The biggest problem with leveraging *Buildah* in rootless mode is the *buildah mount* command. *Buildah* must be used in the *_userspace_* of the system just like FUSEFS with rootless-podman. Therefore, the *buildah mount* command must be used in conjunction with *buildah unshare* as *buildah unshare* provides the "magic" to allow *buildah* to enter the user namespace.
 
+.*Lab: Building a Container Image in Rootless mode*
+====
+We will be completing the steps from above where we build a demo container as a *root* user, but this time we will be leveraging a script to save time. This will be the exact same container image, but will be completed using *buildah unshare <script_name>*.
+
+. Setup the lab and distribute the script to the *server* system.
++
+.Change to Proper Directory
+[source,bash]
+----
+
+----
+
+====
+
+
 
 
 === Managing Images and System Storage

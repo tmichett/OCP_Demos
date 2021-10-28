@@ -1,0 +1,14 @@
+---
+- name: Deploy Exercise Files to Server
+  hosts: server
+  tasks:
+
+## Prepare Config Folder
+    - name: Copy Files to Server
+      copy:
+        src: "{{ item }}"
+        dest: /home/student
+        mode: u+rwx,g+rwx,o+x
+        owner: student
+      loop:
+        - ./rootless_buildah_demo.sh
