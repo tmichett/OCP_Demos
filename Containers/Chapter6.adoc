@@ -295,6 +295,13 @@ inventory = inventory
 COLLECTIONS_PATHS = ~/.ansible/collections:/usr/share/ansible/collections:./collections
 ----
 
+. Edit the *httpd_ansible_demo.yml* file
++
+[source,bash]
+----
+
+----
+
 . Start with the top playbook definitions and directives
 +
 .Ansible Playbook Directives
@@ -343,6 +350,77 @@ tasks:
 <6> Registry Username
 <7> Registry Password
 <8> Arguments used for pushing to remote registry. Works in conjunction with *push: yes*. Must have registry URL specified along with the location (_which is generally the repository username_).
+
+. Explore entire playbook
++
+[source,bash]
+----
+[student@workstation Ansible_Image]$ cat httpd_ansible_demo.yml
+---
+- name: Build and Upload a Container Image
+  hosts: localhost
+  vars_files:
+    - vars/registry_login.yml <1>
+  collections:
+    - containers.podman
+
+tasks:
+  - name: Login to Container Registry <1>
+    podman_login:
+      username: "{{ registry_un }}"
+      password: "{{ registry_pass }}"
+      registry: "{{ registry_url }}"
+
+  - name: Build and Push Custom Container Image <2>
+    podman_image:
+      name: httpd_demo_ansible <3>
+      path: ./ <4>
+      push: yes <5>
+      username: "{{ registry_un }}" <6>
+      password: "{{ registry_pass }}" <7>
+      push_args: <8>
+        dest: "{{ registry_url }}/{{ registry_un }}"
+----
+
+. Edit the *vars/registry_login.yml* file
++
+[source,bash]
+----
+[student@workstation Ansible_Image]$ cp vars/registry_login_demo.yml vars/registry_login.yml ; vim vars/registry_login.yml
+registry_un: UN_Goes_Here <1>
+registry_pass: Password_Goes_Here <2>
+registry_url: quay.io
+----
+<1> Replace with your Quay Username
+<2> Replace with your Quay Password
+
+. Run the playbook to build the image
++
+[source,bash]
+----
+[student@workstation Ansible_Image]$ ansible-playbook httpd_ansible_demo.yml
+----
++
+[IMPORTANT]
+======
+Playbook will fail if you don't have the *containers.podman* collection installed.
+
+
+.Installation of Collections
+[source,bash]
+----
+[student@workstation Ansible_Image]$ ansible-galaxy collection install -r requirements.yml -p ./collections
+----
+
+. Verify that the *httpd_demo_ansible* and added to the local registry.
++
+[source,bash]
+----
+[student@workstation Ansible_Image]$ podman images
+REPOSITORY                                                 TAG      IMAGE ID       CREATED              SIZE
+localhost/httpd_demo_ansible                               latest   95857ed812de   About a minute ago   255 MB
+----
+======
 
 ====
 

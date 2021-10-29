@@ -1,0 +1,15 @@
+---
+- name: Build and Upload a Container Image
+  hosts: localhost
+  vars_files:
+  ## Add Variables
+  collections:
+  ## Add Collections
+  tasks:
+    - name: Login to Container Registry
+
+## Add Login task
+
+    - name: Build and Push Custom Container Image
+
+## Add Container build task

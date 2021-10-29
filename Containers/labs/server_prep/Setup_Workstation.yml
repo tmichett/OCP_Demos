@@ -12,3 +12,8 @@
       copy:
         src: ssh_user_config
         dest: /home/student/.ssh/config
+
+    - name: Copy User's .vimrc
+      copy:
+        src: vimrc
+        dest: /home/student/.vimrc
