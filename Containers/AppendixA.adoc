@@ -173,7 +173,7 @@ ecbc6f53bba0d1923ca9e92b3f747da8353a070fccbae93625bd8b47dbee772e
 [student@servera ~]
 ----
 
-Images that have been downlaoded with the Podman command can be seen with the *podman images* command.
+Images that have been downloaded with the Podman command can be seen with the *podman images* command.
 
 .Listing Local Images
 [source,bash]

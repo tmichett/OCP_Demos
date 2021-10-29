@@ -57,6 +57,22 @@ RHEL8 includes *Pacemaker* containers with *podman* as a tech preview. Pacemaker
 
 Depending on whether *podman* is being run as a privileged user or as a *rootless* user, the configuration file locations and directives will be difference.
 
+Podman uses the *registry.conf* file on the system to retrieve information for container registries. The file is located at */etc/containers/registries.conf*. The list of registries Podman uses are configured in the *[registries.search]* section and the *[registries.insecure]* section of the configuration file.
+
+
+.Rootless Podman Configuration
+[IMPORTANT]
+====
+The system-wide *registries.conf* file located at  */etc/containers/registries.conf* can be overridden by a user's configuration file located in *$HOME/.config/containers* directory.
+====
+
+.Container Image Registries and Searching
+[TIP]
+====
+While it is best practice to specify a fully qualified image, it is possible to provide just an image name on the command line. If an image name is specified, it will search the registries in the listed order to determine which image to select.
+====
+
+
 ==== Root-Based Podman
 
 When running Podman as a privileged user, the default configurations are used. Generally these files are not modified, however, it is a common practice to modify the *registries.conf* file to add additional container image registries as well as alter the registry search order.
@@ -79,6 +95,20 @@ When running *podman* in *rootless* mode, all configuration files will be based 
 [IMPORTANT]
 ====
 If the configuration files don't exist in the user's home directory, *podman* will default back up to */etc* for the configuration files and if they aren't there, it will fall back to the */usr/share/containers/* directory.
+
+.User Registries
+[source,bash]
+----
+[student@servera ~]$ cat .config/containers/registries.conf
+unqualified-search-registries = ['registry.lab.example.com']
+
+[[registry]]
+location = "registry.lab.example.com"
+insecure = true
+blocked = false
+----
+
+
 ====
 
 
