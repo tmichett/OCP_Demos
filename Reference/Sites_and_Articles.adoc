@@ -173,6 +173,12 @@ endif::[]
 * *Podman - Kubernetes by Example*
 ** https://kubebyexample.com/en/learning-paths/container-fundamentals/tools/podman
 
+* *Containers vs. Pods - Taking a Deeper Look*
+** https://iximiuz.com/en/posts/containers-vs-pods/
+
+* *Ansible Blender*
+** https://github.com/ansible-community/ansible-bender
+
 == Buildah References
 
 * *Buildah Tutorial*
@@ -288,7 +294,11 @@ endif::[]
 * *What is Kubernetes?*
 ** https://www.redhat.com/en/topics/containers/what-is-kubernetes
 
+* *Kubernetes: Control Pod Scheduling on Nodes*
+** https://medium.com/dlt-labs-publication/kubernetes-control-pod-scheduling-on-nodes-71f92e88daef
 
+* *How to Create a Kubernetes Cluster Locally - Simple Tutorial*
+** https://www.capitalone.com/tech/software-engineering/create-and-deploy-kubernetes-clusters/
 
 == Docker References
 

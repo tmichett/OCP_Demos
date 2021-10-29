@@ -1056,6 +1056,8 @@ Content-Type: text/html; charset=utf-8
 
 *Working with pods with podman generate and podman play*: https://mohitgoyal.co/2021/05/10/working-with-pods-with-podman-generate-and-podman-play/
 
+*Containers vs. Pods - Taking a Deeper Look*: https://iximiuz.com/en/posts/containers-vs-pods/
+
 *_man pages_*: _podman-system-prune_, _podman-container-cleanup_, _podman-pod-prune_, _podman-container-prune_, _podman-image-prune_, and _podman-volume-prune_.
 
 ====
