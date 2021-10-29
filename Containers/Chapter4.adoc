@@ -176,7 +176,7 @@ The DO180 course has taught how to build containers with an existing Dockerfile/
 
 ==== Building images as the *root* user
 
-.EXAMPLE - Creating a Custom Container Image Using Buildah
+.*LAB: Creating a Custom Container Image Using Buildah*
 =====
 
 . Create a container with Buildah
@@ -559,7 +559,7 @@ When building multiple images on a workstation or server, it is important to pus
 
 Normally after building images and testing the images locally on the developer's workstation, these images should be pushed to a remote container registry for use in production and other environments. We will be leveraging *Buildah* to push the images to the remote container registry.
 
-.Pushing Image to Remote Container Registry
+.*LAB: Pushing Image to Remote Container Registry*
 ====
 
 . Tag the image with *Buildah*
@@ -605,7 +605,7 @@ Generally container images are built locally on a developer workstation. It is i
 
 In a previous chapter and examples, we've used the *podman rmi* command to remove and delete images and image tags from the local image repository. We will now be using those same options with the *buildah* command to cleanup images built that are no longer needed.
 
-.Using *buildah rmi* to Remove Images
+.*LAB: Using *buildah rmi* to Remove Images*
 ====
 We will be using various Buildah commands to list images and remove any unneeded/unused images from the system. We need to ensure that we get all tags removed for an image as well to officially and permanently remove the image from local storage.
 
