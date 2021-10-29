@@ -180,7 +180,7 @@ Error: pod e18e307bab06dd45d3cc5a90472ea075979aacb3adfc2071dfd68dca284b03a3 has 
 
 === Creating a multi-container Pod for Wordpress
 
-.Exercise - Creating a multi-container Pod for Wordpress
+.*LAB: Creating a multi-container Pod for Wordpress*
 ====
 In this exercise, you will be creating a pod to run the Wordpress application. This pod will contain multiple containers, namely Wordpress and MySQL/MariaDB.
 
@@ -356,12 +356,13 @@ POD ID        NAME                STATUS   CREATED        INFRA ID      # OF CON
 .Looking at Stopped Pod
 [source,bash]
 ----
-[root@server Buildah]# podman ps -ap
+[root@server Buildah]# podman ps -ap <1>
 CONTAINER ID  IMAGE                                            COMMAND               CREATED         STATUS                    PORTS                 NAMES               POD ID        PODNAME
 bfe7065204b2  registry.access.redhat.com/ubi8/pause:latest                           10 minutes ago  Exited (0) 2 minutes ago  0.0.0.0:8880->80/tcp  35870e1ae2d0-infra  35870e1ae2d0  wordpress_demo_pod
 21ff11d8a20a  registry.access.redhat.com/rhscl/mysql-57-rhel7  run-mysqld            10 minutes ago  Exited (0) 2 minutes ago  0.0.0.0:8880->80/tcp  db                  35870e1ae2d0  wordpress_demo_pod
 fb2162542a72  quay.io/redhattraining/wordpress:5.3.0           apache2-foregroun...  10 minutes ago  Exited (0) 2 minutes ago  0.0.0.0:8880->80/tcp  wp                  35870e1ae2d0  wordpress_demo_pod
 ----
+<1> The *-ap* will list all containers and the *pod* to which they belong.
 
 .Pruning Stopped Pods and Containers for Pods
 [source,bash]
@@ -466,7 +467,7 @@ Actual container image cleanup is performed with the *podman rmi ** command whic
 ====
 
 
-.Managing Containers and Images
+.*LAB: Managing Containers and Images*
 ====
 
 Playbooks have been setup to create and launch pods as well as various scripts to perform the launching.
@@ -572,7 +573,7 @@ Just as Kubernetes and Openshift manages containers by creating and managing Pod
 
 It is possible to create a deployment file for Podman from a running container. These files can simplify things when launching a job multiple times. It isn't necessary to author a bash script to leverage Podman to start and run the jobs. The resulting deployment file will create a pod with the needed container when running the *podman play kube* command as a *_pod_* is the smallest unit that can be managed and Kubernetes/Openshift doesn't manage anything smaller than the pod-level.
 
-.Creating a Deployment File from a Container
+.*LAB: Creating a Deployment File from a Container*
 ====
 
 . SSH to *root@server*
@@ -639,10 +640,10 @@ spec:
     - name: DOCROOT
       value: /var/www/html
     image: quay.io/redhattraining/httpd-parent:2.4 <2>
-    name: yaml-web-demo
+    name: yaml-web-demo <3>
     ports:
     - containerPort: 80
-      hostPort: 8888 <3>
+      hostPort: 8888 <4>
       protocol: TCP
     resources: {}
     securityContext:
@@ -660,9 +661,15 @@ spec:
   dnsConfig: {}
 status: {}
 ----
-<1> Container name is defined
+<1> Pod name is defined
 <2> Container image is defined
-<3> Container port mapping is defined
+<3> Container name is defined
+<4> Container port mapping is defined
++
+[WARNING]
+======
+Since we didn't create a pod with a separate name, when the command was run, it created a *pod name* which was/is the same as the *container name*. This can cause issues when deploying from the file by creating a warning message. The *podman play kube* will generate a new name for the items so there are no duplicate name conflicts.
+======
 
 . Stop and Remove Container
 +
@@ -734,7 +741,7 @@ POD ID  NAME    STATUS  CREATED  INFRA ID  # OF CONTAINERS
 
 It is possible to create a deployment file for Podman from a running pod. This deployment file will contain information about all containers running in the pod and can be used for later deployments.
 
-.Deployment YAML File for a Pod with Multiple Containers
+.* LAB: Deployment YAML File for a Pod with Multiple Containers*
 ====
 
 For this lab, we will be creating a *Wordpress Demo Pod* like we did above but exposing port 9999. Instead of using a script, we will have a YAML file which can deploy the application.
