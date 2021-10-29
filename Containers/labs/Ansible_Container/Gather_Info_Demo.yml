@@ -1,6 +1,6 @@
 ---
 - name: Container Information
-  hosts: localhost
+  hosts: server
   collections:
     - containers.podman
 
