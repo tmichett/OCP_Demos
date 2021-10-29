@@ -499,13 +499,20 @@ collections/
 64 directories, 146 files
 ----
 
+. Edit the *deploy-httpd-ansible-demo.yml* Starter Playbook
++
+[source,bash]
+----
+[student@workstation Ansible_Container]$ vim deploy-httpd-ansible-demo.yml
+----
+
 . Start with the top playbook definitions and directives
 +
 .Ansible Playbook Directives
 [source,yaml]
 ----
 ---
-- name: Build and Upload a Container Image
+- name: Launch Container from Red Hat Training Image
   hosts: localhost
   vars_files:
     - vars/registry_login.yml <1>
@@ -518,30 +525,46 @@ collections/
 <2> Always specify the collections to be used
 
 . Create the Playbook with Tasks
+.. Use the *quay.io/redhattraining/httpd-parent:2.4*
+.. Launch Container with network port on 7080
+.. Test Website
 +
 .Playbook Tasks
 [source,yaml]
 ----
 tasks:
 
-## Podman Collections Needed for Login
-  - name: Login to Container Registry
-    podman_login:
-      username: "{{ registry_un }}"
-      password: "{{ registry_pass }}"
-      registry: "{{ registry_url }}"
+  ## Start and Run the HTTPD Container
+      - name: Start the Quay Container
+        podman_container:
+          name: Website_Demo
+          image: quay.io/redhattraining/httpd-parent:2.4
+          state: started
+          restart: yes
+          ports:
+            - "7080:80"
 
-## Start and Run the HTTPD Container
-  - name: Start the HTTPD Parent Container
-    podman_container:
-      name: Website_Demo
-      image: quay.io/redhattraining/httpd-parent:2.4
-      state: started
-      restart: yes
-      ports:
-        - "7080:80"
-      volume:
-        - "/Webhosting:/var/www/html:Z"
+  ## Open Firewall for Automated Testing
+      - name: Open Firewall for Website
+        firewalld:
+          port: 7080/tcp
+          permanent: true
+          state: enabled
+          immediate: yes
+
+  - name: Test Website
+    hosts: localhost
+    tasks:
+      - name: Test Website
+        uri:
+          url: http://localhost:7080
+          return_content: yes
+          status_code: 200
+        register: result
+
+      - name: Test Website Output
+        debug:
+          msg: 'The website returned: "{{ result.content }}"'
 ----
 
 ====
