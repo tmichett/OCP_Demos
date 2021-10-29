@@ -250,7 +250,7 @@ image::Chapter2-64e78.png[title="Container Logs", align="center"]
 .Container Console
 
 Cockpit also allows accessing a console directly inside the running container. Accessing the console via cockpit is the same as running the *podman exec -it <Container> /bin/bash* command.
-+
+
 image::Chapter2-416de.png[title="Container Console", align="center"]
 
 ==== Installing Cockpit Podman Plugins
@@ -345,7 +345,7 @@ Existing credentials are valid. Already logged in to registry.redhat.io
 ====
 
 
-.Container Image Management with Cockpit
+.*LAB: Container Image Management with Cockpit*
 ====
 . Navigate to the *Images* section and select *Get new image*
 +
@@ -405,7 +405,7 @@ image::Chapter2-2fd80.png[title="Clair Image Details - Containers Using Image", 
 
 It is possible to manage both *rootless* and *root-based* containers in Cockpit depending on the user you are using to access the management console. In order to create and launch new containers from Cockpit, the image must already be downloaded and existing in the local image registry.
 
-.*Container Creation*
+.*LAB: Container Creation*
 ====
 . Select the image to be used to launch the container by clicking the *Play* button.
 +
@@ -456,7 +456,7 @@ image::Chapter2-6ee11.png[title="Container Console in Cockpit", align="center"]
 image::Chapter2-70921.png[title="Application Verification in Firefox", align="center"]
 ====
 
-.*Saving a Container Image from a Running Container*
+.*LAB: Saving a Container Image from a Running Container*
 ====
 . Select the container to use as a base for the image
 .. Click *Commit*
@@ -486,7 +486,7 @@ If there is no tag specified when the image is being committed, *podman* will au
 =====
 ====
 
-.*Container Cleanup*
+.*LAB: Container Cleanup*
 ====
 . Select the container to stop and remove.
 .. If you just want to stop a running container, click *Stop*
@@ -508,7 +508,7 @@ image::Chapter2-606fd.png[title="Force Removing a Running Container", align="cen
 
 Just as Podman can manage containers as a "rootless" user, it is also possible to manage containers within Cockpit as a "rootless" user. All the same principles apply in Cockpit as they do with *podman*. Additionally, Cockpit has multiple options if the user happens to be in the *sudoers* file.
 
-.Exploring Cockpit Containers as the *student* User
+.*LAB: Exploring Cockpit Containers as the _student_ User*
 ====
 . Login to Cockpit as the Student user
 +
@@ -535,7 +535,7 @@ The *student* user is able to become root as it exists in the *sudoers* file. Ba
 
 Launching and managing containers is also performed the same way as the student user.
 
-.Working with Containers in Cockpit as *student.
+.*LAB: Working with Containers in Cockpit as _student_.*
 ====
 
 . Download a container image.
