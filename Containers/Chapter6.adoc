@@ -513,9 +513,7 @@ collections/
 ----
 ---
 - name: Launch Container from Red Hat Training Image
-  hosts: localhost
-  vars_files:
-    - vars/registry_login.yml <1>
+  hosts: server
   collections:
     - containers.podman <2>
 
@@ -557,7 +555,7 @@ tasks:
     tasks:
       - name: Test Website
         uri:
-          url: http://localhost:7080
+          url: http://server:7080
           return_content: yes
           status_code: 200
         register: result
@@ -565,6 +563,13 @@ tasks:
       - name: Test Website Output
         debug:
           msg: 'The website returned: "{{ result.content }}"'
+----
+
+. Run Ansible Playbook and Verify Success
++
+[source,bash]
+----
+[student@workstation Ansible_Container]$ ansible-playbook deploy-httpd-ansible-demo.yml
 ----
 
 ====

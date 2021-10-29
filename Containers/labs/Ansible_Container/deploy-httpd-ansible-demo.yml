@@ -7,7 +7,7 @@
   tasks:
 
 ## Start and Run the HTTPD Container
-    - name: Start the Quay Container
+    - name:  Start the Apache Container
       podman_container:
         name: Website_Demo
         image: quay.io/redhattraining/httpd-parent:2.4
@@ -29,7 +29,7 @@
   tasks:
     - name: Test Website
       uri:
-        url: http://localhost:7080
+        url: http://lserver:7080
         return_content: yes
         status_code: 200
       register: result
