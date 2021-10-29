@@ -456,6 +456,7 @@ COLLECTIONS_PATHS = ~/.ansible/collections:/usr/share/ansible/collections:./coll
 .Podman Collection *requirements.yml* File
 [source,yaml]
 ----
+[student@workstation Ansible_Container]$ vim requirements.yml
 collections:
 - name: containers.podman <1>
 ----
