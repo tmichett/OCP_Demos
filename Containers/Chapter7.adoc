@@ -130,8 +130,8 @@ For this workshop, the setup to prepare the environment in Chapter 1 provided th
 
 The server needs prepared to run Quay as a service. Firewall ports will need to be opened and the infrastructure containers and components need setup.
 
-.Preparing Infrastructure
-
+.*LAB: Preparing Infrastructure*
+====
 . SSH to *server* as the root user
 +
 [source,bash]
@@ -181,7 +181,10 @@ success
 [root@server ~]# setfacl -m u:26:-wx $QUAY/postgres-quay
 ----
 
-.Setting up Infrastructure Containers
+====
+
+.*LAB: Setting up Infrastructure Containers*
+====
 
 . Install *container-tools* Module
 +
@@ -247,8 +250,10 @@ Storing signatures
 c847b459ded23acdd30e2a6ec1acfdeb3dd79f1457f7f99082cedb0a40447d73
 ----
 
-.Launch the Quay Configuration Container
+====
 
+.*LAB: Launch the Quay Configuration Container*
+====
 . Run the Quay container in configuration mode
 +
 [source,bash]
@@ -301,7 +306,8 @@ image::Chapter7-55ad6.png[title="Quay Redis Setup", align="center"]
 At this point, there is enough configuration to validate and download the Quay config file for launching and running Quay. We will continue to setup *Repository Mirroring*, *Clair Image Scanning*, and *Admin Accounts*.
 ======
 
-.Setting up Repository Mirroring
+.*Setting up Repository Mirroring*
+
 
 . Enable Repository Mirroring
 +
@@ -312,7 +318,8 @@ image::Chapter7-7569a.png[title="Quay Mirroring Setup", align="center"]
 Remember to disable SSL as SSL isn't being used for this setup.
 ======
 
-.Setting up Security Scanning
+
+.*Setting up Security Scanning*
 
 . Select *Enable Security Scanning*
 .. Endpont: *http://quay.local:8081*
@@ -327,7 +334,7 @@ You *MUST* use the Pre-Shared-Key (PSK) of *MTU5YzA4Y2ZkNzJoMQ==* as we will be 
 ======
 
 
-.Configuring Super Users (Admins)
+.*Configuring Super Users (Admins)*
 
 . Add superusers to the system
 .. UN: *quayadmin*
@@ -337,7 +344,8 @@ image::Chapter7-f07c3.png[title="Quay Superuser Setup", align="center"]
 +
 image::Chapter7-6ac80.png[title="Quay Superuser Setup - Validation", align="center"]
 
-.Completing Quay Configuration - Validating and Download Configuration File
+
+.*Completing Quay Configuration - Validating and Download Configuration File*
 
 . Validate Configuration Changes
 +
@@ -369,7 +377,7 @@ config-editor stdout | time="2021-10-26T18:30:52Z" level=debug msg="Validating O
 2021-10-26 18:37:01,603 INFO stopped: stdout (terminated by SIGTERM")
 ----
 
-
+====
 
 .Quay Next Steps
 [TIP]
@@ -381,7 +389,8 @@ Based on the options in the Quay deployment configuration, it is necessary to se
 
 It is necessary to create a storage location for Quay container images and images that will be loaded into the registry. It is also necessary to copy the Quay configuration file and Clair Configuration files and label them appropriately for use. The Clair scanner will use and leverage Postgresql, so it will also be necessary to setup and configure a Postgresql container for Clair.
 
-.Prepare Quay Storage
+.*LAB: Prepare Quay Storage*
+====
 
 . Create Directory for Quay Config
 +
@@ -421,7 +430,10 @@ config.yaml  extra_ca_certs  quay-config.tar.gz
 [root@server ~]#  mkdir $QUAY/storage ; setfacl -m u:1001:-wx $QUAY/storage
 ----
 
-.Prepare and Launch Clair
+====
+
+.*LAB: Prepare and Launch Clair*
+====
 
 . Create the Clair Postgres Storage
 +
@@ -495,7 +507,14 @@ Storing signatures
 7f5ec8bd697c83fc2ad9277fd76d4c8c8b48048ec45d59f948cd58f87e03295e
 ----
 
+====
+
 ===== Starting Quay and the Mirroring Containers
+
+After all configurations have been made and the supporting containers are running, it is possible to launch the Quay and Quay Mirroring containers.
+
+.*LAB: Starting Quay and the Mirroring Containers*
+====
 
 . Launch the Quay Container
 +
@@ -539,6 +558,7 @@ e0db014a5a2f  registry.redhat.io/rhel8/postgresql-10:1       run-postgresql  20 
 At this point the Quay setup has been completed with the Mirroring Worker and Clair v4 Image Scanner. You can proceed to the next steps and skip the section called: *Installing the Quay Image Registry with Ansible*. You should proceed to the section titled *Setting up the Quay Web Console and Testing Quay*.
 ======
 
+====
 
 === Installing the Quay Image Registry with Ansible
 

@@ -759,6 +759,94 @@ The *podman collection* has several components to manage and collect information
         state: absent
 ----
 
+.*LAB: Clean up containers and container images*
+====
+
+. Get Listing of Running Containers
++
+[source,bash]
+----
+[student@workstation Ansible_Container]$ ssh root@server "podman ps -a | grep -i website"
+2ad6b0954ed8  quay.io/redhattraining/httpd-parent:2.4                 /bin/sh -c /usr/s...  11 minutes ago  Up 11 minutes ago          0.0.0.0:7080->80/tcp                            Website_Demo
+----
+
+. Get Listing of Container Images
++
+[source,bash]
+----
+[student@workstation Ansible_Container]$ ssh root@server "podman images | grep -i httpd-parent"
+quay.io/redhattraining/httpd-parent              2.4        3639ce1374d3  2 years ago    236 MB
+----
+
+. Analyze the *Stop_and_Remove_Demo.yml* Playbook
++
+[source,bash]
+----
+[student@workstation Ansible_Container]$ cat Stop_and_Remove_Demo.yml
+---
+- name: Container Information
+  hosts: server
+  collections:
+    - containers.podman
+
+  tasks:
+
+    - name: Stop Running Container
+      podman_container:
+        name: Website_Demo
+        state: stopped
+
+    - name: Remove Stopped Container
+      podman_container:
+        name: Website_Demo
+        state: absent
+
+    - name: Remove Container Image
+      podman_image:
+        name: quay.io/redhattraining/httpd-parent:2.4
+        state: absent
+----
+
+. Run the *Stop_and_Remove_Demo.yml* Playbook
++
+[source,bash]
+----
+[student@workstation Ansible_Container]$ ansible-playbook Stop_and_Remove_Demo.yml
+
+PLAY [Container Information] ****************************************************
+
+TASK [Gathering Facts] **********************************************************
+ok: [server]
+
+TASK [Stop Running Container] ***************************************************
+changed: [server]
+
+TASK [Remove Stopped Container] *************************************************
+changed: [server]
+
+TASK [Remove Container Image] ***************************************************
+changed: [server]
+
+PLAY RECAP **********************************************************************
+server                     : ok=4    changed=3    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+----
+
+. Verify container is gone.
++
+[source,bash]
+----
+[student@workstation Ansible_Container]$ ssh root@server "podman ps -a | grep -i website"
+----
+
+. Verify container image is gone.
++
+[source,bash]
+----
+[student@workstation Ansible_Container]$ ssh root@server "podman images | grep -i httpd-parent"
+----
+
+====
+
 
 .References
 [NOTE]
