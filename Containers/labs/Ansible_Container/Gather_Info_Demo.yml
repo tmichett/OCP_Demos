@@ -1,8 +1,6 @@
 ---
 - name: Container Information
   hosts: localhost
-  vars_files:
-    - vars/registry_login.yml
   collections:
     - containers.podman
 

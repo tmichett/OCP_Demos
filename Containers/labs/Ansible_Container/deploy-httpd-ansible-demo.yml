@@ -2,38 +2,23 @@
 - name: Deploy HTTPD Server Demo
   hosts: server
   collections:
-    - containers.podman
 
   tasks:
 
 ## Start and Run the HTTPD Container
     - name:  Start the Apache Container
       podman_container:
-        name: Website_Demo
-        image: quay.io/redhattraining/httpd-parent:2.4
-        state: started
-        restart: yes
-        ports:
-          - "7080:80"
+
 
 ## Open Firewall for Automated Testing
     - name: Open Firewall for Website
       firewalld:
-        port: 7080/tcp
-        permanent: true
-        state: enabled
-        immediate: yes
+
 
 - name: Test Website
   hosts: localhost
   tasks:
     - name: Test Website
-      uri:
-        url: http://server:7080
-        return_content: yes
-        status_code: 200
-      register: result
+
 
     - name: Test Website Output
-      debug:
-        msg: 'The website returned: "{{ result.content }}"'
