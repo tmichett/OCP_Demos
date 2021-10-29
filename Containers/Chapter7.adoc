@@ -568,6 +568,11 @@ The Quay playbooks have been broken down so that they can be run to easily deplo
 
 ==== Deploying Quay with Ansible
 
+Alternatively, there has been a project created with several playbooks allowing Quay to be deployed in the PoC method via Ansible playbooks.
+
+.*LAB: Deploying Quay with Ansible*
+====
+
 . Change to the *github/quay_lab_poc* directory
 +
 [source,bash]
@@ -685,6 +690,8 @@ The *./files/quay-config.tar.gz* file will be used and deployed to control the c
 [student@workstation quay_lab_poc]$ ansible-playbook Quay_Mirror_Deploy.yml
 ----
 
+====
+
 === Setting up the Quay Web Console and Testing Quay
 
 After all Quay containers have been configured and installed, it is necessary to setup the Admin (Superuser) for Quay as well as test out the system for both image scanning and the ability to mirror container images from upstream repositories.
@@ -709,6 +716,9 @@ SUPER_USERS:
 ----
 ====
 
+.*LAB* Configuring Quay and Super Users*
+====
+
 . Open the Quay web console by navigating to it in your favorite browser using *http://Quay-FQDN*
 +
 image::Chapter7-77f15.png[title="Quay Login Page", align="center"]
@@ -725,11 +735,14 @@ image::README-4c04a.png[]
 . Verify the account was setup properly and you have *Super User* rights by clicking your Username and looking for *Super User Admin Panel*.
 +
 image::README-6c250.png[]
+====
 
 ==== Testing Quay and ClairV4 Image Scanning
 
 In order to test the scanning capabilities and ensure that things function properly, update a basic image into the Quay Repository
 
+.*LAB: Testing Image Scanning*
+====
 . Login to Local Quay Repository (test authentication and account)
 +
 .*podman* Authentication
@@ -803,10 +816,14 @@ image::Chapter7-a96b8.png[title="HTTPD Parent Image - Image Tags", align="center
 . Click on Security scan to view the vulnerabilities
 +
 image::Chapter7-d95ad.png[title="HTTPD Parent Image - Image Vulnerabilities", align="center"]
+====
 
 ==== Testing Repository Mirroring
 
 The next step is to ensure that the QUAY Image mirroring container is working and that you can successfully mirror container images from upstream repositories.
+
+.*LAB: Testing Repository Mirroring*
+====
 
 . Create a new repository in Quay by clicking *Create New Repository*
 +
@@ -843,13 +860,16 @@ image::README-115df.png[]
 image::README-4189e.png[]
 +
 image::README-de19a.png[]
-
+====
 
 ==== Using the Quay Image Registry
 
 After testing the initial Quay image registry, we will need to use the registry similar to the one located at Quay.io. It is important to understand that since this repository/registry is local, it is fully maintained by the adminstrators that installed it. There were one or more *Superuser* accounts created as part of the installation process. These accounts can create organizations or modify permissions to organizations as well as maintain the infrastructure.
 
 ===== Configuring Quay as the *Superuser*
+
+.*LAB: Configuring QUAY*
+====
 
 . Login to the Quay site and open the *Super User Admin Panel*
 +
@@ -870,11 +890,14 @@ image::Chapter7-51245.png[title="Quay Superuser - System Message", align="center
 image::Chapter7-ae3cc.png[title="Quay Superuser - System Message Creation", align="center"]
 +
 image::Chapter7-90b34.png[title="System Message Verification", align="center"]
-
+====
 
 ===== Creating Organizations
 
 Organizations can be created so that multiple users can share container images. After creating an organization, users can be added to the organization so that they can manage images within that organization.
+
+.*LAB: Configuring/Creating Organizations*
+====
 
 . Click *Create New Organization*
 +
@@ -918,11 +941,14 @@ image::Chapter7-0a6c2.png[title="Red Hat Training Organization - Permissions", a
 image::Chapter7-63094.png[title="Red Hat Training Organization - Dev Team with Write Permissions", align="center"]
 +
 image::Chapter7-7cfbf.png[title="Red Hat Training Organization - Permission Verification", align="center"]
+====
 
 ===== Testing Organizations
 
 Once an organization has been created it is important to test the organization and ensure that members can login and create repositories and are also able to push images to those repositories.
 
+.*LAB: Testing Organizations*
+====
 . Login to *quay.local* from the workstation machine
 +
 [source,bash]
@@ -1037,7 +1063,7 @@ Storing signatures
   </body>
 </html>
 ----
-
+====
 
 === Inspecting Images with Skopeo on Remote Registries
 
@@ -1055,6 +1081,9 @@ In addition to gaining information about images from remote registries, Skopeo c
 ==== Using Skopeo to Inspect Images and Copy Images
 
 The following exercises will leverage Skopeo to inspect the *quay.local/redhattraining/hello-world-nginx* image remotely. They will also copy the image from the *quay.local/redhattraining* to your private repository.
+
+.*LAB: Inspecting Remote Images with Skopeo*
+====
 
 . SSH to *server*
 +
@@ -1269,6 +1298,8 @@ Password:
 Login Succeeded!
 ----
 ======
+
+====
 
 .References
 [NOTE]
