@@ -515,12 +515,11 @@ collections/
 - name: Launch Container from Red Hat Training Image
   hosts: server
   collections:
-    - containers.podman <2>
+    - containers.podman <1>
 
 ... OUTPUT OMITTED ...
 ----
-<1> Always provide registry login information
-<2> Always specify the collections to be used
+<1> Always specify the collections to be used
 
 . Create the Playbook with Tasks
 .. Use the *quay.io/redhattraining/httpd-parent:2.4*
