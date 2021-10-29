@@ -29,7 +29,7 @@
   tasks:
     - name: Test Website
       uri:
-        url: http://lserver:7080
+        url: http://server:7080
         return_content: yes
         status_code: 200
       register: result
