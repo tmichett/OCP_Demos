@@ -533,7 +533,7 @@ collections/
 tasks:
 
   ## Start and Run the HTTPD Container
-      - name: Start the Quay Container
+      - name: Start the Apache Container
         podman_container:
           name: Website_Demo
           image: quay.io/redhattraining/httpd-parent:2.4
@@ -607,6 +607,124 @@ It is also important to know that in order to access specific elements from the 
 <2> Using the *set_fact* module to map the attribute of the information to a known variable name
 <3> Displaying the information from the set fact
 ====
+
+.*LAB: Analyze a running container with Ansible*
+====
+. Change to */home/student/github/OCP_Demos/Containers/labs/Ansible_Container* if not already there.
++
+[source,bash]
+----
+[student@workstation Ansible_Container]$ cd /home/student/github/OCP_Demos/Containers/labs/Ansible_Container
+----
+
+. Explore the *Gather_Info_Demo.yml* playbook
++
+[source,bash]
+----
+[student@workstation Ansible_Container]$ cat Gather_Info_Demo.yml
+---
+- name: Container Information
+  hosts: localhost
+
+  collections:
+    - containers.podman
+
+  tasks:
+
+    - name: Gather Information on Running Containers
+      podman_container_info:
+        name: Website_Demo
+      register: container_info
+
+    - name: Running Container Information
+      debug:
+        var: container_info
+
+    - name: Set Fact for Running Container Launch Command
+      set_fact:
+        Args: "{{ container_info.containers | map(attribute='Args') | list }}"
+
+    - name: Display Running Container Launch Command
+      debug:
+        var: Args
+
+    - name: Set Fact for Running Container Image
+      set_fact:
+        ImageName: "{{ container_info.containers | map(attribute='ImageName') | list }}"
+
+    - name: Display Running Container Image
+      debug:
+        var: ImageName
+----
+
+. Run the *Gather_Info_Demo.yml* Playbook
++
+[source,bash]
+----
+[student@workstation Ansible_Container]$ ansible-playbook Gather_Info_Demo.yml
+
+PLAY [Container Information] ****************************************************
+
+TASK [Gathering Facts] **********************************************************
+ok: [server]
+
+TASK [Gather Information on Running Containers] *********************************
+ok: [server]
+
+TASK [Running Container Information] ********************************************
+ok: [server] => {
+    "container_info": {
+
+... OUTPUT OMITTED ...
+
+                    "Image": "quay.io/redhattraining/httpd-parent:2.4",
+
+... OUTPUT OMITTED ...
+
+                    "PortBindings": {
+                        "80/tcp": [
+                            {
+                                "HostIp": "",
+                                "HostPort": "7080"
+                            }
+... OUTPUT OMITTED ...
+
+                "Name": "Website_Demo",
+                "Namespace": "",
+                "NetworkSettings": {
+
+... OUTPUT OMITTED ...
+
+TASK [Set Fact for Running Container Launch Command] ****************************
+ok: [server]
+
+TASK [Display Running Container Launch Command] *********************************
+ok: [server] => {
+    "Args": [
+        [
+            "-c",
+            "/usr/sbin/httpd -DFOREGROUND"
+        ]
+    ]
+}
+
+TASK [Set Fact for Running Container Image] *************************************
+ok: [server]
+
+TASK [Display Running Container Image] ******************************************
+ok: [server] => {
+    "ImageName": [
+        "quay.io/redhattraining/httpd-parent:2.4"
+    ]
+}
+
+PLAY RECAP **********************************************************************
+server                     : ok=7    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+----
+
+====
+
+
 
 ==== Controlling Running Containers with Ansible
 

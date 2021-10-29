@@ -1,6 +1,6 @@
 ---
 - name: Container Information
-  hosts: localhost
+  hosts: server
   vars_files:
     - vars/registry_login.yml
   collections:
