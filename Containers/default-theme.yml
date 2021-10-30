@@ -31,7 +31,7 @@ page:
   background_color: ffffff
   layout: portrait
   margin: [1.0in, 0.67in, 1.5in, 0.67in]
-  size: A4
+  size: LETTER
 #some additional variables
 confidentiality:
 customer:
