@@ -94,7 +94,7 @@ heading:
   #h3_font_size: round($base_font_size * 1.7)
   h4_font_size: 10
   #h4_font_size: $base_font_size_large
-  h5_font_size: 10
+  h5_font_size: 10 
   #h5_font_size: $base_font_size
   h6_font_size: $base_font_size_small
   #h6_font_size: $base_font_size_small
@@ -107,14 +107,14 @@ title_page:
   align: left
   title:
     top: 55%
-    font_size: 24
+    font_size: 24 
     font_style: bold
     # this font-variant doesnt seem to work yet
     #font-variant: small-caps
     #font_color: 000000
     line_height: 1.5
   subtitle:
-    font_size: 16
+    font_size: 16 
     # this font-variant doesnt seem to work yet
     #font-variant: small-caps
     font_style: bold
@@ -175,10 +175,10 @@ conum:
   font_size: $base_font_size
   line_height: 4 / 3
 example:
-  border_color: #ff8000
+  border_color: $base_border_color
   border_radius: $base_border_radius
   border_width: 0.75
-  background_color: #ffffc2
+  background_color: transparent
   # FIXME reenable margin bottom once margin collapsing is implemented
   padding: [$vertical_rhythm, $horizontal_rhythm, 0, $horizontal_rhythm]
 image:
@@ -216,7 +216,7 @@ outline_list:
   #marker_font_color: 404040
 table:
   background_color: $page_background_color
-  head_background_color: cccccc
+  head_background_color: cccccc 
   #head_font_color: $base_font_color
   head_font_style: bold
   #even_row_background_color: f9f9f9
@@ -244,7 +244,7 @@ header:
   vertical_align: top
   border_style: solid
   border_width: 0.5
-  border_color: ff0000
+  border_color: ff0000 
   recto_content:
     left: |
         Chapter {chapter-title}
@@ -261,7 +261,7 @@ footer:
   font_style: bold
   # NOTE if background_color is set, background and border will span width of page
   border_width: 0.5
-  border_color: ff0000
+  border_color: ff0000 
   #height: $base_line_height_length * 2.5
   height: 0.5in
   line_height: .3
