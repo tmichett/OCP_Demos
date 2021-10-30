@@ -180,7 +180,7 @@ example:
   border_width: 0.75
   background_color: #ffffc2
   # FIXME reenable margin bottom once margin collapsing is implemented
-  padding: [$vertical_rhythm, $horizontal_rhythm, 0, $horizontal_rhythm]
+  padding: $code_font_size
 image:
   align: left
 prose:
