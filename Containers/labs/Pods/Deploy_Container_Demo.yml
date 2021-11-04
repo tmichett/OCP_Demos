@@ -42,7 +42,7 @@
         registry: "{{ registry_url }}"
 
 ## Start and Run the HTTPD Container
-    - name: Start the Quay Container
+    - name: Start the Webserver Container
       podman_container:
         name: Website_Demo
         image: quay.io/redhattraining/httpd-parent:2.4

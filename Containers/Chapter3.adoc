@@ -257,8 +257,23 @@ You can check login to MySQL and verify the service allows login and a simple *s
 0
 ----
 
-
 =====
++
+.Copy/Pasteable Command
+[NOTE]
+======
+
+.Launching MySQL Container
+[source,bash]
+----
+podman run -d --name db \
+-e MYSQL_USER=wordpress \
+-e MYSQL_PASSWORD=wordpress \
+-e MYSQL_DATABASE=wordpress \
+-e MYSQL_ROOT_PASSWORD=somewordpress \
+--pod wordpress_pod_demo registry.access.redhat.com/rhscl/mysql-57-rhel7
+----
+======
 
 . Start the Wordpres Container
 +
@@ -281,6 +296,22 @@ Writing manifest to image destination
 Storing signatures
 793b3d5de8108204ed9161fdc65cf81214be99a13676e9f8f251f439852c70f2
 ----
++
+.Copy/Pasteable Command
+[NOTE]
+======
+
+.Launching Wordpress Applicatin
+[source,bash]
+----
+podman run -d --name wp \
+-e WORDPRESS_DB_HOST=127.0.0.1:3306 \
+-e WORDPRESS_DB_USER=wordpress \
+-e WORDPRESS_DB_PASSWORD=wordpress \
+-e WORDPRESS_DB_NAME=wordpress \
+--pod wordpress_pod_demo quay.io/redhattraining/wordpress:5.3.0
+----
+======
 
 . Check Podman Pod and Container Status
 +
@@ -772,6 +803,23 @@ For this lab, we will be creating a *Wordpress Demo Pod* like we did above but e
 > -e MYSQL_ROOT_PASSWORD=somewordpress \
 > --pod wordpress_pod_demo registry.access.redhat.com/rhscl/mysql-57-rhel7
 ----
++
+.Copy/Pasteable Command
+[NOTE]
+======
+
+.Deployng a Database Container
+[source,bash]
+----
+podman run -d --name db \
+-e MYSQL_USER=wordpress \
+-e MYSQL_PASSWORD=wordpress \
+-e MYSQL_DATABASE=wordpress \
+-e MYSQL_ROOT_PASSWORD=somewordpress \
+--pod wordpress_pod_demo registry.access.redhat.com/rhscl/mysql-57-rhel7
+----
+
+======
 
 . Create the Wordpress Container in the Running Pod
 +
@@ -784,6 +832,22 @@ For this lab, we will be creating a *Wordpress Demo Pod* like we did above but e
 > -e WORDPRESS_DB_NAME=wordpress \
 > --pod wordpress_pod_demo quay.io/redhattraining/wordpress:5.3.0
 ----
++
+.Copy/Pasteable Command
+[NOTE]
+======
+
+.Deploying Wordpreess Container
+[source,bash]
+----
+podman run -d --name wp \
+-e WORDPRESS_DB_HOST=127.0.0.1:3306 \
+-e WORDPRESS_DB_USER=wordpress \
+-e WORDPRESS_DB_PASSWORD=wordpress \
+-e WORDPRESS_DB_NAME=wordpress \
+--pod wordpress_pod_demo quay.io/redhattraining/wordpress:5.3.0
+----
+======
 
 . Verify Podman and Container Status
 +
@@ -1033,6 +1097,25 @@ X-Powered-By: PHP/7.3.12
 Expires: Wed, 11 Jan 1984 05:00:00 GMT
 Cache-Control: no-cache, must-revalidate, max-age=0
 Content-Type: text/html; charset=utf-8
+----
+
+. Cleanup pod and containers
++
+[source,bash]
+----
+[root@server ~]# podman pod rm wordpress_pod_demo -f
+----
+
+. Verify Cleanup
++
+[source,bash]
+----
+[root@server ~]# podman pod ps
+POD ID  NAME    STATUS  CREATED  INFRA ID  # OF CONTAINERS
+
+[root@server ~]# podman ps -a | grep wp
+
+[root@server ~]# podman ps -a | grep db
 ----
 
 ====
