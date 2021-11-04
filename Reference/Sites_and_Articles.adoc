@@ -179,6 +179,17 @@ endif::[]
 * *Ansible Blender*
 ** https://github.com/ansible-community/ansible-bender
 
+* *Should you use the --user flag in rootless containers?*
+** https://www.redhat.com/sysadmin/user-flag-rootless-containers
+
+* *How to use the --privileged flag with container engines*
+** https://www.redhat.com/sysadmin/privileged-flag-container-engines
+
+* *Running rootless Podman as a non-root user*
+** https://www.redhat.com/sysadmin/rootless-podman-makes-sense
+
+
+
 == Buildah References
 
 * *Buildah Tutorial*
@@ -321,6 +332,11 @@ endif::[]
 
 * *How to run an X11 application (xclock) on podman?*
 ** https://superuser.com/questions/1407370/how-to-run-an-x11-application-xclock-on-podman
+
+* *Deploy Nessus as a Docker Image*
+** https://docs.tenable.com/nessus/8_13/Content/DeployNessusDocker.htm
+
+
 
 == Git References
 
