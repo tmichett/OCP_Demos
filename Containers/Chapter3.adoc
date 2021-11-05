@@ -772,7 +772,7 @@ POD ID  NAME    STATUS  CREATED  INFRA ID  # OF CONTAINERS
 
 It is possible to create a deployment file for Podman from a running pod. This deployment file will contain information about all containers running in the pod and can be used for later deployments.
 
-.* LAB: Deployment YAML File for a Pod with Multiple Containers*
+.*LAB: Deployment YAML File for a Pod with Multiple Containers*
 ====
 
 For this lab, we will be creating a *Wordpress Demo Pod* like we did above but exposing port 9999. Instead of using a script, we will have a YAML file which can deploy the application.
