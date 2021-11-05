@@ -213,7 +213,7 @@ To register this system, run: insights-client --register
 
 [cuser@server ~]$ cd ~/.config/containers/
 
-[cuser@server containers]$ wget http://classroom.example.com/content/courses/rhcsa650e/rhel8.2/materials/registries.conf
+[cuser@server containers]$ scp student@workstation:github/OCP_Demos/Containers/labs/SystemD/registries.conf .
 ----
 
 . Create Content for Webserver
@@ -229,9 +229,9 @@ To register this system, run: insights-client --register
 +
 [source,bash]
 ----
-[cuser@server ~]$ podman login registry.lab.example.com
-Username: admin
-Password: redhat321
+[cuser@server ~]$ podman login quay.io
+Username: <UN>
+Password: <PW>
 Login Succeeded!
 ----
 
@@ -342,6 +342,41 @@ I am a demo webserver
 CONTAINER ID  IMAGE                                COMMAND               CREATED             STATUS                 PORTS                 NAMES
 6da1c129c3e2  quay.io/redhattraining/httpd-parent  /bin/sh -c /usr/s...  About a minute ago  Up About a minute ago  0.0.0.0:8080->80/tcp  demoweb
 ----
+
+. Reboot the server
++
+[source,bash]
+----
+[cuser@server user]$ su -
+Password:
+Last login: Fri Nov  5 16:12:41 EDT 2021 from 172.25.250.9 on pts/0
+
+[root@server ~]# reboot
+----
+
+. Log back into the server as any user other than *cuser*
++
+[source,bash]
+----
+[student@workstation Buildah]$ ssh root@server
+----
+
+. Verify Status of Website
++
+[source,bash]
+----
+[root@server ~]# curl localhost:8080
+I am a demo webserver
+----
+
+. Verify that Container isn't running as root
++
+[source,bash]
+----
+[root@server ~]# podman ps -a
+CONTAINER ID  IMAGE   COMMAND  CREATED  STATUS  PORTS   NAMES
+----
+
 
 =====
 
