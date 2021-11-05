@@ -128,4 +128,19 @@ and check to make sure that only the key(s) you wanted were added.
 ----
 [student@workstation server_prep]$ ansible-playbook Setup_Server.yml
 ----
+
+. Install the *Container Tools* package on *server*
++
+[source,bash]
+----
+[root@server ~]# yum module install container-tools
+----
+
+. Install *cockpit* on *server*
++
+[source,bash]
+----
+[root@server ~]# yum install cockpit* <1>
+----
+<1> The '*' is added to install all Cockpit packages and plugins. This will allow the *cockpit-podman* to already be installed and ready on the system.
 ====
