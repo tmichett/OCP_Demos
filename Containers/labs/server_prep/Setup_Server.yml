@@ -43,14 +43,14 @@
         dest: /etc/yum.repos.d/rhel_dvd.repo
 
 ## Modify the /etc/hosts file on Server
-    - name: Modify /etc/hosts to have the quay.local
+    - name: Modify /etc/hosts to have the quay.local on Server
       lineinfile:
         path: /etc/hosts
         regexp: '^172.25.250.251 quay.local quay server server.lab.example.com'
         line: '172.25.250.251 quay.local quay server server.lab.example.com'
 
 ## Modify the /etc/hosts file on Workstation
-    - name: Modify /etc/hosts to have the quay.local
+    - name: Modify /etc/hosts to have the quay.local on Workstation
       lineinfile:
         path: /etc/hosts
         regexp: '^172.25.250.251 quay.local quay server server.lab.example.com'
