@@ -184,14 +184,13 @@ WantedBy=multi-user.target
 ----
 [root@server ~]# chmod 644 /etc/systemd/system/systemd_test_service.service
 ----
-
++
 .SystemD Services
 [NOTE]
 =====
 Once a script has been created and made executable and a service file has properly been created and placed in */etc/systemd/system/* directory it is possible to use the *systemctl* command to interact with the service file and make it active on boot.
 =====
-
-
++
 .Default SystemD Directories
 [IMPORTANT]
 =====
@@ -605,9 +604,12 @@ It is possible to use a single *cockpit* Interface to manage multiple servers.
 ====
 . Ensure cockpit socket/service is running and configured on all systems.
 +
-.Test and Enable Cockpit
+.Test and Enable Cockpit (Both *workstation* and *server*)
 [source,bash]
 ----
+[root@workstation ~]# systemctl enable cockpit.socket --now
+Created symlink /etc/systemd/system/sockets.target.wants/cockpit.socket → /usr/lib/systemd/system/cockpit.socket.
+
 [student@workstation ~]$ ssh root@server
 Activate the web console with: systemctl enable --now cockpit.socket
 
@@ -622,8 +624,9 @@ image::Chapter3-c05bc.png[title="Red Hat Web Console (cockpit)", align="center"]
 . Add another Web Console from the Cockpit Dashboard
 .. Navigate to the Dashboard
 .. Click the "+" and complete the information
+*** *workstation.lab.example.com*
 +
-image::Chapter3-cfa22.png[title="Adding Additional machines", align="center"]
+image::Chapter1-eec6e.png[title="Adding Additional machines", align="center"]
 
 . Verify the System Fingerprint and click *Connect*
 +
