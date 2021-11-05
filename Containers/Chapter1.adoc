@@ -39,8 +39,8 @@ Tactical TMUX: https://danielmiessler.com/study/tmux/
 
 In the example below, we will explore the *screen* functionalities of TMUX with respect to attaching and detaching of sessions.
 
-*Installing TMUX*
-
+.*LAB: Installing TMUX*
+====
 . Install *tmux* with YUM
 +
 .Installation of TMUX
@@ -89,7 +89,7 @@ image::Chapter1-7d227.png[title="*tmux* Terminal Window", align="center"]
 
 .Naming or Renaming Sessions
 [TIP]
-====
+=====
 It is possible that once you are in a *tmux* session to rename the session.
 
 .Renaming a TMUX Session
@@ -112,6 +112,7 @@ travis-demo: 1 windows (created Mon Apr 13 11:08:28 2020) [98x23]
 
 [student@workstation ~]$ tmux attach-session -t travis-demo
 ----
+=====
 ====
 
 === SystemD Overview
@@ -128,6 +129,9 @@ Linus Torvalds and others on Linux's systemd: https://www.zdnet.com/article/linu
 SysVinit Vs systemd Cheatsheet: https://www.2daygeek.com/sysvinit-vs-systemd-cheatsheet-systemctl-command-usage/
 ====
 
+
+.*LAB: Creating a SystemD Script and Service*
+====
 . Create the Init Script
 +
 .Init Script to Run at Startup
@@ -183,18 +187,18 @@ WantedBy=multi-user.target
 
 .SystemD Services
 [NOTE]
-====
+=====
 Once a script has been created and made executable and a service file has properly been created and placed in */etc/systemd/system/* directory it is possible to use the *systemctl* command to interact with the service file and make it active on boot.
-====
+=====
 
 
 .Default SystemD Directories
 [IMPORTANT]
-====
+=====
 It is important to note that there are several default SystemD directories. When defining your own files, the proper location is to place them in */etc/systemd*. There is more information available in other Red Hat courses, specifically the RH442 Performance Tuning course.
 
 Default Location: */lib/systemd/*
-====
+=====
 
 . Starting and Enabling a Custom Service
 +
@@ -233,6 +237,8 @@ Oct 25 10:07:42 server.lab.example.com bash[1533]: Looping...
 [root@server ~]# grep -i "systemd custom" /var/log/messages
 Oct 25 10:07:42 server journal[1536]: This is a sample service started at 2021-10-25 10:07:42 for the SystemD Custom course.
 ----
+
+====
 
 .SystemD References
 [TIP]
@@ -595,6 +601,8 @@ Using the installation method above will install all Cockpit packages and plugin
 
 It is possible to use a single *cockpit* Interface to manage multiple servers.
 
+.*LAB: Setting up Cockpit to control multiple systems*
+====
 . Ensure cockpit socket/service is running and configured on all systems.
 +
 .Test and Enable Cockpit
@@ -624,3 +632,4 @@ image::Chapter3-87075.png[title="Fingerprint Verification", align="center"]
 . It is now possible to switch systems from the System Drop-down menu
 +
 image::Chapter3-f67ec.png[title="Switching Systems", align="center"]
+====
