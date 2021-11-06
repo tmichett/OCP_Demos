@@ -553,85 +553,39 @@ collections/
 .Playbook Tasks
 [source,yaml]
 ----
-  tasks:
+tasks:
 
   ## Start and Run the HTTPD Container
-    - name: Start the Apache Container
-      podman_container:
-        name: Website_Demo
-        image: quay.io/redhattraining/httpd-parent:2.4
-        state: started
-        restart: yes
-        ports:
-          - "7080:80"
+      - name: Start the Apache Container
+        podman_container:
+          name: Website_Demo
+          image: quay.io/redhattraining/httpd-parent:2.4
+          state: started
+          restart: yes
+          ports:
+            - "7080:80"
 
   ## Open Firewall for Automated Testing
-    - name: Open Firewall for Website
-      firewalld:
-        port: 7080/tcp
-        permanent: true
-        state: enabled
-        immediate: yes
+      - name: Open Firewall for Website
+        firewalld:
+          port: 7080/tcp
+          permanent: true
+          state: enabled
+          immediate: yes
 
-- name: Test Website
-  hosts: localhost
-  tasks:
-    - name: Test Website
-      uri:
-        url: http://server:7080
-        return_content: yes
-        status_code: 200
-      register: result
+  - name: Test Website
+    hosts: localhost
+    tasks:
+      - name: Test Website
+        uri:
+          url: http://server:7080
+          return_content: yes
+          status_code: 200
+        register: result
 
-    - name: Test Website Output
-      debug:
-        msg: 'The website returned: "{{ result.content }}"'
-----
-
-. Verify entire playbook
-+
-[source,bash]
-----
----
-- name: Deploy HTTPD Server Demo
-  hosts: server
-  collections:
-    - containers.podman
-
-  tasks:
-
-## Start and Run the HTTPD Container
-    - name:  Start the Apache Container
-      podman_container:
-        name: Website_Demo
-        image: quay.io/redhattraining/httpd-parent:2.4
-        state: started
-        restart: yes
-        ports:
-          - "7080:80"
-
-## Open Firewall for Automated Testing
-    - name: Open Firewall for Website
-      firewalld:
-        port: 7080/tcp
-        permanent: true
-        state: enabled
-        immediate: yes
-
-- name: Test Website
-  hosts: localhost
-  tasks:
-    - name: Test Website
-      uri:
-        url: http://server:7080
-        return_content: yes
-        status_code: 200
-      register: result
-
-    - name: Test Website Output
-      debug:
-        msg: 'The website returned: "{{ result.content }}"'
-
+      - name: Test Website Output
+        debug:
+          msg: 'The website returned: "{{ result.content }}"'
 ----
 
 . Run Ansible Playbook and Verify Success
@@ -913,19 +867,6 @@ server                     : ok=4    changed=3    unreachable=0    failed=0    s
 ----
 [student@workstation Ansible_Container]$ ssh root@server "podman images | grep -i httpd-parent"
 ----
-+
-[WARNING]
-======
-There may be other versions of the image on the system as we are only removing the image tagged with the version tag "2.4". Depending on cleanup, it is possible that a version tagged with "latest" might exist.
-
-
-[source,bash]
-----
-[student@workstation Ansible_Container]$ ssh root@server "podman images | grep -i httpd-parent"
-quay.io/redhattraining/httpd-parent              latest  4346d3cace25  2 years ago    236 MB
-----
-
-======
 
 ====
 
