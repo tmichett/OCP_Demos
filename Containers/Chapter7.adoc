@@ -461,8 +461,13 @@ It is necessary to create a storage location for Quay container images and image
 +
 [source,bash]
 ----
-[root@server ~]# scp student@workstation:~/Downloads/quay-config.tar.gz $QUAY/config
+[root@server ~]# [root@server ~]# scp student@workstation:~/github/OCP_Demos/Containers/labs/Quay/quay-config.tar.gz $QUAY/config
 ----
++
+[IMPORTANT]
+======
+We are coping the *quay-config.tar.gz* from the project to ensure that the correct parameters are used. This should have been the same exact configuration archive that was created and downloaded on the Workstation system in the *Downloads* directory.
+======
 
 . Extract the files for use
 +
@@ -514,6 +519,24 @@ config.yaml  extra_ca_certs  quay-config.tar.gz
 > registry.redhat.io/rhel8/postgresql-10:1
 e0db014a5a2f35cc895ef4ad136695a56ae2cda81c86db804810082ad38b9529
 ----
++
+.Copy/Pasteable Command
+[TIP]
+======
+
+[source,bash]
+----
+podman run -d --rm --name postgresql-clairv4 \
+-e POSTGRESQL_USER=clairuser \
+-e POSTGRESQL_PASSWORD=clairpass \
+-e POSTGRESQL_DATABASE=clair \
+-e POSTGRESQL_ADMIN_PASSWORD=adminpass \
+-p 5433:5432 \
+-v $QUAY/postgres-clairv4:/var/lib/pgsql/data:Z \
+registry.redhat.io/rhel8/postgresql-10:1
+----
+======
+
 
 . Install *Postgres uuid-ossp module*
 +
@@ -524,6 +547,20 @@ e0db014a5a2f35cc895ef4ad136695a56ae2cda81c86db804810082ad38b9529
 > 'echo "CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\"" \
 > | psql -d clair -U postgres'
 ----
++
+.Copy/Pasteable Command
+[TIP]
+======
+
+[source,bash]
+----
+podman exec -it postgresql-clairv4 \
+/bin/bash -c \
+'echo "CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\"" \
+| psql -d clair -U postgres'
+----
+======
+
 
 . Create Clair Configuration File and place at */etc/clairv4/config/config.yml*
 .. https://github.com/quay/clair/blob/main/Documentation/reference/config.md
@@ -564,6 +601,20 @@ Trying to pull registry.redhat.io/quay/clair-rhel8:v3.6.0-70...
 Storing signatures
 7f5ec8bd697c83fc2ad9277fd76d4c8c8b48048ec45d59f948cd58f87e03295e
 ----
++
+.Copy/Pasteable Command
+[TIP]
+======
+
+[source,bash]
+----
+podman run -d --rm --name clairv4 \
+-p 8081:8081 -p 8089:8089 \
+-e CLAIR_CONF=/clair/config.yaml -e CLAIR_MODE=combo \
+-v /etc/clairv4/config:/clair:Z \
+registry.redhat.io/quay/clair-rhel8:v3.6.0-70
+----
+======
 
 ====
 
@@ -585,6 +636,20 @@ After all configurations have been made and the supporting containers are runnin
 > registry.redhat.io/quay/quay-rhel8:v3.6.0-62
 0357e5cfd31fa0336cdc0561bd2d39e332451ba781671abd5b6f2fac2b24c7f0
 ----
++
+.Copy/Pasteable Command
+[TIP]
+======
+
+[source,bash]
+----
+podman run -d --rm -p 80:8080 \
+--name=quay \
+-v $QUAY/config:/conf/stack:Z \
+-v $QUAY/storage:/datastorage:Z \
+registry.redhat.io/quay/quay-rhel8:v3.6.0-62
+----
+======
 
 . Launch the Quay Mirroring Container
 +
@@ -595,6 +660,18 @@ After all configurations have been made and the supporting containers are runnin
 > registry.redhat.io/quay/quay-rhel8:v3.6.0-62 repomirror
 adcd500ae3e0ca7510134d91b4389812cc55ebb2f1f2ebefcfc318f7ce2f6fd9
 ----
++
+.Copy/Pasteable Command
+[TIP]
+======
+
+[source,bash]
+----
+podman run -d --name mirroring-worker \
+-v $QUAY/config:/conf/stack:Z \
+registry.redhat.io/quay/quay-rhel8:v3.6.0-62 repomirror
+----
+======
 
 . Verify all containers are running
 +
