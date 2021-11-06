@@ -851,10 +851,11 @@ SUPER_USERS:
 ----
 ====
 
-.*LAB* Configuring Quay and Super Users*
+.*LAB: Configuring Quay and Super Users*
 ====
 
 . Open the Quay web console by navigating to it in your favorite browser using *http://Quay-FQDN*
+.. *Quay-FQDN*: quay.local
 +
 image::Chapter7-77f15.png[title="Quay Login Page", align="center"]
 
@@ -891,7 +892,7 @@ Login Succeeded!
 
 . Pull and Download an Image, Tag it, then upload to repository
 .. Image to download: *quay.io/redhattraining/httpd-parent:2.4*
-.. Tag Name: **
+.. Tag Name: *quay.local/travis/httpd-parent:2.4*
 +
 .Downloading image
 [source,bash]
@@ -965,6 +966,7 @@ The next step is to ensure that the QUAY Image mirroring container is working an
 image::README-a249a.png[]
 
 . Give repository a name and setup the repository visibility
+.. .. *Name*: rhttraining_httpd
 +
 image::README-e0e97.png[]
 
@@ -977,8 +979,8 @@ image::README-cec53.png[]
 image::README-0e703.png[]
 
 . In the *Mirroring* tab, complete the required information for the repository and create a *Robot User*. Click *Enable Mirror*
-.. Registry Location - quay.io/redhattraining/httpd-parent
-.. Tags: latest and 2.4
+.. *Registry Location*: quay.io/redhattraining/httpd-parent
+.. *Tags*: latest and 2.4
 +
 image::README-5415f.png[]
 +

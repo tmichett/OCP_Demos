@@ -311,6 +311,17 @@ endif::[]
 * *How to Create a Kubernetes Cluster Locally - Simple Tutorial*
 ** https://www.capitalone.com/tech/software-engineering/create-and-deploy-kubernetes-clusters/
 
+
+* *Introduction to YAML: Creating a Kubernetes deployment*
+** https://www.mirantis.com/blog/introduction-to-yaml-creating-a-kubernetes-deployment/
+
+* *Podman can now ease the transition to Kubernetes and CRI-O*
+** https://developers.redhat.com/blog/2019/01/29/podman-kubernetes-yaml
+
+* *Deploy to Kubernetes*
+** https://docs.docker.com/get-started/kube-deploy/
+
+
 == Docker References
 
 * *Transitioning from Docker to Podman*
