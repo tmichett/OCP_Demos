@@ -223,6 +223,23 @@ Writing manifest to image destination
 Storing signatures
 c21bf1231538b75d5510b4bd81732ad8f56fa61a98582b985124bd3d5de2ae04
 ----
++
+.Copy/Paste version of Command
+[TIP]
+======
+
+[source,bash]
+----
+podman run -d --rm --name postgresql-quay \
+-e POSTGRESQL_USER=quayuser \
+-e POSTGRESQL_PASSWORD=quaypass \
+-e POSTGRESQL_DATABASE=quay \
+-e POSTGRESQL_ADMIN_PASSWORD=adminpass \
+-p 5432:5432 \
+-v $QUAY/postgres-quay:/var/lib/pgsql/data:Z \
+registry.redhat.io/rhel8/postgresql-10:1
+----
+======
 
 . Modify the *Postgresql* database to ensure that *pg_trgm* module has been installed.
 +
@@ -233,6 +250,20 @@ c21bf1231538b75d5510b4bd81732ad8f56fa61a98582b985124bd3d5de2ae04
 > 'echo "CREATE EXTENSION IF NOT EXISTS pg_trgm" \
 > | psql -d quay -U postgres'
 ----
++
+.Copy/Paste version of Command
+[TIP]
+======
+
+[source,bash]
+----
+podman exec -it postgresql-quay \
+/bin/bash -c \
+'echo "CREATE EXTENSION IF NOT EXISTS pg_trgm" \
+| psql -d quay -U postgres'
+----
+======
+
 
 . Setup the *Redis* Container
 +
@@ -249,6 +280,20 @@ Trying to pull registry.redhat.io/rhel8/redis-5:1...
 Storing signatures
 c847b459ded23acdd30e2a6ec1acfdeb3dd79f1457f7f99082cedb0a40447d73
 ----
++
+.Copy/Paste version of Command
+[TIP]
+======
+
+[source,bash]
+----
+podman run -d --rm --name redis \
+-p 6379:6379 \
+-e REDIS_PASSWORD=strongpassword \
+registry.redhat.io/rhel8/redis-5:1
+----
+======
+
 
 ====
 
@@ -269,9 +314,22 @@ Trying to pull registry.redhat.io/quay/quay-rhel8:v3.6.0-62...
 config-editor stdout | time="2021-10-26T17:54:07Z" level=warning msg="An error occurred loading TLS: No public key provided for HTTPS. Server falling back to HTTP."
 config-editor stdout | time="2021-10-26T17:54:07Z" level=info msg="Running the configuration editor with HTTP on port 8080 with username quayconfig"
 ----
++
+.Copy/Paste version of Command
+[TIP]
+======
+
+[source,bash]
+----
+podman run --rm -it --name quay_config \
+-p 8080:8080 \
+registry.redhat.io/quay/quay-rhel8:v3.6.0-62 config secret
+----
+======
+
 
 . Access a Web Browser and begin the Quay Configuration
-.. URL: *quay.local*
+.. URL: *quay.local:8080*
 .. UN: *quayconfig*
 .. PW: *secret*
 +
@@ -296,7 +354,7 @@ image::Chapter7-d61cd.png[title="Quay Postgresql DB Setup", align="center"]
 
 . Setup Redis Information
 .. Redis Hostname: quay.local
-.. Redis Port: 63779
+.. Redis Port: 6379
 .. Redis Password: strongpassword
 +
 image::Chapter7-55ad6.png[title="Quay Redis Setup", align="center"]

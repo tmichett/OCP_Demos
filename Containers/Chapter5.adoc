@@ -377,6 +377,28 @@ I am a demo webserver
 CONTAINER ID  IMAGE   COMMAND  CREATED  STATUS  PORTS   NAMES
 ----
 
+. Cleanup Service and Files for Upcoming Exercises
++
+.Disable and Stop Container and Service
+[source,bash]
+----
+[cuser@server ~]$ systemctl --user disable container-demoweb.service --now
+Removed /home/cuser/.config/systemd/user/multi-user.target.wants/container-demoweb.service.
+Removed /home/cuser/.config/systemd/user/default.target.wants/container-demoweb.service.
+----
++
+.Warning Header
+[WARNING]
+======
+The session must be logged into *cuser* through SSH in order for *Linger* and *SystemD* to recognize the *systemctl --user* command!
+======
++
+.Verify Container was Stopped and Removed
+[source,bash]
+----
+[cuser@server ~]$ podman ps -a
+CONTAINER ID  IMAGE   COMMAND  CREATED  STATUS  PORTS   NAMES
+----
 
 =====
 
