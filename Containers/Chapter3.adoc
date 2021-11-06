@@ -11,7 +11,7 @@ endif::[]
 :imagesdir: images/
 
 
-== Podman Pods
+== Podman Pods and Container/Pod Resource Files
 
 *Podman* has replaced *Docker/Moby* in RHEL 8 and will be the container management application moving forward. *Podman* (short for Pod Manager) is a daemon-less way to run containers and pods as a standard non-privileged user or as a privileged or "root" user. Podman also lends itself nicely to Kubernetes since it manages both containers and pods. Remember that the smallest item that Kubernetes/Openshift manages is a pod and that pods consist of one or more containers.
 
