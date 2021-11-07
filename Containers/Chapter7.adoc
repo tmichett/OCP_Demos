@@ -1041,6 +1041,7 @@ Organizations can be created so that multiple users can share container images. 
 image::Chapter7-d9382.png[title="Creating an Organization", align="center"]
 
 . Provide name for Organization and click *Create Organization*
+.. *Organization Name*: redhattraining
 +
 image::Chapter7-7e401.png[title="Red Hat Training Organization", align="center"]
 +
@@ -1053,7 +1054,8 @@ When naming the organization, it is important to use all lowercase letters and n
 +
 image::Chapter7-6d5f3.png[title="Red Hat Training Organization - Membership", align="center"]
 
-. Create a team
+. Create a team by clicking *Create New Team* and proving a team name.
+.. *Team Name*: devteam
 +
 image::Chapter7-8049d.png[title="Red Hat Training Organization - Creating a Team", align="center"]
 +
@@ -1066,12 +1068,17 @@ image::Chapter7-0f988.png[title="Red Hat Training Organization - Membership Veri
 image::Chapter7-fab2a.png[title="devteam - Membership Modification", align="center"]
 
 . Search for and add team members and add a team description
+.. *Team Description*: Red Hat Training and Development Team
+.. *Team Members*: <_add your user_>
 +
 image::Chapter7-1da3d.png[title="devteam - Edit team and members", align="center"]
 +
 image::Chapter7-eb3fb.png[title="devteam - Final Team Details", align="center"]
 
-. Create default organization permissions
+. Create default organization permissions. Make selections below and click *Create Permission*
+.. Permission Applies to Anyone
+.. *Permission*: Write
+.. *Applied To:* devteam
 +
 image::Chapter7-0a6c2.png[title="Red Hat Training Organization - Permissions", align="center"]
 +
@@ -1110,6 +1117,11 @@ Writing manifest to image destination
 Storing signatures
 8d990e08937e299ce1d9e629e4df86ef824744e9c9d2057a8883553650d25ba9
 ----
++
+[IMPORTANT]
+======
+The *quay.io/redhattraining/hello-world-nginx* image is public so it shouldn't require login and authentication. However, if that changes and you are unable to access the image, login to *quay.io* before pulling the image.
+======
 
 . Tag image for upload to *quay.local*
 +
@@ -1117,6 +1129,11 @@ Storing signatures
 ----
 [student@workstation ~]$ podman tag quay.io/redhattraining/hello-world-nginx quay.local/redhattraining/hello-world-nginx
 ----
++
+[TIP]
+======
+The downloaded image from Quay.io has been tagged so it can be uploaded to the local Quay repository at *quay.local*.
+======
 
 . Verify images and tags
 +
@@ -1140,6 +1157,11 @@ Getting image source signatures
 Writing manifest to image destination
 Storing signatures
 ----
++
+[IMPORTANT]
+======
+We are using *podman push* with the *--tls-verify=false* option because we are using HTTP on port 80 as a transport method and we don't have this registry configured in the *registries.conf* file. Additionally, the instance of *quay.local* doesn't currently support TLS/SSL secure connections.
+======
 
 . Verify repository appears in Quay WebUI
 +
@@ -1154,6 +1176,8 @@ image::Chapter7-befee.png[title="hello-world-nginx - Image Tags and Scan Results
 image::Chapter7-bb7cb.png[title="hello-world-nginx - Private (Locked) Repository", align="center"]
 
 . Unlock Repository for Public Use of Image
+.. Click the *Gear* on the repository navigation left-side bar menu
+.. Under *Repository Visibility* click *Make Public*
 +
 image::Chapter7-94320.png[title="hello-world-nginx - Making Repository Public", align="center"]
 +
@@ -1188,6 +1212,39 @@ Trying to pull quay.local:80/redhattraining/hello-world-nginx:latest.
 Storing signatures
 9c9251222721e8ebbd1e38b8a9623b035ba1d814cbfc4dd25fc0256fded25777
 ----
++
+[WARNING]
+======
+You might receive an error message about the HTTPS connection to the repository.
+
+.Error Message
+[CAUTION]
+=======
+Trying to pull quay.local:80/redhattraining/hello-world-nginx:latest...
+  Get "https://quay.local:80/v2/": http: server gave HTTP response to HTTPS client
+Error: Error initializing source docker://quay.local:80/redhattraining/hello-world-nginx:latest: error pinging docker registry quay.local:80: Get "https://quay.local:80/v2/": *http: server gave HTTP response to HTTPS client*
+=======
+
+The error message means that *podman* is still trying to connect via HTTPS to an HTTP registry. If this occurs, update the *registries.conf* file for the user or for the system.
+
+.Rgistries.Conf
+[source,bash]
+----
+[root@server ~]# vim /etc/containers/registries.conf
+
+... OUTPUT OMITTED ...
+
+[registries.search]
+registries = ['registry.access.redhat.com', 'registry.redhat.io', 'docker.io', 'quay.io', 'quay.local:80'] <1>
+
+... OUTPUT OMITTED ...
+
+[registries.insecure]
+registries = ['quay.local:80'] <2>
+----
+<1> Add the new *quay.local* registry with the port to the registries search order
+<2> Add the new *quay.local:80* so that *podman* knows it is using HTTP and not HTTPS or if it has a self-signed certificate.
+======
 
 . Verify webserver is running
 +
@@ -1435,6 +1492,12 @@ Password:
 Login Succeeded!
 ----
 ======
+
+. Verify that the *hello-world-nginx* now exists in the *Travis* repository/registry.
+.. Click *Repositories*
+... Look for *travis/hello-world-nginx*
++
+image::Chapter7-5996c.png[title="Verification of Successful Skopeo Copy", align="center"]
 
 ====
 
