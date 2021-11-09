@@ -31,7 +31,7 @@ The lab environment will need *server* configured to be our *quay.local* system 
 .Lab Installation and Setup Exercise
 ====
 
-. Create Directories and Download Github Repos
+. Create Directories and Download Github Repos on *workstation*
 +
 .Creating Directory and Switch to Directory
 [source,bash]
@@ -39,7 +39,7 @@ The lab environment will need *server* configured to be our *quay.local* system 
 [student@workstation ~]$ mkdir github ; cd github
 ----
 +
-.Cloning Repositories - Cloning *quay_lab_poc*
+.Cloning Repositories - Cloning *quay_lab_poc* on *workstation*
 [source,bash]
 ----
 [student@workstation github]$ git clone https://github.com/tmichett/quay_lab_poc.git
@@ -52,7 +52,7 @@ Receiving objects: 100% (266/266), 5.90 MiB | 22.90 MiB/s, done.
 Resolving deltas: 100% (67/67), done
 ----
 +
-.Cloning Repositories - Cloning *OCP_Demos*
+.Cloning Repositories - Cloning *OCP_Demos* on *workstation*
 [source,bash]
 ----
 [student@workstation github]$ git clone https://github.com/tmichett/OCP_Demos.git
@@ -65,21 +65,21 @@ Receiving objects: 100% (763/763), 37.16 MiB | 29.22 MiB/s, done.
 Resolving deltas: 100% (329/329), done.
 ----
 
-. Switch to the *OCP_Demos/Containers/labs/server_prep* Folder
+. Switch to the *OCP_Demos/Containers/labs/server_prep* Folder on *workstation*
 +
 [source,bash]
 ----
 [student@workstation github]$ cd OCP_Demos/Containers/labs/server_prep
 ----
 
-. Execute the *Setup_Workstation.yml* playbook
+. Execute the *Setup_Workstation.yml* playbook on *workstation*
 +
 [source,bash]
 ----
 [student@workstation server_prep]$ ansible-playbook Setup_Workstation.yml
 ----
 
-. Create SSH keys
+. Create SSH keys on *workstation*
 +
 [source,bash]
 ----
@@ -106,7 +106,7 @@ The key's randomart image is:
 +----[SHA256]-----+
 ----
 
-. Copy SSH key for the *root* user to *server*
+. Copy SSH key for the *root* user to *server* from *workstation*
 +
 [source,bash]
 ----
@@ -122,7 +122,7 @@ Now try logging into the machine, with:   "ssh 'root@server'"
 and check to make sure that only the key(s) you wanted were added.
 ----
 
-. Execute the *Setup_Server.yml* playbook
+. Execute the *Setup_Server.yml* playbook on *workstation*
 +
 [source,bash]
 ----

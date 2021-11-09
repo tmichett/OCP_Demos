@@ -86,7 +86,7 @@ image::Chapter1-7d227.png[title="*tmux* Terminal Window", align="center"]
 
 [student@workstation ~]$ tmux attach-session -t 0
 ----
-
++
 .Naming or Renaming Sessions
 [TIP]
 =====
@@ -102,17 +102,48 @@ usage: rename-session [-t target-session] new-name
 ----
 image::Chapter1-bf6b1.png[title="Renamed *tmux* Session", align="center"]
 
+=====
+
+. Rename the *tmux* Session and place in background with (*_CTRL+B, then D_*)
++
+[source,bash]
+----
+[student@workstation ~]$ tmux rename-session -t 0 travis-demo
+
+
+[student@workstation ~]$ tmux attach-session
+[detached (from session travis-demo)] <1>
+----
+<1> Verifying TMUX Sessions Exited
+
+. Create a new session and place in background with (*_CTRL+B, then D_*)
++
 [source,bash]
 ----
 [student@workstation ~]$ tmux new-session
-[detached (from session travis-demo)]
+----
++
+[WARNING]
+======
+If you receive a warning/error message *"sessions should be nested with care, unset $TMUX to force"*, that means the current TMUX Session has not been placed in the background. It is important not to nest TMUX sessions as this can cause confusion.
+======
 
+. List Sessions
++
+[source,bash]
+----
 [student@workstation ~]$ tmux list-sessions
-travis-demo: 1 windows (created Mon Apr 13 11:08:28 2020) [98x23]
+1: 1 windows (created Tue Nov  9 08:09:40 2021) [86x18]
+travis-demo: 1 windows (created Tue Nov  9 08:04:27 2021) [86x18]
+----
 
+. Reattach to the *travis-demo* seession
++
+[source,bash]
+----
 [student@workstation ~]$ tmux attach-session -t travis-demo
 ----
-=====
+
 ====
 
 === SystemD Overview
