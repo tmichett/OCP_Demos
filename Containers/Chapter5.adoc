@@ -172,7 +172,7 @@ system* directory so that the *systemd* unit file is in the correct directory.
 
 Red Hat Training offers other courses, starting with the free technical overview course Deploying Containerized Applications (DO080) and continuing with Introduction to Containers, Kubernetes, and OpenShift (DO180). For more information, visit https://www.redhat.com/training.
 
-A number of resources are available there, including ways to try out OpenShift for yourself using tools like CodeReady Containers [https://developers.redhat.com/products/ codeready-containers/overview]. See https://www.openshift.com/try for more information.
+A number of resources are available there, including ways to try out OpenShift for yourself using tools like CodeReady Containers [https://developers.redhat.com/products/codeready-containers/overview]. See https://www.openshift.com/try for more information.
 
 === DEMO - Managing Containers as Services
 
