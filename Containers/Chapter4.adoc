@@ -24,7 +24,7 @@ While Podman allows building of containers with Dockerfiles/Container files or c
 
 OpenShift Source-to-Image process also leverages *Buildah* to construct and build the container images. There are also other projects and applications that rely on *Buildah* to construct and build container images such as *ansible-blender*. In Chapter 6, we will be using a simple playbook leveraging Ansible Collections to build and publish an image to a container registry from a *Containerfile*.
 
-Buildah is capable of producing very small OCI comtainer images as it doesn't include any of the build tools within the image itself. Additionally, the resulting container image also doesn't include any compilers or other tools thereby making the image smaller and more secure. Since Buildah images are OCI images, they are portable and can run on a variety of different container images.
+Buildah is capable of producing very small OCI container images as it doesn't include any of the build tools within the image itself. Additionally, the resulting container image also doesn't include any compilers or other tools thereby making the image smaller and more secure. Since Buildah images are OCI images, they are portable and can run on a variety of different container images.
 
 ==== Buildah Commands and Overview
 
@@ -38,7 +38,7 @@ Just like Podman, *buildah* commands have very similar options.
 * *buildah images*: View images in local registry
 * *buildah rm*: Removes container
 * *buildah rmi*: Removes container image
-* *buildah from*: Pulls image from remote registry
+* *buildah pull*: Pulls image from remote registry
 * *buildah push*: Pushes image to remote registry
 * *buildah commit*: Saves and tags the image to the local image registry
 * *buildah bud* or *buildah build-using-dockerfile*: Builds container image from Dockerfile/Containerfile
