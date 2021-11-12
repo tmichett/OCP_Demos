@@ -436,6 +436,8 @@ Playbook will fail if you don't have the *containers.podman* collection installe
 [student@workstation Ansible_Image]$ ansible-galaxy collection install -r requirements.yml -p ./collections
 ----
 
+======
+
 . Verify that the *httpd_demo_ansible* and added to the local registry.
 +
 [source,bash]
@@ -444,7 +446,6 @@ Playbook will fail if you don't have the *containers.podman* collection installe
 REPOSITORY                                                 TAG      IMAGE ID       CREATED              SIZE
 localhost/httpd_demo_ansible                               latest   95857ed812de   About a minute ago   255 MB
 ----
-======
 
 ====
 
