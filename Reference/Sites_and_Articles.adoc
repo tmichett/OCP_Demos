@@ -53,6 +53,13 @@ endif::[]
 * *A Comparison Of Linux Container Images*
 ** http://crunchtools.com/comparison-linux-container-images/
 
+* *Container image formats*
+** https://cloud.google.com/container-registry/docs/image-formats
+
+* *The differences between Docker, containerd, CRI-O and runc*
+** https://www.tutorialworks.com/difference-docker-containerd-runc-crio-oci/
+
+
 == Podman References
 
 * *What is Podman?*
@@ -188,7 +195,11 @@ endif::[]
 * *Running rootless Podman as a non-root user*
 ** https://www.redhat.com/sysadmin/rootless-podman-makes-sense
 
+* *Using volumes with rootless podman, explained*
+** https://www.tutorialworks.com/podman-rootless-volumes/
 
+* *How to Start Containers Automatically, with Podman and Systemd*
+** https://www.tutorialworks.com/podman-systemd/
 
 == Buildah References
 
@@ -242,6 +253,9 @@ endif::[]
 
 * *okd4-single-node-cluster*
 ** https://cgruver.github.io/okd4-single-node-cluster/
+
+* *Libvirt OpenShift Provisioner*
+** https://github.com/kubealex/libvirt-ocp4-provisioner
 
 == Kubernetes References
 
@@ -358,3 +372,11 @@ endif::[]
 
 * *Deploy Red Hat Quay for proof-of-concept (non-production) purposes*
 ** https://access.redhat.com/documentation/en-us/red_hat_quay/3/html/deploy_red_hat_quay_for_proof-of-concept_non-production_purposes/index
+
+== Container Registries
+
+* *How to implement a simple personal/private Linux container image registry for internal use*
+** https://www.redhat.com/sysadmin/simple-container-registry
+
+* *Tutorial: Host a Local Podman Image Registry*
+** https://thenewstack.io/tutorial-host-a-local-podman-image-registry/
