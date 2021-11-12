@@ -49,4 +49,5 @@ include::Chapter7.adoc[]
 
 [appendix]
 include::AppendixA.adoc[]
+[appendix]
 include::AppendixB.adoc[]
