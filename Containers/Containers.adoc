@@ -28,7 +28,7 @@ ifdef::env-github[]
 :tip-caption: :bulb:
 :warning-caption: :warning:
 endif::[]
-:revnumber: 1.1
+:revnumber: 1.2
 :imagesdir: images/
 
 // Introduction Section goes below here

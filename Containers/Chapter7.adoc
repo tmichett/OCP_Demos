@@ -764,7 +764,7 @@ quay.local                 : ok=13   changed=10   unreachable=0    failed=0    s
 +
 .Ansible Failure Possible
 [IMPORTANT]
-====
+=====
 It is possible that you will receive an Ansible failure message like this
 
 [source,bash]
@@ -776,7 +776,7 @@ If you are using a module and expect the file to exist on the remote, see the re
 ----
 <1> This error means you forgot to create/edit the *registry_login.yml* file.
 
-====
+=====
 
 . Run the configuration file deployment based on using the TAR config file or the file-based configuration method. *_NOTE: You can only choose one method for configuration._*
 +
@@ -788,9 +788,9 @@ If you are using a module and expect the file to exist on the remote, see the re
 +
 .File-Based Configuration Considerations
 [IMPORTANT]
-====
+=====
 The *./files/config/config.yaml* file will be used and deployed to control the configuration of the Quay environment.
-====
+=====
 +
 .TAR File Configuration Method
 [source,bash]
@@ -800,9 +800,9 @@ The *./files/config/config.yaml* file will be used and deployed to control the c
 +
 .TAR-Based Configuration Considerations
 [IMPORTANT]
-====
+=====
 The *./files/quay-config.tar.gz* file will be used and deployed to control the configuration of the Quay environment. This file MUST have been created as part of the Quay configuration container process with the WebUI and it must be placed in the *./files/quay-config.tar.gz* before running the playbook.
-====
+=====
 
 . Deploy the ClairV4 scanning image by executing the *Quay_Clair_Deploy.yml* playbook
 +
@@ -966,7 +966,7 @@ The next step is to ensure that the QUAY Image mirroring container is working an
 image::README-a249a.png[]
 
 . Give repository a name and setup the repository visibility
-.. .. *Name*: rhttraining_httpd
+.. *Name*: rhttraining_httpd
 +
 image::README-e0e97.png[]
 
