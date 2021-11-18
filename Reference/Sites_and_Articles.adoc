@@ -380,3 +380,14 @@ endif::[]
 
 * *Tutorial: Host a Local Podman Image Registry*
 ** https://thenewstack.io/tutorial-host-a-local-podman-image-registry/
+
+
+== CI/CD
+
+* *Jenkins Installation Using Podman*
+* https://8gwifi.org/docs/podman-jenkins.jsp
+
+== Monitoring of Containers
+
+* *How to Monitor Docker Containers with Zabbix Monitoring Tool*
+** https://www.tecmint.com/monitor-docker-containers-with-zabbix-monitoring/
