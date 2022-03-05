@@ -277,27 +277,11 @@ footer:
   recto_content:
     #right: '{section-or-chapter-title} | {page-number}'
     left: |
-            {customer} +
-            {confidentiality}
-    center: |
-            {document-title} +
-            {description}
-    #right: '{page-number}'
-    right: |
-            {page-number} +
-            v{revnumber}
+            BOB
+
   verso_content:
     #left: '{page-number} | {chapter-title}'
     left: |
-            {customer} +
-            {confidentiality}
-    center: |
-            {document-title} +
-            {description}
-    right: |
-            {page-number} +
-            v{revnumber}
-    #right: '{page-number}'
-    #center: '{page-number}'
+            BOB
 note:
   background_color: #cccccc

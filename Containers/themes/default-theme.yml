@@ -20,7 +20,7 @@ page:
   # margin_inner and margin_outer keys are used for recto/verso print margins when media=prepress
   margin_inner: 0.75in
   margin_outer: 0.59in
-  size: LETTER
+  size: A4
 base:
   align: justify
   # color as hex string (leading # is optional)
@@ -271,6 +271,21 @@ header:
   font_size: $base_font_size_small
   line_height: 1
   vertical_align: middle
+  recto:
+    columns: "<40% =20% >40%"
+    left:
+      content: Chapter {chapter-title}
+    center:
+      content: image:rh_logo.png[pdfwidth=0.25in]
+  verso:
+    columns: $header_recto_columns
+    right:
+      content: Section {section-title}
+    center:
+      content: $header_recto_center_content  
+
+
+  
 footer:
   font_size: $base_font_size_small
   # NOTE if background_color is set, background and border will span width of page
