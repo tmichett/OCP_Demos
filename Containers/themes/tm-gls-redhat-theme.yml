@@ -26,15 +26,15 @@ header:
   recto:
   #  columns: "<40% =20% >40%"
     right:
-      content: '{section-or-chapter-title}'
+      content: Section {section-title}
     left: 
       content: image:rh_logo.png[pdfwidth=0.8in]
     center:
       content: 
   verso:
-  #  columns: $header_recto_columns
+  #  columns: $header_recto_columns  - fix me
     left:
-      content: $header_recto_right_content
+      content: Chapter {chapter-title}
     center:
       content: $header_recto_center_content
     right:
