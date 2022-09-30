@@ -16,7 +16,7 @@ RUN sed -ri -e "/^Listen 80/c\Listen ${PORT}" /etc/httpd/conf/httpd.conf && \
 
 RUN mkdir /var/www/html/images
 
-USER apache
+
 
 # Expose the custom port that you provided in the ENV var
 EXPOSE ${PORT}
@@ -25,6 +25,10 @@ EXPOSE ${PORT}
 # Copy all files under src/ folder to Apache DocumentRoot (/var/www/html)
 ADD https://people.redhat.com/~tmichett/OCP/index_html /var/www/html/index.html 
 ADD https://people.redhat.com/~tmichett/OCP/rht_training_logo.png /var/www/html/images/
+
+RUN chown -R apache:apache /var/www/
+
+USER apache
 
 # Start Apache in the foreground
 CMD ["httpd", "-D", "FOREGROUND"]
