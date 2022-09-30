@@ -26,7 +26,8 @@ EXPOSE ${PORT}
 ADD https://people.redhat.com/~tmichett/OCP/index_html /var/www/html/index.html 
 ADD https://people.redhat.com/~tmichett/OCP/rht_training_logo.png /var/www/html/images/
 
-RUN chown -R apache:apache /var/www/
+RUN chown -R apache:apache /var/www/html
+RUN chmod -R +rx /var/www/html
 
 USER apache
 
