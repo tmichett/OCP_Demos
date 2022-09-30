@@ -1,4 +1,4 @@
-FROM ubi8/ubi:8.4
+FROM registry.access.redhat.com/ubi8/ubi-minimal:8.5
 
 MAINTAINER Your Name <tmichett@redhat.com>
 
