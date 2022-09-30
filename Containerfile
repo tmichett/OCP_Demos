@@ -1,12 +1,12 @@
-FROM registry.access.redhat.com/ubi8/ubi-minimal:8.5
+FROM registry.access.redhat.com/ubi8/ubi:latest
 
 MAINTAINER Your Name <tmichett@redhat.com>
 
 # Environment variable for Apache Port
 ENV PORT 8080
 
-RUN yum install -y httpd && \
-    yum clean all
+RUN dnf install -y httpd && \
+    dnf clean all
 
 # Change configuration of Apache WS to listen on the port specified as an environment variable in the Containerfile
 
