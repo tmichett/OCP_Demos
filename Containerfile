@@ -1,6 +1,6 @@
 FROM registry.access.redhat.com/ubi8/ubi:latest
 
-MAINTAINER Your Name <tmichett@redhat.com>
+MAINTAINER Travis <tmichett@redhat.com>
 
 # Environment variable for Apache Port
 ENV PORT 8080
