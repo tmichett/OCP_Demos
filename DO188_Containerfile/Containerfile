@@ -10,7 +10,7 @@ RUN dnf install -y httpd && \
 
 # Change configuration of Apache WS to listen on the port specified as an environment variable in the Containerfile
 
-RUN sed -ri -e "/^Listen 80/c\Listen ${PORT}" /etc/httpd/conf/httpd.conf && \
+RUN sed -ri -e "/^Listen 80/c\Listen ${PORT}" /etc/httpd/conf/httpd.conf
 
 RUN mkdir /var/www/html/images
 
