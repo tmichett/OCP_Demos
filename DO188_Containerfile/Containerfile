@@ -21,6 +21,11 @@ ADD https://people.redhat.com/~tmichett/OCP/rht_training_logo.png /var/www/html/
 
 RUN chmod -R +rx /var/www/html
 
+RUN chgrp -R 0 /var/log/httpd /var/run/httpd && \
+    chmod -R g=u /var/log/httpd /var/run/httpd
+
+USER 1001
+
 # Start Apache in the foreground
 CMD ["httpd", "-D", "FOREGROUND"]
 
