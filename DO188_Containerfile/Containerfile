@@ -21,9 +21,14 @@ ADD https://people.redhat.com/~tmichett/OCP/rht_training_logo.png /var/www/html/
 
 RUN chmod -R +rx /var/www/html
 
+## Needed for OpenShift to Set Permissions
+#  Fix filesystem ownership for writing logs
+#  Fix filesystem ownership for accessing the runtime PID
+#  Prevents need from modifying SCC and creating service accounts
 RUN chgrp -R 0 /var/log/httpd /var/run/httpd && \
     chmod -R g=u /var/log/httpd /var/run/httpd
 
+## Needed for OpenShift to set a generic user
 USER 1001
 
 # Start Apache in the foreground
