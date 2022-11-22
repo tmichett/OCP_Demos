@@ -335,6 +335,20 @@ endif::[]
 * *Deploy to Kubernetes*
 ** https://docs.docker.com/get-started/kube-deploy/
 
+* *How to encrypt etcd and use secrets in OpenShift*
+** https://www.redhat.com/sysadmin/encrypt-etcd-openshift-secrets
+
+* *Introduction to Kubernetes operators for sysadmins*
+** https://www.redhat.com/sysadmin/kubernetes-operators-intro
+
+* *Learn OpenShift with Minishift*
+** https://www.redhat.com/sysadmin/learn-openshift-minishift
+
+* *Encrypting ETCD*
+** https://docs.openshift.com/container-platform/4.11/security/encrypting-etcd.html
+
+* *GitOps secret management*
+** https://cloud.redhat.com/blog/gitops-secret-management
 
 == Docker References
 
