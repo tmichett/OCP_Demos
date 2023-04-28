@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: webserver
+spec:
+  selector:
+    matchLabels:
+      app: webserver
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: webserver
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+        - name: webserver
+          image: registry.ocp4.example.com:8443/redhattraining/do180-httpd-app:v1
+          ports:
+            - name: webport
+              containerPort: 8080
+          volumeMounts:
+            - name: webdata
+              mountPath: /var/www/html
+  volumeClaimTemplates:
+    - metadata:
+        name: webdata
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: "lvms-vg1"
+        resources:
+          requests:
+            storage: 1Gi
