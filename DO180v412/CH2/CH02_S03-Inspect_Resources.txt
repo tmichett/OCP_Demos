@@ -1,0 +1,21 @@
+lab start cli-resources
+
+oc project
+
+oc project cli-resources
+
+oc explain --help
+
+oc get pods
+
+oc get pod <tab><tab> -o yaml
+
+oc explain deployments
+
+oc describe -h
+
+oc projects -h
+
+oc get project cli-resources -o json
+
+oc get project cli-resources -o yaml

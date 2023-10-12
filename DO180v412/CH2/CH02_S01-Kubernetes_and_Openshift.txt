@@ -1,0 +1,37 @@
+### NOTES: CLI for "oc" and "kubectl" commands already installed. Also, tab completion enabled by default.
+
+### Completion information
+##
+# oc completion -h
+
+## Creating and Adding CLI Completion
+
+oc completion bash >> .bash_profile
+
+## Syntax is oc completion <shell>
+
+Leverage Scripts from Repository (Resources) directory
+
+## DEMO
+
+kubectl version  (--short)
+oc version
+
+kubectl help
+
+## Remind that OpenShift and OC command extends and builds on Kubernetes
+
+oc cluster-info
+oc api-versions
+oc get clusteroperator
+oc get pods -n openshift-apiserver
+oc status -n openshift-authentication
+oc explain services
+oc get nodes
+
+## Accessing Compute Node
+
+oc debug node/master01
+chroot /host
+systemctl status kubelet
+systemctl status crio
