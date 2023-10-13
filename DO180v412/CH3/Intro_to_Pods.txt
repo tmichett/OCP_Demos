@@ -1,0 +1,42 @@
+lab start pods-containers
+
+oc project   # Shows project you are currently in
+
+
+oc new-project pods-demo
+
+
+oc describe project pods-demo
+
+
+## Run a container with some commands
+oc run -it ubi9-user --restart 'Never' \
+  --image registry.ocp4.example.com:8443/ubi9/ubi \
+  -- /bin/bash -c "whoami && id"
+
+## Show Failure
+oc run -it ubi9-user --restart 'Never' \
+  --image registry.ocp4.example.com:8443/ubi9/ubi \
+  -- /bin/bash -c "cat /etc/redhat-release"
+
+oc run -it ubi9-release --restart 'Never' \
+  --image registry.ocp4.example.com:8443/ubi9/ubi \
+  -- /bin/bash -c "cat /etc/redhat-release"
+
+oc get pods
+
+oc run -it --rm ubi9-release2 --restart 'Never'   --image registry.ocp4.example.com:8443/ubi9/ubi   -- /bin/bash -c "cat /etc/redhat-release"
+
+
+oc logs ubi9-user
+
+oc delete pod ubi9-user
+oc delete pod ubi9-release
+
+
+## Running Pods with Interactive commands
+
+oc run ubi9-cli -it \
+  --image registry.ocp4.example.com:8443/ubi9/ubi -- /bin/bash
+
+oc attach ubi9-cli -c ubi9-cli -it

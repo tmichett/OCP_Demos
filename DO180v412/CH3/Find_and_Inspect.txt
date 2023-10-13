@@ -1,0 +1,32 @@
+
+## Fails as it can't bind to unprivileged port
+oc run tm-do180-broken \
+  --image quay.io/tmichett/do180-custom-httpd:v1.0
+
+oc get pods
+
+oc get events
+
+oc logs pods/tm-do180-broken
+
+oc delete pod/tm-do180-broken
+
+
+
+## This one works
+
+oc run tm-do180-works \
+  --image quay.io/tmichett/do188-ocp-web-demo:v1.1
+
+oc logs tm-do180-works
+
+oc get pods
+
+oc describe pod tm-do180-works
+
+skopeo inspect --config \
+  docker://quay.io/tmichett/do180-custom-httpd:v1.0
+
+ oc expose pod tm-do180-works --port 8080
+
+ oc expose service/tm-do180-works
