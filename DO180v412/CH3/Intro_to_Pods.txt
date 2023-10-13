@@ -40,3 +40,15 @@ oc run ubi9-cli -it \
   --image registry.ocp4.example.com:8443/ubi9/ubi -- /bin/bash
 
 oc attach ubi9-cli -c ubi9-cli -it
+
+
+oc delete pod ubi9-cli
+
+
+## Introduction to Labels (missing from current book)
+
+oc run ubi9-cli -it -l mylabel=demo  --image registry.ocp4.example.com:8443/ubi9/ubi -- /bin/bash
+
+ oc get pods -L mylabel
+
+ oc delete all -l mylabel=demo
