@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: load-demo
+spec:
+  containers:
+  - image: registry.ocp4.example.com:8443/redhattraining/long-load:v1
+    name: load-demo
+    securityContext:
+      allowPrivilegeEscalation: false
+  restartPolicy: Always
