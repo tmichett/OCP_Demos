@@ -1,0 +1,11 @@
+---
+- name: Encode Base64 Value
+  hosts: localhost
+  vars_prompt:
+    - name: ocp_secret
+      prompt: Please specify the value to base64 encode ...
+      private: false
+  tasks:
+    - name: Encode value
+      ansible.builtin.debug:
+        msg: The encoded value for {{ ocp_secret }} is {{ ocp_secret | b64encode }}
