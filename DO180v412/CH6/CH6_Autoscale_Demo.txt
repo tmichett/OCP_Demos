@@ -1,0 +1,11 @@
+ vim demo_autoscale.yml
+ oc apply -f demo_autoscale.yml
+ oc autoscale deployment/demo-autoscale --min 2 --max 20 --cpu-percent 50
+ oc get hpa demo-autoscale
+ oc describe hpa demo-autoscale
+ oc watch demo-autoscale
+
+### New Terminal window
+
+ oc get route demo-autoscale
+ curl demo-autoscale-reliability-autoscaling.apps.ocp4.example.com/api/loadtest/v1/cpu/1 

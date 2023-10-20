@@ -1,0 +1,63 @@
+apiVersion: v1
+kind: List
+metadata: {}
+items:
+  - apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      labels:
+        app: demo-autoscale
+      name: demo-autoscale
+    spec:
+      replicas: 2
+      selector:
+        matchLabels:
+          app: demo-autoscale
+      template:
+        metadata:
+          labels:
+            app: demo-autoscale
+        spec:
+          containers:
+          - image: registry.ocp4.example.com:8443/redhattraining/loadtest:v1.0
+            name: demo-autoscale
+            readinessProbe:
+              failureThreshold: 3
+              httpGet:
+                path: /api/demo-autoscale/v1/healthz
+                port: 8080
+                scheme: HTTP
+              periodSeconds: 10
+              successThreshold: 1
+              timeoutSeconds: 1
+            resources:
+              requests:
+                cpu: 25m
+              limits:
+                cpu: 50m
+  - apiVersion: v1
+    kind: Service
+    metadata:
+      labels:
+        app: demo-autoscale
+      name: demo-autoscale
+    spec:
+      ports:
+      - port: 8080
+        protocol: TCP
+        targetPort: 8080
+      selector:
+        app: demo-autoscale
+
+  - apiVersion: route.openshift.io/v1
+    kind: Route
+    metadata:
+      labels:
+        app: demo-autoscale
+      name: demo-autoscale
+    spec:
+      port:
+        targetPort: 8080
+      to:
+        kind: Service
+        name: demo-autoscale
