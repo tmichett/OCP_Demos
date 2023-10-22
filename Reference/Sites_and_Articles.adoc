@@ -335,6 +335,18 @@ endif::[]
 * *Deploy to Kubernetes*
 ** https://docs.docker.com/get-started/kube-deploy/
 
+* *Kubernetes basics for sysadmins*
+** https://www.redhat.com/sysadmin/kubernetes-basics-sysadmins
+
+* *Build Kubernetes pods with Podman play kube*
+** https://www.redhat.com/sysadmin/podman-play-kube-updates
+
+* *Kubernetes labels: 11 things to know*
+** https://www.redhat.com/sysadmin/kubernetes-labels-best-practices
+
+* *Start learning Kubernetes from your local machine*
+** https://www.redhat.com/sysadmin/start-learning-kubernetes
+
 * *How to encrypt etcd and use secrets in OpenShift*
 ** https://www.redhat.com/sysadmin/encrypt-etcd-openshift-secrets
 
