@@ -1,3 +1,6 @@
+** NEED TO HAVE PROJECT AND RESORUCES **
+** lab start reliability-ha **
+
  vim demo_autoscale.yml
  oc apply -f demo_autoscale.yml
  oc autoscale deployment/demo-autoscale --min 2 --max 20 --cpu-percent 50
