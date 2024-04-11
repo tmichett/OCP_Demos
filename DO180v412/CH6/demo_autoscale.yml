@@ -24,7 +24,7 @@ items:
             readinessProbe:
               failureThreshold: 3
               httpGet:
-                path: /api/demo-autoscale/v1/healthz
+                path: /api/loadtest/v1/healthz
                 port: 8080
                 scheme: HTTP
               periodSeconds: 10
